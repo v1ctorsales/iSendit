@@ -5,8 +5,8 @@ return(
     <>
     <div className="SlideBarButtonDiv">
         <button className="SlideBarButton">
-        {props.icon}
-        {props.name}
+        <div className="slidebaricon">{props.icon}</div>
+        <div className="slidebarname">{props.name}</div>
         </button>
     </div>
     </>

@@ -3,6 +3,8 @@ import SlideBarButton from "./SlideBarButton"
 import { FaPaperPlane } from "react-icons/fa";
 import { FaList } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
+import { PiWallFill } from "react-icons/pi";
+import { IoCube } from "react-icons/io5";   
 
 function SideBar(){
     return(
@@ -15,8 +17,9 @@ function SideBar(){
                 </div>
             </div>
             <div className="navBarBody">
-                <SlideBarButton icon={<FaPaperPlane />}name="Enviar Objetos"></SlideBarButton>
-                <SlideBarButton icon={<FaList />} name="Objetos Enviados"></SlideBarButton>
+                <SlideBarButton icon={<PiWallFill />}name="Enviar Regras de Firewall  "></SlideBarButton>
+                <SlideBarButton icon={<IoCube />}name="Enviar Objetos"></SlideBarButton>
+                <SlideBarButton icon={<FaList />} name="Ver envios"></SlideBarButton>
                 <SlideBarButton icon={<IoMdSettings />} name="Configurações"></SlideBarButton>
             </div>
         </div>

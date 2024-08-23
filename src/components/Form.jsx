@@ -11,19 +11,32 @@ function Form() {
     const [ip, setIp] = useState('');
     const [masc, setMasc] = useState('/1'); // Estado para armazenar a seleção da máscara
     const [desc, setDesc] = useState('');
+    const [fqdn, setfqdn] = useState('');
+
+    // Estado para controlar qual formulário está ativo
+    const [activeForm, setActiveForm] = useState(null);
 
     // Função para lidar com a submissão do formulário
-    const handleSubmit = (e) => {
+    const handleSubmit = (formType) => (e) => {
         e.preventDefault(); // Prevenir comportamento padrão do formulário
 
         // Log dos valores capturados
+        console.log('Tipo de Formulário:', formType);
         console.log('Nome do Objeto:', nomeObj);
         console.log('IP:', ip);
         console.log('Máscara:', masc);
         console.log('Descrição:', desc);
+        console.log('FQDN:', fqdn);
 
         // Enviar esses valores ao servidor
-        sendFormDataComponent(nomeObj, ip, masc, desc);
+        if (formType === "ip") {
+            sendFormDataComponent(formType, nomeObj, ip, masc, desc);
+        } else if (formType === "fqdn") {
+            sendFormDataComponent(formType, nomeObj, ip, masc, desc);
+        }
+        else if (formType === "addressGroup") {
+            sendFormDataComponent(formType, nomeObj, ip, masc, desc);
+        }
     };
 
     const handleSelectChange = (e) => {
@@ -33,91 +46,182 @@ function Form() {
     return (
         <div>
             <div className="choiceObjeto">
-                <button class="btn-choice">Objeto 1</button>
-                <button class="btn-choice">Objeto 2</button>
-                <button class="btn-choice">Objeto 3</button>
+                <button 
+                    className="btn-choice" 
+                    onClick={() => setActiveForm('addressGroup')}
+                >
+                    Addres Group
+                </button>
+                <button 
+                    className="btn-choice" 
+                    onClick={() => setActiveForm('fqdn')}
+                >
+                    FQDN
+                </button>
+                <button 
+                    className="btn-choice" 
+                    onClick={() => setActiveForm('ip')}
+                >
+                    IP/Subnet
+                </button>
             </div>
-            <form onSubmit={handleSubmit}>
-                <div className="formPai">
-                <div className="formDiv">
-                    <div class="divson" htmlFor="nomeObj">Nome</div>
-                    <input 
-                        type="text" 
-                        id="nomeObj" 
-                        value={nomeObj} 
-                        onChange={(e) => setNomeObj(e.target.value)} 
-                    />
-                </div>
-                <div className="formDiv">
-                    <div class="divson"  htmlFor="ip">IP</div>
-                    <input 
-                        class="inputIp"
-                        type="text" minlength="7" maxlength="15" size="15" pattern="^(?>(\d|[1-9]\d{2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?1)$"
-                        id="ip" 
-                        value={ip} 
-                        onChange={(e) => setIp(e.target.value)} 
-                    />
-                    <select 
-                        id="mascara" 
-                        value={masc} 
-                        onChange={handleSelectChange}
-                    >
-                        {Array.from({ length: 32 }, (_, i) => (
-                            <option key={i} value={`/${i + 1}`}>
-                                /{i + 1}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="formDiv">
-                    <div class="divson" htmlFor="desc">Descrição</div>
-                    <input 
-                        type="text" 
-                        id="desc" 
-                        value={desc} 
-                        onChange={(e) => setDesc(e.target.value)} 
-                    />
-                </div>
-                <button type="submit">Enviar</button>
-                </div>
-            </form>
-                            
+            
+            {activeForm === 'ip' && (
+                <form onSubmit={handleSubmit("ip")}>
+                    <div className="formPai" id="form_ip">
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="nomeObj">Nome</div>
+                            <input 
+                                type="text" 
+                                id="nomeObj" 
+                                value={nomeObj} 
+                                onChange={(e) => setNomeObj(e.target.value)} 
+                            />
+                        </div>
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="ip">IP</div>
+                            <input 
+                                className="inputIp"
+                                type="text" 
+                                minLength="7" 
+                                maxLength="15" 
+                                size="15" 
+                                pattern="^(?>(\d|[1-9]\d{2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?1)$"
+                                id="ip" 
+                                value={ip} 
+                                onChange={(e) => setIp(e.target.value)} 
+                            />
+                            <select 
+                                id="mascara" 
+                                value={masc} 
+                                onChange={handleSelectChange}
+                            >
+                                {Array.from({ length: 32 }, (_, i) => (
+                                    <option key={i} value={`/${i + 1}`}>
+                                        /{i + 1}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="desc">Descrição</div>
+                            <input 
+                                type="text" 
+                                id="desc" 
+                                value={desc} 
+                                onChange={(e) => setDesc(e.target.value)} 
+                            />
+                        </div>
+                        <button type="submit">Enviar</button>
+                    </div>
+                </form>
+            )}
+
+            {activeForm === 'fqdn' && (
+                <form onSubmit={handleSubmit("fqdn")}>
+                    <div className="formPai" id="form_fqdn">
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="nomeObj">Nome</div>
+                            <input 
+                                type="text" 
+                                id="nomeObj" 
+                                value={nomeObj} 
+                                onChange={(e) => setNomeObj(e.target.value)} 
+                            />
+                        </div>
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="nomeObj">FQDN</div>
+                            <input 
+                                type="text" 
+                                id="fqdn" 
+                                value={fqdn} 
+                                onChange={(e) => setfqdn(e.target.value)} 
+                            />
+                        </div>
+                        <button type="submit">Enviar</button>
+                    </div>
+                </form>
+            )}
+
+            {activeForm === 'addressGroup' && (
+                <form onSubmit={handleSubmit("addressGroup")}>
+                    <div className="formPai" id="form_addressGroup">
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="nomeObj">Nome</div>
+                            <input 
+                                type="text" 
+                                id="nomeObj" 
+                                value={nomeObj} 
+                                onChange={(e) => setNomeObj(e.target.value)} 
+                            />
+                        </div>
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="nomeObj">Descrição</div>
+                            <input 
+                                type="text" 
+                                id="fqdn" 
+                                value={desc} 
+                                onChange={(e) => setDesc(e.target.value)} 
+                            />
+                        </div>
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="ip">IP</div>
+                            <input 
+                                className="inputIp"
+                                type="text" 
+                                minLength="7" 
+                                maxLength="15" 
+                                size="15" 
+                                pattern="^(?>(\d|[1-9]\d{2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?1)$"
+                                id="ip" 
+                                value={ip} 
+                                onChange={(e) => setIp(e.target.value)} 
+                            />
+                            <select 
+                                id="mascara" 
+                                value={masc} 
+                                onChange={handleSelectChange}
+                            >
+                                {Array.from({ length: 32 }, (_, i) => (
+                                    <option key={i} value={`/${i + 1}`}>
+                                        /{i + 1}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <button type="submit">Enviar</button>
+                    </div>
+                </form>
+            )}
         </div>
     );
 }
 
-function sendFormDataComponent(nomeObj, ip, masc, desc) {
 
-    var expression = /((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))/;
+function sendFormDataComponent(formType, nomeObj, ip, masc, desc) {
+    if ((formType === "ip")|| formType == "addressGroup" )  {
+        // Regex simplificada para validar IPv4 e IPv6
+        const ipv4Pattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+        const ipv6Pattern = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
 
-    if (!expression.test(ip)) {
-        notify(); // Mostra a notificação se o IP for inválido
-        return; // Para a execução da função se o IP for inválido
-    }
-    else{
+        // Verificação se o IP corresponde a uma das regex
+        if (!(ipv4Pattern.test(ip) || ipv6Pattern.test(ip))) {
+            notify();
+            return;
+        }
+        notifyOk();
+    } else if (formType === "fqdn") {
+        // Lógica para validar e enviar FQDN
         notifyOk();
     }
 
-
-    console.log('Enviando dados para o servidor...');
-    fetch('/api/sendFormData', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nomeObj, ip, masc, desc }), // Enviando os valores para o servidor
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Erro na requisição');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('done', data);
-    })
-    .catch(error => {
-        console.error('Erro ao enviar requisição ao backend:', error);
+    // Log para depuração
+    console.log("Objeto enviado:", {    
+        nomeObj,
+        ip,
+        masc,
+        desc,
+        formType,
     });
 }
 
