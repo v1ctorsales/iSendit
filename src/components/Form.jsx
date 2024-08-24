@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import BtnSubmit from "./Botoes/BtnSubmit";
+
 const notify = () => toast.error("Endereço IP inválido!");
 const notifyOk = () => toast.success("Objeto enviado!");
 
@@ -46,6 +48,12 @@ function Form() {
     return (
         <div>
             <div className="choiceObjeto">
+            <button 
+                    className="btn-choice" 
+                    onClick={() => setActiveForm('ip')}
+                >
+                    IP/Subnet
+                </button>
                 <button 
                     className="btn-choice" 
                     onClick={() => setActiveForm('addressGroup')}
@@ -58,14 +66,84 @@ function Form() {
                 >
                     FQDN
                 </button>
-                <button 
-                    className="btn-choice" 
-                    onClick={() => setActiveForm('ip')}
-                >
-                    IP/Subnet
-                </button>
+
             </div>
             
+
+            {activeForm === 'fqdn' && (
+                <form onSubmit={handleSubmit("fqdn")}>
+                    <div className="formPai" id="form_fqdn">
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="nomeObj">Nome</div>
+                            <input 
+                                type="text" 
+                                id="nomeObj" 
+                                value={nomeObj} 
+                                onChange={(e) => setNomeObj(e.target.value)} 
+                            />
+                        </div>
+                        <div className="formDiv">   
+                            <div className="divson" htmlFor="nomeObj">FQDN</div>
+                            <input 
+                                type="text" 
+                                id="fqdn" 
+                                value={fqdn} 
+                                onChange={(e) => setfqdn(e.target.value)} 
+                            />
+                        </div>
+                        <div className="formDiv">
+                            <div className="divsondesc" htmlFor="nomeObj">Descrição</div>
+                            <input 
+                                         placeholder="  opcional"
+                                type="text" 
+                                id="desc" 
+                                value={desc} 
+                                onChange={(e) => setDesc(e.target.value)} 
+                            />
+                        </div>
+                        <BtnSubmit />
+                    </div>
+                </form>
+            )}
+
+            {activeForm === 'addressGroup' && (
+                <form onSubmit={handleSubmit("addressGroup")}>
+                    <div className="formPai" id="form_addressGroup">
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="nomeObj">Nome</div>
+                            <input 
+                                type="text" 
+                                id="nomeObj" 
+                                value={nomeObj} 
+                                onChange={(e) => setNomeObj(e.target.value)} 
+                            />
+                        </div>
+                        <div className="formDiv">
+                            <div className="divson" htmlFor="nomeObj">Membros</div>
+                            <input 
+                                type="text" 
+                                id="fqdn" 
+                                value={desc} 
+                                onChange={(e) => setDesc(e.target.value)} 
+                            />
+                        </div>
+                        <div className="formDiv">
+                            <div className="divsondesc" htmlFor="nomeObj">Descrição</div>
+                            <input 
+                                         placeholder="  opcional"
+                                type="text" 
+                                id="desc" 
+                                value={desc} 
+                                onChange={(e) => setDesc(e.target.value)} 
+                            />
+                        </div>
+
+
+                        <BtnSubmit />
+                    </div>
+                </form>
+            )}
+
             {activeForm === 'ip' && (
                 <form onSubmit={handleSubmit("ip")}>
                     <div className="formPai" id="form_ip">
@@ -104,102 +182,29 @@ function Form() {
                             </select>
                         </div>
                         <div className="formDiv">
-                            <div className="divson" htmlFor="desc">Descrição</div>
+                            <div className="divsondesc" htmlFor="desc">Descrição</div>
                             <input 
+                                placeholder="  opcional"
                                 type="text" 
                                 id="desc" 
                                 value={desc} 
                                 onChange={(e) => setDesc(e.target.value)} 
                             />
                         </div>
-                        <button type="submit">Enviar</button>
+                        <BtnSubmit />
                     </div>
                 </form>
             )}
 
-            {activeForm === 'fqdn' && (
-                <form onSubmit={handleSubmit("fqdn")}>
-                    <div className="formPai" id="form_fqdn">
-                        <div className="formDiv">
-                            <div className="divson" htmlFor="nomeObj">Nome</div>
-                            <input 
-                                type="text" 
-                                id="nomeObj" 
-                                value={nomeObj} 
-                                onChange={(e) => setNomeObj(e.target.value)} 
-                            />
-                        </div>
-                        <div className="formDiv">
-                            <div className="divson" htmlFor="nomeObj">FQDN</div>
-                            <input 
-                                type="text" 
-                                id="fqdn" 
-                                value={fqdn} 
-                                onChange={(e) => setfqdn(e.target.value)} 
-                            />
-                        </div>
-                        <button type="submit">Enviar</button>
-                    </div>
-                </form>
-            )}
-
-            {activeForm === 'addressGroup' && (
-                <form onSubmit={handleSubmit("addressGroup")}>
-                    <div className="formPai" id="form_addressGroup">
-                        <div className="formDiv">
-                            <div className="divson" htmlFor="nomeObj">Nome</div>
-                            <input 
-                                type="text" 
-                                id="nomeObj" 
-                                value={nomeObj} 
-                                onChange={(e) => setNomeObj(e.target.value)} 
-                            />
-                        </div>
-                        <div className="formDiv">
-                            <div className="divson" htmlFor="nomeObj">Descrição</div>
-                            <input 
-                                type="text" 
-                                id="fqdn" 
-                                value={desc} 
-                                onChange={(e) => setDesc(e.target.value)} 
-                            />
-                        </div>
-                        <div className="formDiv">
-                            <div className="divson" htmlFor="ip">IP</div>
-                            <input 
-                                className="inputIp"
-                                type="text" 
-                                minLength="7" 
-                                maxLength="15" 
-                                size="15" 
-                                pattern="^(?>(\d|[1-9]\d{2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?1)$"
-                                id="ip" 
-                                value={ip} 
-                                onChange={(e) => setIp(e.target.value)} 
-                            />
-                            <select 
-                                id="mascara" 
-                                value={masc} 
-                                onChange={handleSelectChange}
-                            >
-                                {Array.from({ length: 32 }, (_, i) => (
-                                    <option key={i} value={`/${i + 1}`}>
-                                        /{i + 1}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <button type="submit">Enviar</button>
-                    </div>
-                </form>
-            )}
         </div>
+        
     );
+    
 }
 
 
 function sendFormDataComponent(formType, nomeObj, ip, masc, desc) {
-    if ((formType === "ip")|| formType == "addressGroup" )  {
+    if ((formType === "ip") )  {
         // Regex simplificada para validar IPv4 e IPv6
         const ipv4Pattern = /^(\d{1,3}\.){3}\d{1,3}$/;
         const ipv6Pattern = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
@@ -210,7 +215,7 @@ function sendFormDataComponent(formType, nomeObj, ip, masc, desc) {
             return;
         }
         notifyOk();
-    } else if (formType === "fqdn") {
+    } else if (formType === "fqdn" || formType == "addressGroup") {
         // Lógica para validar e enviar FQDN
         notifyOk();
     }
