@@ -1,43 +1,84 @@
 import React, { useState } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import cube from "../img/cube2.gif";
 import BtnSubmit from "./Botoes/BtnSubmit";
 
-const notify = () => toast.error("Endereço IP inválido!");
+const notify = () => toast.error("Houve um erro.");
+const notifyIp = () => toast.error("Endereço IP inválido!");
 const notifyOk = () => toast.success("Objeto enviado!");
+const notifyFieldRequired = (field) => toast.error(`O campo ${field} é obrigatório.`);
 
 function Form() {
-    // Criando estados para cada campo
     const [nomeObj, setNomeObj] = useState('');
     const [ip, setIp] = useState('');
-    const [masc, setMasc] = useState('/1'); // Estado para armazenar a seleção da máscara
+    const [masc, setMasc] = useState('/1');
+    const [membros, setMembros] = useState('');
     const [desc, setDesc] = useState('');
     const [fqdn, setfqdn] = useState('');
+    const [activeForm, setActiveForm] = useState('ip');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Estado para controlar qual formulário está ativo
-    const [activeForm, setActiveForm] = useState(null);
-
-    // Função para lidar com a submissão do formulário
-    const handleSubmit = (formType) => (e) => {
-        e.preventDefault(); // Prevenir comportamento padrão do formulário
-
-        // Log dos valores capturados
-        console.log('Tipo de Formulário:', formType);
-        console.log('Nome do Objeto:', nomeObj);
-        console.log('IP:', ip);
-        console.log('Máscara:', masc);
-        console.log('Descrição:', desc);
-        console.log('FQDN:', fqdn);
-
-        // Enviar esses valores ao servidor
-        if (formType === "ip") {
-            sendFormDataComponent(formType, nomeObj, ip, masc, desc);
-        } else if (formType === "fqdn") {
-            sendFormDataComponent(formType, nomeObj, ip, masc, desc);
+    const isButtonDisabled = (formType) => {
+        if (formType === 'ip') {
+            return nomeObj.trim() === '' || ip.trim() === '';
+        } else if (formType === 'addressGroup') {
+            return nomeObj.trim() === '' || membros.trim() === '';
+        } else if (formType === 'fqdn') {
+            return nomeObj.trim() === '' || fqdn.trim() === '';
         }
-        else if (formType === "addressGroup") {
-            sendFormDataComponent(formType, nomeObj, ip, masc, desc);
+        return true;
+    };
+
+    const handleSubmit = (formType) => async (e) => {
+        e.preventDefault();
+        if (formType === 'ip') {
+            if (nomeObj.trim() === '') {
+                notifyFieldRequired('Nome');
+                return;
+            }
+            if (ip.trim() === '') {
+                notifyFieldRequired('IP');
+                return;
+            }
+            const ipv4Pattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+            const ipv6Pattern = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+            if (!(ipv4Pattern.test(ip) || ipv6Pattern.test(ip))) {
+                notifyIp();
+                return;
+            }
+        } else if (formType === 'addressGroup') {
+            if (nomeObj.trim() === '') {
+                notifyFieldRequired('Nome');
+                return;
+            }
+            if (membros.trim() === '') {
+                notifyFieldRequired('Membros');
+                return;
+            }
+        } else if (formType === 'fqdn') {
+            if (nomeObj.trim() === '') {
+                notifyFieldRequired('Nome');
+                return;
+            }
+            if (fqdn.trim() === '') {
+                notifyFieldRequired('FQDN');
+                return;
+            }
+        }
+    
+        setIsSubmitting(true);
+    
+        try {
+            await sendFormDataComponent(
+                formType, nomeObj, ip, masc, desc, fqdn, membros, 
+                setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros
+            );
+        } catch (error) {
+            console.error('Erro ao enviar o formulário:', error);
+            notify();
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -47,26 +88,31 @@ function Form() {
 
     return (
         <div>
-            <div className="choiceObjeto">
-            <button 
-                    className="btn-choice" 
-                    onClick={() => setActiveForm('ip')}
-                >
-                    IP/Subnet
-                </button>
-                <button 
-                    className="btn-choice" 
-                    onClick={() => setActiveForm('addressGroup')}
-                >
-                    Addres Group
-                </button>
-                <button 
-                    className="btn-choice" 
-                    onClick={() => setActiveForm('fqdn')}
-                >
-                    FQDN
-                </button>
-
+            <div className="topForm">
+                <div className="h2Obj">
+                    <h2>Envio de Objetos</h2>
+                    <img className="cubeImg" src={cube} alt="Cube" />
+                </div>
+                <div className="choiceObjeto">
+                    <button 
+                        className={`btn-choice ${activeForm === 'ip' ? 'btn-active' : ''}`} 
+                        onClick={() => setActiveForm('ip')}
+                    >
+                        IP/Subnet
+                    </button>
+                    <button 
+                        className={`btn-choice ${activeForm === 'addressGroup' ? 'btn-active' : ''}`} 
+                        onClick={() => setActiveForm('addressGroup')}
+                    >
+                        Address Group
+                    </button>
+                    <button 
+                        className={`btn-choice ${activeForm === 'fqdn' ? 'btn-active' : ''}`} 
+                        onClick={() => setActiveForm('fqdn')}
+                    >
+                        FQDN
+                    </button>
+                </div>
             </div>
             
 
@@ -83,7 +129,7 @@ function Form() {
                             />
                         </div>
                         <div className="formDiv">   
-                            <div className="divson" htmlFor="nomeObj">FQDN</div>
+                            <div className="divson" htmlFor="fqdn">FQDN</div>
                             <input 
                                 type="text" 
                                 id="fqdn" 
@@ -91,17 +137,20 @@ function Form() {
                                 onChange={(e) => setfqdn(e.target.value)} 
                             />
                         </div>
-                        <div className="formDiv">
-                            <div className="divsondesc" htmlFor="nomeObj">Descrição</div>
+                        <div className="formDiv formDivDescricao">
+                            <div className="divsondesc" htmlFor="desc">Descrição</div>
                             <input 
-                                         placeholder="  opcional"
+                                placeholder="opcional"
                                 type="text" 
                                 id="desc" 
                                 value={desc} 
                                 onChange={(e) => setDesc(e.target.value)} 
                             />
                         </div>
-                        <BtnSubmit />
+                        <BtnSubmit 
+                            disabled={isButtonDisabled('fqdn')} 
+                            isLoading={isSubmitting} // Passa o estado de carregamento
+                        />
                     </div>
                 </form>
             )}
@@ -119,27 +168,28 @@ function Form() {
                             />
                         </div>
                         <div className="formDiv">
-                            <div className="divson" htmlFor="nomeObj">Membros</div>
+                            <div className="divson" htmlFor="membros">Membros</div>
                             <input 
                                 type="text" 
-                                id="fqdn" 
-                                value={desc} 
-                                onChange={(e) => setDesc(e.target.value)} 
+                                id="membros" 
+                                value={membros} 
+                                onChange={(e) => setMembros(e.target.value)} 
                             />
                         </div>
-                        <div className="formDiv">
-                            <div className="divsondesc" htmlFor="nomeObj">Descrição</div>
+                        <div className="formDiv formDivDescricao">
+                            <div className="divsondesc" htmlFor="desc">Descrição</div>
                             <input 
-                                         placeholder="  opcional"
+                                placeholder="opcional"
                                 type="text" 
                                 id="desc" 
                                 value={desc} 
                                 onChange={(e) => setDesc(e.target.value)} 
                             />
                         </div>
-
-
-                        <BtnSubmit />
+                        <BtnSubmit 
+                            disabled={isButtonDisabled('addressGroup')} 
+                            isLoading={isSubmitting} // Passa o estado de carregamento
+                        />
                     </div>
                 </form>
             )}
@@ -181,54 +231,59 @@ function Form() {
                                 ))}
                             </select>
                         </div>
-                        <div className="formDiv">
+                        <div className="formDiv formDivDescricao">
                             <div className="divsondesc" htmlFor="desc">Descrição</div>
                             <input 
-                                placeholder="  opcional"
+                                placeholder="opcional"
                                 type="text" 
                                 id="desc" 
                                 value={desc} 
                                 onChange={(e) => setDesc(e.target.value)} 
                             />
                         </div>
-                        <BtnSubmit />
+                        <BtnSubmit 
+                            disabled={isButtonDisabled('ip')} 
+                            isLoading={isSubmitting} // Passa o estado de carregamento
+                        />
                     </div>
                 </form>
             )}
 
+
+            <ToastContainer />
         </div>
-        
     );
-    
 }
 
+async function sendFormDataComponent(formType, nomeObj, ip, masc, desc, fqdn, membros, setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros) {
+    try {
+        const response = await fetch('/api/sendFormData', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ formType, nomeObj, ip, masc, desc, fqdn, membros }),
+        });
 
-function sendFormDataComponent(formType, nomeObj, ip, masc, desc) {
-    if ((formType === "ip") )  {
-        // Regex simplificada para validar IPv4 e IPv6
-        const ipv4Pattern = /^(\d{1,3}\.){3}\d{1,3}$/;
-        const ipv6Pattern = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
-
-        // Verificação se o IP corresponde a uma das regex
-        if (!(ipv4Pattern.test(ip) || ipv6Pattern.test(ip))) {
-            notify();
-            return;
+        if (!response.ok) {
+            throw new Error('Erro na requisição');
         }
+
+        const data = await response.json();
+        console.log('done', data);
         notifyOk();
-    } else if (formType === "fqdn" || formType == "addressGroup") {
-        // Lógica para validar e enviar FQDN
-        notifyOk();
+
+        // Resetar todos os campos
+        setNomeObj('');
+        setIp('');
+        setMasc('/1');
+        setDesc('');
+        setfqdn('');
+        setMembros('');
+    } catch (error) {
+        console.error('Erro ao enviar requisição ao backend:', error);
+        notify();
     }
-
-    // Log para depuração
-    console.log("Objeto enviado:", {    
-        nomeObj,
-        ip,
-        masc,
-        desc,
-        formType,
-    });
 }
-
 
 export default Form;

@@ -72,6 +72,12 @@ background-color: white;
   align-items: center;
   display: flex;
 }
+a {
+  text-decoration: none;
+}
+.SlideBarButtonDiv {
+  position: relative; /* Necessário para z-index funcionar */
+}
 
 .SlideBarButton {
   text-align: left;
@@ -81,7 +87,7 @@ background-color: white;
   gap: 4%;
   display: flex;
   align-items: center;
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(255, 255, 255); /* Cor de fundo padrão */
   border: 0;
   border-bottom: 2px solid transparent;
   border-image: linear-gradient(to right, rgba(173, 73, 225, 0), #AD49E1 50%, rgba(173, 73, 225, 0));
@@ -89,8 +95,19 @@ background-color: white;
   color: #453947;
   font-weight: bold;
   transition: all 0.3s ease-in-out; /* Animações suaves */
+  position: relative; /* Necessário para z-index funcionar */
 }
 
+/* Estilo para o botão ativo */
+.SlideBarButton.btn-active {
+  background-color: #AD49E1; /* Cor de fundo quando o botão está ativo */
+  border-bottom: 2px solid #7D33A3; /* Borda inferior mais escura quando ativo */
+  color: #FFFFFF; /* Cor do texto quando o botão está ativo */
+  z-index: 1; /* Garante que o botão ativo esteja acima dos outros */
+  font-size: 1.2em; /* Aumenta o tamanho da fonte quando ativo */
+}
+
+/* Estilo de hover para SlideBarButton */
 .SlideBarButton:hover {
   border-image: linear-gradient(to right, #AD49E1, #AD49E1); /* Preenche completamente a borda */
   color: #320C52; /* Altera a cor do texto */
@@ -100,18 +117,13 @@ background-color: white;
   font-size: 1.2em; /* Aumenta o tamanho da fonte */
 }
 
-.SlideBarButton:hover::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  z-index: -1;
-  transition: all 0.3s ease-in-out;
+/* Garantir que o estilo de hover não afete o botão ativo */
+.SlideBarButton.btn-active:hover {
+  background: #AD49E1; /* Mantém a cor de fundo do botão ativo */
+  border-bottom: 2px solid #7D33A3; /* Mantém a borda inferior do botão ativo */
+  color: #FFFFFF; /* Mantém a cor do texto do botão ativo */
+  font-size: 1.2em; /* Mantém o tamanho da fonte */
 }
-
-
 
 button{
   cursor: pointer;
@@ -127,6 +139,13 @@ button{
   font-size: 1rem;
   font-weight: bold;
 
+}
+
+.btn-submit:disabled {
+  background-color: #cccccc; /* Cor de fundo quando desativado */
+  color: #666666; /* Cor do texto quando desativado */
+  cursor: not-allowed; /* Cursor padrão quando desativado */
+  opacity: 0.6; 
 }
 
 .btnSubmitItems svg{
@@ -145,7 +164,8 @@ input{
 }
 
 .navbar{
-  position: fixed;
+  position: absolute;
+  top: 0;
   width: 20%;
   height: 100%;
   background-color: #ffffff;
@@ -177,6 +197,15 @@ select{
   width: 80px;
 }
 
+.divson2{
+  margin-left: auto;
+  text-align: right;
+}
+
+.divsonPlus{
+  width: 130px;
+}
+
 .divsondesc{
   font-style: italic;
   color: #a7a7a7;
@@ -194,21 +223,83 @@ input{
   border:0;outline:0;
 }
 
+
 .btn-choice{
   width: 100%;
+  align-items: center;
+  background-color: rgb(255, 255, 255);
+  border: 0;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  height: 40px;
 }
+
+
+.btn-choice:hover {
+
+}
+
+h4{
+
+margin: auto;
+margin-top: 20px;
+margin-bottom: 0;
+}
+
+#action{
+  width: 504px;
+}
+
+.h2Obj{
+  margin: 0;
+  display: inline-flex;
+  text-align: center;
+  justify-content: center;
+}
+
+.fireImg{
+  width: 7%;
+  height: 12%;
+}
+
+.cubeImg{
+  margin-left: 1%;
+  width: 10%;
+}
+
+.btn-active {
+  background-color: #AD49E1; 
+  color: white; 
+
+}
+
 
 .choiceObjeto{
   width: 585px;
   margin:auto;
   display: flex;
   margin-bottom: 25px;
+  gap: 2px;
+  margin-top: 1.5%;
 }
 
 .formDiv{
   display: flex;
   justify-content: space-between;
 }
+
+.formDivDescricao{
+  margin-top: 20px;
+}
+
+.loading-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 
 .formPai{
   width: fit-content;

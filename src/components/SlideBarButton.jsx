@@ -1,16 +1,14 @@
 import React from "react";
 
-function SlideBarButton(props){
-return(
-    <>
-    <div className="SlideBarButtonDiv">
-        <button className="SlideBarButton">
-        <div className="slidebaricon">{props.icon}</div>
-        <div className="slidebarname">{props.name}</div>
-        </button>
-    </div>
-    </>
-)
+function SlideBarButton({ icon, name, isActive, onClick }) {
+    return (
+        <div className={`SlideBarButtonDiv ${isActive ? 'active' : ''}`}>
+            <button className={`SlideBarButton ${isActive ? 'btn-active' : ''}`} onClick={onClick}>
+                <div className="slidebaricon">{icon}</div>
+                <div className="slidebarname">{name}</div>
+            </button>
+        </div>
+    );
 }
 
-export default SlideBarButton
+export default SlideBarButton;

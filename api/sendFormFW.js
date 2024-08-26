@@ -8,30 +8,25 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-export default async function sendFormData(req, res) {
+export default async function sendFormFW(req, res) {
     if (req.method === 'POST') {
-        // Recebendo os dados do corpo da requisição
-        const { formType, nomeObj, ip, masc, desc, fqdn, membros } = req.body;
+        const { regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action } = req.body;
 
-        // Fazendo log dos dados recebidos
-        console.log('Tipo do Form', formType);
-        console.log('Nome do Objeto:', nomeObj);
-        console.log('IP:', ip);
-        console.log('Máscara:', masc);
+        console.log('Tipo do Form:', regrafw);
+        console.log('Nome da Regra:', nomeRegra);
+        console.log('Porta:', porta);
+        console.log('Interface Origem:', interfaceOrigem);
+        console.log('Interface Destino:', interfaceDestino);
+        console.log('Objeto Origem:', objetoorigem);
+        console.log('Objeto Destino:', objetodestino);
         console.log('Descrição:', desc);
-        console.log('Fqdn:', fqdn);
-        console.log('Membros:', membros);
-        const formattedMasc = masc.startsWith('/') ? masc.slice(1) : masc;
+        console.log('Ação:', action);
 
-        if(formType != "ip"){
-            formattedMasc == null;
-        }
-
-        // Inserindo os dados na tabela 'tasks'
+        // Insere os dados na tabela 'tasks'
         const { data, error } = await supabase
             .from('tasks')
             .insert([
-                { autor:'victor@teste.com', nome: nomeObj, ip: ip, mascara: formattedMasc, descricao: desc, type: formType, fqdn: fqdn, membros: membros }
+                { autor: 'victor@teste.com', nome: nomeRegra, descricao: desc, type: regrafw, porta, interface_origem: interfaceOrigem, interface_destino: interfaceDestino, objeto_origem: objetoorigem, objeto_destino: objetodestino, acao: action === "accept" ? 1 : 0 }
             ]);
 
         if (error) {
@@ -41,7 +36,6 @@ export default async function sendFormData(req, res) {
             res.status(200).json({ message: 'Dados recebidos e salvos com sucesso!' });
         }
     } else {
-        // Método não permitido
         res.status(405).json({ message: 'Método não permitido' });
     }
 }

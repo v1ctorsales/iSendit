@@ -1,16 +1,16 @@
-import React from "react";
-import SlideBarButton from "./SlideBarButton"
-import { FaPaperPlane } from "react-icons/fa";
-import { FaList } from "react-icons/fa";
-import { IoMdSettings } from "react-icons/io";
-import { PiWallFill } from "react-icons/pi";
+import React, { useState } from "react";
+import SlideBarButton from "./SlideBarButton";
+import { FaPaperPlane, FaList } from "react-icons/fa";
+import { IoMdSettings, IoIosHelpCircle } from "react-icons/io";
+import { ImFire } from "react-icons/im";
 import { IoCube } from "react-icons/io5";   
-import { IoIosHelpCircle } from "react-icons/io";
-import image from "../img/isendit.png"
+import image from "../img/isendit.png";
+import { Link } from 'react-router-dom';
 
-function SideBar(){
-    return(
-        <>
+function SideBar() {
+    const [activeButton, setActiveButton] = useState('firewall');
+
+    return (
         <div className="navbar">
             <div className="navBarHeader">
                 <div className="logo">
@@ -19,15 +19,44 @@ function SideBar(){
                 </div>
             </div>
             <div className="navBarBody">
-                <SlideBarButton icon={<PiWallFill />}name="Enviar Regras de Firewall  "></SlideBarButton>
-                <SlideBarButton icon={<IoCube />}name="Enviar Objetos"></SlideBarButton>
-                <SlideBarButton icon={<FaList />} name="Ver envios"></SlideBarButton>
-                <SlideBarButton icon={<IoMdSettings />} name="Configurações"></SlideBarButton>
-                <SlideBarButton icon={<IoIosHelpCircle />} name="Ajuda"></SlideBarButton>
+                <Link to="/" onClick={() => setActiveButton('firewall')}>
+                    <SlideBarButton 
+                        icon={<ImFire />} 
+                        name="Enviar Regras de Firewall" 
+                        isActive={activeButton === 'firewall'}
+                    />
+                </Link>
+                <Link to="/objetos" onClick={() => setActiveButton('objetos')}>
+                    <SlideBarButton 
+                        icon={<IoCube />} 
+                        name="Enviar Objetos"
+                        isActive={activeButton === 'objetos'}
+                    />
+                </Link>
+                <Link to="/envios" onClick={() => setActiveButton('envios')}>
+                    <SlideBarButton 
+                        icon={<FaList />} 
+                        name="Ver envios"
+                        isActive={activeButton === 'envios'}
+                    />
+                </Link>
+                <Link to="/configuracoes" onClick={() => setActiveButton('configuracoes')}>
+                    <SlideBarButton 
+                        icon={<IoMdSettings />} 
+                        name="Configurações"
+                        isActive={activeButton === 'configuracoes'}
+                    />
+                </Link>
+                <Link to="/ajuda" onClick={() => setActiveButton('ajuda')}>
+                    <SlideBarButton 
+                        icon={<IoIosHelpCircle />} 
+                        name="Ajuda"
+                        isActive={activeButton === 'ajuda'}
+                    />
+                </Link>
             </div>
         </div>
-        </>
-    )
+    );
 }
 
 export default SideBar;
