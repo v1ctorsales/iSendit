@@ -51,7 +51,22 @@ function FormRegraFW() {
                     </button>
                     </div>
             <form onSubmit={handleSubmit}>
+                
                 <div className="formPai" id="form_regrasfw">
+
+                <div className="formDiv">
+                        <div className="divson" htmlFor="action">Localidade</div>
+                        <select 
+                            name="localidade" 
+                            id="localidade" 
+                            value={action} 
+                            onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                        >
+                            <option value="">Localidade 1</option>
+                            <option value="">Localidade 2</option>
+                        </select>
+                    </div>
+
                     <div className="formDiv">
                         <div className="divson" htmlFor="nomeRegra">Nome</div>
                         <input 
@@ -61,9 +76,58 @@ function FormRegraFW() {
                             onChange={(e) => setNomeRegra(e.target.value)} 
                         />
                     </div>
+                   
+                    <h4>Interfaces</h4>
                     <div className="formDiv">
-                        <div className="divson" htmlFor="porta">Porta</div>
+                        <div className="divson" htmlFor="interfaceorigem">Origem</div>
+                        <select 
+                            name="interfaceorigem" 
+                            id="interfaceorigem" 
+                            value={action} 
+                            onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                        >
+                            <option value="">Origem 1</option>
+                            <option value="">Origem 2</option>
+                        </select>
+                    </div>
+                    <div className="formDiv">
+                        <div className="divson" htmlFor="interfacedestino">Destino</div>
+                        <select 
+                            name="interfacedestino" 
+                            id="interfacedestino" 
+                            value={action} 
+                            onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                        >
+                            <option value="">Destino 1</option>
+                            <option value="">Destino 2</option>
+                        </select>
+                    </div>
+                    <h4>Objetos</h4>
+                    <div className="formDiv">   
+                        <div className="divson" htmlFor="objetoorigem">Origem</div>
                         <input 
+                            placeholder="ex: AD, DataBase, FileServer"
+                            type="text" 
+                            id="objetoorigem" 
+                            value={objetoorigem} 
+                            onChange={(e) => setObjetoorigem(e.target.value)} 
+                        />
+                    </div>
+                    <div className="formDiv">   
+                        <div className="divson" htmlFor="objetodestino">Destino</div>
+                        <input 
+                          placeholder="ex: AD, DataBase, FileServer"
+                            type="text" 
+                            id="objetodestino" 
+                            value={objetodestino} 
+                            onChange={(e) => setObjetodestino(e.target.value)} 
+                        />
+                    </div>
+
+                    <div className="formDiv">
+                        <div className="divson" htmlFor="porta">Porta(s)</div>
+                        <input 
+                            placeholder="ex: HTTPS, HTTP, 3389"
                             type="text" 
                             id="porta" 
                             value={porta} 
@@ -82,44 +146,7 @@ function FormRegraFW() {
                             <option value="deny">Recusar</option>
                         </select>
                     </div>
-                    <h4>Interface</h4>
-                    <div className="formDiv">   
-                        <div className="divson" htmlFor="interfaceorigem">Origem</div>
-                        <input 
-                            type="text" 
-                            id="interfaceorigem" 
-                            value={interfaceOrigem} 
-                            onChange={(e) => setInterfaceOrigem(e.target.value)} 
-                        />
-                    </div>
-                    <div className="formDiv">   
-                        <div className="divson" htmlFor="interfacedestino">Destino</div>
-                        <input 
-                            type="text" 
-                            id="interfacedestino" 
-                            value={interfaceDestino} 
-                            onChange={(e) => setInterfaceDestino(e.target.value)} 
-                        />
-                    </div>
-                    <h4>Objeto</h4>
-                    <div className="formDiv">   
-                        <div className="divson" htmlFor="objetoorigem">Origem</div>
-                        <input 
-                            type="text" 
-                            id="objetoorigem" 
-                            value={objetoorigem} 
-                            onChange={(e) => setObjetoorigem(e.target.value)} 
-                        />
-                    </div>
-                    <div className="formDiv">   
-                        <div className="divson" htmlFor="objetodestino">Destino</div>
-                        <input 
-                            type="text" 
-                            id="objetodestino" 
-                            value={objetodestino} 
-                            onChange={(e) => setObjetodestino(e.target.value)} 
-                        />
-                    </div>
+
                     <div className="formDiv formDivDescricao">
                         <div className="divsondesc" htmlFor="desc">Descrição</div>
                         <input 
@@ -130,6 +157,7 @@ function FormRegraFW() {
                             onChange={(e) => setDesc(e.target.value)} 
                         />
                     </div>
+                    
                     <BtnSubmit disabled={isButtonDisabled('regrafw')} isLoading={isLoading} />
                 </div>
             </form>

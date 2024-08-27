@@ -119,6 +119,18 @@ function Form() {
             {activeForm === 'fqdn' && (
                 <form onSubmit={handleSubmit("fqdn")}>
                     <div className="formPai" id="form_fqdn">
+                    <div className="formDiv">
+                        <div className="divson" htmlFor="action">Localidade</div>
+                        <select 
+                            name="localidade" 
+                            id="localidade" 
+                            //value={action} 
+                            //onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                        >
+                            <option value="">Localidade 1</option>
+                            <option value="">Localidade 2</option>
+                        </select>
+                    </div>
                         <div className="formDiv">
                             <div className="divson" htmlFor="nomeObj">Nome</div>
                             <input 
@@ -158,6 +170,18 @@ function Form() {
             {activeForm === 'addressGroup' && (
                 <form onSubmit={handleSubmit("addressGroup")}>
                     <div className="formPai" id="form_addressGroup">
+                    <div className="formDiv">
+                        <div className="divson" htmlFor="action">Localidade</div>
+                        <select 
+                            name="localidade" 
+                            id="localidade" 
+                            //value={action} 
+                            //onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                        >
+                            <option value="">Localidade 1</option>
+                            <option value="">Localidade 2</option>
+                        </select>
+                    </div>
                         <div className="formDiv">
                             <div className="divson" htmlFor="nomeObj">Nome</div>
                             <input 
@@ -197,6 +221,18 @@ function Form() {
             {activeForm === 'ip' && (
                 <form onSubmit={handleSubmit("ip")}>
                     <div className="formPai" id="form_ip">
+                    <div className="formDiv">
+                        <div className="divson" htmlFor="action">Localidade</div>
+                        <select 
+                            name="localidade" 
+                            id="localidade" 
+                            //value={action} 
+                            //onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                        >
+                            <option value="">Localidade 1</option>
+                            <option value="">Localidade 2</option>
+                        </select>
+                    </div>
                         <div className="formDiv">
                             <div className="divson" htmlFor="nomeObj">Nome</div>
                             <input 

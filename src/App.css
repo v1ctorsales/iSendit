@@ -42,6 +42,10 @@
   margin-bottom: 10%;
 }
 
+#objetodestino{
+  margin-bottom: 20px;
+}
+
 .logo{
   display: flex;
   align-items: center;
@@ -245,7 +249,8 @@ margin-top: 20px;
 margin-bottom: 0;
 }
 
-#action{
+
+#action, #localidade, #interfaceorigem, #interfacedestino{
   width: 504px;
 }
 
@@ -289,6 +294,19 @@ margin-bottom: 0;
 
 .formDivDescricao{
   margin-top: 20px;
+}
+
+select{
+  border: 1px solid #caced1;
+  border-radius: 0.25rem;
+  color: #000;
+  cursor: pointer;
+}
+
+
+
+select:focus{
+  appearance: none;
 }
 
 .loading-icon {
