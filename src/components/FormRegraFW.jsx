@@ -37,7 +37,7 @@ function FormRegraFW() {
                 const data = await response.json();
                 setLocalidades(data);
                 if (data.length > 0) {
-                    setLocalidade(data[0].nome); // Define a primeira localidade como padrão
+                    setLocalidade("default"); // Define a primeira localidade como padrão
                 }
             } catch (err) {
                 console.error('Erro ao carregar localidades:', err);
@@ -87,7 +87,7 @@ function FormRegraFW() {
                                 value={localidade} // Garantir que o valor da localidade esteja controlado
                                 onChange={(e) => setLocalidade(e.target.value)} // Atualiza estado ao selecionar
                             >
-                                <option value="">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
+                                <option value="default">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
                                 {localidades.map((localidade, index) => (
                                     <option key={index} value={localidade.nome}>
                                         {localidade.nome}

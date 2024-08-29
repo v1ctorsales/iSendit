@@ -97,7 +97,7 @@ function Form() {
             await sendFormDataComponent(
                 formType, nomeObj, ip, masc, desc, fqdn, membros, 
                 localidadeSelecionada, // Passa a localidade selecionada
-                setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros
+                setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros, setLocalidadeSelecionada
             );
         } catch (error) {
             console.error('Erro ao enviar o formulário:', error);
@@ -154,6 +154,7 @@ function Form() {
                                     value={localidadeSelecionada} // Bind para o estado localidadeSelecionada
                                     onChange={(e) => setLocalidadeSelecionada(e.target.value)} // Atualiza estado ao selecionar
                                 >
+                                    <option value="">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
                                     {localidades.map((localidade, index) => (
                                         <option key={index} value={localidade.nome}>
                                             {localidade.nome}
@@ -203,6 +204,7 @@ function Form() {
                                     value={localidadeSelecionada} // Bind para o estado localidadeSelecionada
                                     onChange={(e) => setLocalidadeSelecionada(e.target.value)} // Atualiza estado ao selecionar
                                 >
+                                    <option value="">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
                                     {localidades.map((localidade, index) => (
                                         <option key={index} value={localidade.nome}>
                                             {localidade.nome}
@@ -261,6 +263,7 @@ function Form() {
                                     value={localidadeSelecionada} // Bind para o estado localidadeSelecionada
                                     onChange={(e) => setLocalidadeSelecionada(e.target.value)} // Atualiza estado ao selecionar
                                 >
+                                    <option value="">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
                                     {localidades.map((localidade, index) => (
                                         <option key={index} value={localidade.nome}>
                                             {localidade.nome}
@@ -326,7 +329,7 @@ function Form() {
     );
 }
 
-async function sendFormDataComponent(formType, nomeObj, ip, masc, desc, fqdn, membros, localidadeSelecionada, setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros) {
+async function sendFormDataComponent(formType, nomeObj, ip, masc, desc, fqdn, membros, localidadeSelecionada, setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros, setLocalidadeSelecionada) {
     try {
         const response = await fetch('/api/sendFormData', {
             method: 'POST',
@@ -351,6 +354,7 @@ async function sendFormDataComponent(formType, nomeObj, ip, masc, desc, fqdn, me
         setDesc('');
         setfqdn('');
         setMembros('');
+        setLocalidadeSelecionada(''); // Resetar a localidade selecionada
     } catch (error) {
         console.error('Erro ao enviar requisição ao backend:', error);
         notify();
