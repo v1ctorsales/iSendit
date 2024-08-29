@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import EditableLocalidades from "./EditableLocalidades";
 import gear from "../img/gear.gif";
+import EditableInterfaces from "./EditableInterfaces";
 
 function FormConfigurar() {
     const [activeForm, setActiveForm] = useState('informacoes');
@@ -39,6 +40,9 @@ function FormConfigurar() {
             </div>
             <div className="listaEditableLocalidades">
                 {activeForm === 'rede' && <EditableLocalidades />}
+            </div>
+            <div className="listaEditableInterfaces">
+                {activeForm === 'interfaces' && <EditableInterfaces />}
             </div>
         </>
     );

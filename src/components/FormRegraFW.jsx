@@ -16,15 +16,17 @@ function FormRegraFW() {
     const [objetodestino, setObjetodestino] = useState('');
     const [desc, setDesc] = useState('');
     const [action, setAction] = useState('accept');
-    const [localidade, setLocalidade] = useState(''); // Adicionar estado para localidade
-    const [isSubmitting, setIsSubmitting] = useState(false); // Novo estado para controlar o envio
-    const [isLoading, setLoading] = useState(false); // Estado de carregamento
+    const [localidade, setLocalidade] = useState(''); // Começa como string vazia
+    const [isSubmitting, setIsSubmitting] = useState(false); 
+    const [isLoading, setLoading] = useState(false); 
     const [localidades, setLocalidades] = useState([]);
-    const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); // Estado para controlar o carregamento das localidades
+    const [interfaces, setInterfaces] = useState([]); 
+    const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); 
+    const [isLoadingInterfaces, setIsLoadingInterfaces] = useState(false); 
 
     const isButtonDisabled = () => {
         return isSubmitting || !nomeRegra.trim() || !porta.trim() || !interfaceOrigem.trim() || !interfaceDestino.trim() ||
-            !objetoorigem.trim() || !objetodestino.trim() || !action.trim() || !localidade.trim(); // Inclui localidade
+            !objetoorigem.trim() || !objetodestino.trim() || !action.trim() || !localidade.trim();
     };
 
     useEffect(() => {
@@ -36,29 +38,49 @@ function FormRegraFW() {
                 }
                 const data = await response.json();
                 setLocalidades(data);
-                if (data.length > 0) {
-                    setLocalidade("default"); // Define a primeira localidade como padrão
-                }
             } catch (err) {
                 console.error('Erro ao carregar localidades:', err);
                 notify();
             } finally {
-                setIsLoadingLocalidades(false); // Conclui o carregamento das localidades
+                setIsLoadingLocalidades(false);
             }
         };
 
         fetchLocalidades();
     }, []);
 
+    useEffect(() => {
+        if (localidade && localidade !== 'default') { // Verifica se a localidade foi selecionada
+            const fetchInterfaces = async () => {
+                try {
+                    setIsLoadingInterfaces(true);
+                    const response = await fetch(`/api/getInterfaces?localidade=${localidade}`);
+                    if (!response.ok) {
+                        throw new Error('Erro ao buscar interfaces');
+                    }
+                    const data = await response.json();
+                    setInterfaces(data);
+                } catch (err) {
+                    console.error('Erro ao carregar interfaces:', err);
+                    notify();
+                } finally {
+                    setIsLoadingInterfaces(false);
+                }
+            };
+
+            fetchInterfaces();
+        }
+    }, [localidade]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        setLoading(true); // Atualizar estado para iniciar o carregamento
+        setLoading(true);
     
         sendFormDataComponent(
-            "regrafw", nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade, // Inclui localidade
+            "regrafw", nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade,
             setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction, setLocalidade,
-            setIsSubmitting, setLoading // Passar setLoading para atualizar o estado de carregamento
+            setIsSubmitting, setLoading
         );
     };
 
@@ -75,19 +97,18 @@ function FormRegraFW() {
             </div>
             <form onSubmit={handleSubmit}>
                 <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_regrasfw">
-
                     <div className="formDiv">
-                    <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
-                            {isLoadingLocalidades ? (
+                        <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
+                        {isLoadingLocalidades ? (
                             <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
                         ) : (
                             <select 
                                 name="localidade" 
                                 id="localidade" 
-                                value={localidade} // Garantir que o valor da localidade esteja controlado
-                                onChange={(e) => setLocalidade(e.target.value)} // Atualiza estado ao selecionar
+                                value={localidade}
+                                onChange={(e) => setLocalidade(e.target.value)}
                             >
-                                <option value="default">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
+                                <option value="default">Selecione uma localidade</option> {/* Opção padrão */}
                                 {localidades.map((localidade, index) => (
                                     <option key={index} value={localidade.nome}>
                                         {localidade.nome}
@@ -108,32 +129,48 @@ function FormRegraFW() {
                     </div>
                    
                     <h4>Interfaces</h4>
-                    <div className="formDiv">
-                        <div className="divson" htmlFor="interfaceorigem">Origem</div>
-                        <select 
-                            name="interfaceorigem" 
-                            id="interfaceorigem" 
-                            value={interfaceOrigem} // Corrige para usar interfaceOrigem
-                            onChange={(e) => setInterfaceOrigem(e.target.value)} // Atualiza estado ao selecionar
-                        >
-                            <option value="">Selecione uma origem</option> {/* Adiciona uma opção padrão */}
-                            <option value="Origem 1">Origem 1</option>
-                            <option value="Origem 2">Origem 2</option>
-                        </select>
-                    </div>
-                    <div className="formDiv">
-                        <div className="divson" htmlFor="interfacedestino">Destino</div>
-                        <select 
-                            name="interfacedestino" 
-                            id="interfacedestino" 
-                            value={interfaceDestino} // Corrige para usar interfaceDestino
-                            onChange={(e) => setInterfaceDestino(e.target.value)} // Atualiza estado ao selecionar
-                        >
-                            <option value="">Selecione um destino</option> {/* Adiciona uma opção padrão */}
-                            <option value="Destino 1">Destino 1</option>
-                            <option value="Destino 2">Destino 2</option>
-                        </select>
-                    </div>
+                    {isLoadingInterfaces ? (
+                        <div className="centerDois">
+                            <AiOutlineLoading3Quarters className="loading-icon" />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="formDiv">
+                                <div className="divson" htmlFor="interfaceorigem">Origem</div>
+                                <select 
+                                    name="interfaceorigem" 
+                                    id="interfaceorigem" 
+                                    value={interfaceOrigem}
+                                    onChange={(e) => setInterfaceOrigem(e.target.value)}
+                                >
+                                    <option value="">Selecione uma origem</option>
+                                    {interfaces.map((iface, index) => (
+                                        <option key={index} value={iface.nome}>
+                                            {iface.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="formDiv">
+                                <div className="divson" htmlFor="interfacedestino">Destino</div>
+                                <select 
+                                    name="interfacedestino" 
+                                    id="interfacedestino" 
+                                    value={interfaceDestino}
+                                    onChange={(e) => setInterfaceDestino(e.target.value)}
+                                >
+                                    <option value="">Selecione um destino</option>
+                                    {interfaces.map((iface, index) => (
+                                        <option key={index} value={iface.nome}>
+                                            {iface.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </>
+                    )}
+
+
                     <h4>Objetos</h4>
                     <div className="formDiv">   
                         <div className="divson" htmlFor="objetoorigem">Origem</div>
@@ -172,7 +209,7 @@ function FormRegraFW() {
                             name="action" 
                             id="action" 
                             value={action} 
-                            onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                            onChange={(e) => setAction(e.target.value)} 
                         >
                             <option value="accept">Aceitar</option>
                             <option value="deny">Recusar</option>
@@ -199,9 +236,9 @@ function FormRegraFW() {
 }
 
 function sendFormDataComponent(
-    regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade, // Inclui localidade
+    regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade,
     setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction, setLocalidade,
-    setIsSubmitting, setLoading // Adicionar setLoading como parâmetro
+    setIsSubmitting, setLoading
 ) {
     fetch('/api/sendFormFW', {
         method: 'POST',
@@ -218,7 +255,7 @@ function sendFormDataComponent(
             objetodestino, 
             desc, 
             action, 
-            localidade // Enviar localidade ao backend
+            localidade 
         }), 
     })
     .then(response => {
@@ -247,7 +284,7 @@ function sendFormDataComponent(
     })
     .finally(() => {
         setIsSubmitting(false); 
-        setLoading(false); // Atualizar estado de carregamento após o envio
+        setLoading(false); 
     });
 }
 

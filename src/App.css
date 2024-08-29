@@ -282,26 +282,38 @@ margin-bottom: 0;
   font-weight: bold;
 }
 
-.btn-addLocalidade{
+span{
+  color: #7D33A3;
+}
+
+
+.btn-addLocalidade, .btn-addInterface{
   background-color:#ffffff;
   border: 0;
   color: #26773e;
   border: 1px solid #26773e;
   border-radius: 2px;
-  width: 95%;
+  width: 85%;
   margin: auto;
   height: 100%;
   border-radius: 5px;
 }
 
-.btn-addLocalidade:hover{
+.btn-addLocalidade:hover, .btn-addInterface:hover{
   background-color:#0f9136;
   color: white;
   font-size: 15px;
 }
 
-.EditableLocalidades{
+.EditableLocalidades, .EditableInterfaces{
   display: flex;
+}
+
+.listaEditableInterfaces{
+  width: 580px;
+    margin: auto;
+    display: grid;
+    gap: 8%;
 }
 
 .fireImg{
@@ -416,7 +428,7 @@ width: 120px;
 
 .formDiv{
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .formDivDescricao{
@@ -428,6 +440,7 @@ select{
   border-radius: 0.25rem;
   color: #000;
   cursor: pointer;
+  padding-left: 0.5% ;
 }
 
 
