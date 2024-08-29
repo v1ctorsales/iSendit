@@ -295,7 +295,7 @@ margin-bottom: 0;
 }
 
 .btn-addLocalidade:hover{
-  background-color:#6c9478;
+  background-color:#0f9136;
   color: white;
   font-size: 15px;
 }
@@ -448,6 +448,13 @@ select:focus{
 .center{
   text-align: center;
   margin: auto;
+  margin-top: 6%;
+}
+
+.centerDois{
+  text-align: center;
+  margin: auto;
+  margin-top: 0;
 }
 
 .formPai{

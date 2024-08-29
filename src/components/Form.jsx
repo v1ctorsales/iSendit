@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import cube from "../img/cube2.gif";
 import BtnSubmit from "./Botoes/BtnSubmit";
 
@@ -16,6 +17,8 @@ function Form() {
     const [membros, setMembros] = useState('');
     const [desc, setDesc] = useState('');
     const [fqdn, setfqdn] = useState('');
+    const [localidades, setLocalidades] = useState([]);
+    const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); // Estado de carregamento
     const [activeForm, setActiveForm] = useState('ip');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,6 +32,26 @@ function Form() {
         }
         return true;
     };
+
+    const fetchLocalidades = async () => {
+        try {
+            const response = await fetch('/api/getLocalidade');
+            if (!response.ok) {
+                throw new Error('Erro ao buscar localidades');
+            }
+            const data = await response.json();
+            setLocalidades(data);
+        } catch (err) {
+            console.error('Erro ao carregar localidades:', err);
+            notify();
+        } finally {
+            setIsLoadingLocalidades(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchLocalidades(); // Carrega as localidades ao montar o componente
+    }, []);
 
     const handleSubmit = (formType) => async (e) => {
         e.preventDefault();
@@ -115,22 +138,26 @@ function Form() {
                 </div>
             </div>
             
-
             {activeForm === 'fqdn' && (
                 <form onSubmit={handleSubmit("fqdn")}>
-                    <div className="formPai" id="form_fqdn">
-                    <div className="formDiv">
-                        <div className="divson" htmlFor="action">Localidade</div>
-                        <select 
-                            name="localidade" 
-                            id="localidade" 
-                            //value={action} 
-                            //onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
-                        >
-                            <option value="">Localidade 1</option>
-                            <option value="">Localidade 2</option>
-                        </select>
-                    </div>
+                    <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_fqdn">
+                        <div className="formDiv">
+                        <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
+                            {isLoadingLocalidades ? (
+                                <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
+                            ) : (
+                                <select 
+                                    name="localidade" 
+                                    id="localidade"
+                                >
+                                    {localidades.map((localidade, index) => (
+                                        <option key={index} value={localidade.nome}>
+                                            {localidade.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
                         <div className="formDiv">
                             <div className="divson" htmlFor="nomeObj">Nome</div>
                             <input 
@@ -138,15 +165,6 @@ function Form() {
                                 id="nomeObj" 
                                 value={nomeObj} 
                                 onChange={(e) => setNomeObj(e.target.value)} 
-                            />
-                        </div>
-                        <div className="formDiv">   
-                            <div className="divson" htmlFor="fqdn">FQDN</div>
-                            <input 
-                                type="text" 
-                                id="fqdn" 
-                                value={fqdn} 
-                                onChange={(e) => setfqdn(e.target.value)} 
                             />
                         </div>
                         <div className="formDiv formDivDescricao">
@@ -169,19 +187,24 @@ function Form() {
 
             {activeForm === 'addressGroup' && (
                 <form onSubmit={handleSubmit("addressGroup")}>
-                    <div className="formPai" id="form_addressGroup">
-                    <div className="formDiv">
-                        <div className="divson" htmlFor="action">Localidade</div>
-                        <select 
-                            name="localidade" 
-                            id="localidade" 
-                            //value={action} 
-                            //onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
-                        >
-                            <option value="">Localidade 1</option>
-                            <option value="">Localidade 2</option>
-                        </select>
-                    </div>
+                    <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_addressGroup">
+                        <div className="formDiv">
+                        <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
+                            {isLoadingLocalidades ? (
+                                <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
+                            ) : (
+                                <select 
+                                    name="localidade" 
+                                    id="localidade"
+                                >
+                                    {localidades.map((localidade, index) => (
+                                        <option key={index} value={localidade.nome}>
+                                            {localidade.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
                         <div className="formDiv">
                             <div className="divson" htmlFor="nomeObj">Nome</div>
                             <input 
@@ -221,18 +244,23 @@ function Form() {
             {activeForm === 'ip' && (
                 <form onSubmit={handleSubmit("ip")}>
                     <div className="formPai" id="form_ip">
-                    <div className="formDiv">
-                        <div className="divson" htmlFor="action">Localidade</div>
-                        <select 
-                            name="localidade" 
-                            id="localidade" 
-                            //value={action} 
-                            //onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
-                        >
-                            <option value="">Localidade 1</option>
-                            <option value="">Localidade 2</option>
-                        </select>
-                    </div>
+                        <div className="formDiv">
+                            <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
+                            {isLoadingLocalidades ? (
+                                <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
+                            ) : (
+                                <select 
+                                    name="localidade" 
+                                    id="localidade"
+                                >
+                                    {localidades.map((localidade, index) => (
+                                        <option key={index} value={localidade.nome}>
+                                            {localidade.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
                         <div className="formDiv">
                             <div className="divson" htmlFor="nomeObj">Nome</div>
                             <input 
@@ -284,7 +312,6 @@ function Form() {
                     </div>
                 </form>
             )}
-
 
             <ToastContainer />
         </div>

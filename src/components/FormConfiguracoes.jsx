@@ -3,7 +3,7 @@ import EditableLocalidades from "./EditableLocalidades";
 import gear from "../img/gear.gif";
 
 function FormConfigurar() {
-    const [activeForm, setActiveForm] = useState('informacoes'); // Define 'rede' como o formulário inicial
+    const [activeForm, setActiveForm] = useState('informacoes');
 
     return (
         <>
@@ -16,7 +16,7 @@ function FormConfigurar() {
                     className={`btn-choice ${activeForm === 'informacoes' ? 'btn-active' : ''}`}
                     onClick={() => setActiveForm('informacoes')}
                 >
-                    Informações Gerais
+                    Informações
                 </button>
                 <button
                     className={`btn-choice ${activeForm === 'preferencias' ? 'btn-active' : ''}`}
@@ -28,7 +28,13 @@ function FormConfigurar() {
                     className={`btn-choice ${activeForm === 'rede' ? 'btn-active' : ''}`}
                     onClick={() => setActiveForm('rede')}
                 >
-                    Rede Local
+                    Localidades
+                </button>
+                <button
+                    className={`btn-choice ${activeForm === 'interfaces' ? 'btn-active' : ''}`}
+                    onClick={() => setActiveForm('interfaces')}
+                >
+                    Interfaces
                 </button>
             </div>
             <div className="listaEditableLocalidades">

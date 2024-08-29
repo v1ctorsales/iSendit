@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import fwimg from "../img/fire.gif";
 import BtnSubmit from "./Botoes/BtnSubmit";
 import { ToastContainer, toast } from 'react-toastify';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 const notify = () => toast.error("Houve um erro.");
 const notifyOk = () => toast.success("Regra de Firewall enviada!");
@@ -16,12 +17,34 @@ function FormRegraFW() {
     const [desc, setDesc] = useState('');
     const [action, setAction] = useState('accept');
     const [isSubmitting, setIsSubmitting] = useState(false); // Novo estado para controlar o envio
-      const [isLoading, setLoading] = useState(false); // Estado de carregamento    
+    const [isLoading, setLoading] = useState(false); // Estado de carregamento
+    const [localidades, setLocalidades] = useState([]);
+    const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); // Estado para controlar o carregamento das localidades
 
     const isButtonDisabled = () => {
         return isSubmitting || nomeRegra.trim() === '' || porta.trim() === '' || interfaceOrigem.trim() === '' || interfaceDestino.trim() === '' ||
             objetoorigem.trim() === '' || objetodestino.trim() === '' || action.trim() === '';
     };
+
+    useEffect(() => {
+        const fetchLocalidades = async () => {
+            try {
+                const response = await fetch('/api/getLocalidade');
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar localidades');
+                }
+                const data = await response.json();
+                setLocalidades(data);
+            } catch (err) {
+                console.error('Erro ao carregar localidades:', err);
+                notify();
+            } finally {
+                setIsLoadingLocalidades(false); // Conclui o carregamento das localidades
+            }
+        };
+
+        fetchLocalidades();
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -44,27 +67,29 @@ function FormRegraFW() {
                 </div>          
             </div>
             <div className="choiceObjeto">
-                    <button 
-                        className={`btn-choice btn-active`} 
-                    >
-                        Regras de Firewall
-                    </button>
-                    </div>
+                <button className={`btn-choice btn-active`}>Regras de Firewall</button>
+            </div>
             <form onSubmit={handleSubmit}>
-                
-                <div className="formPai" id="form_regrasfw">
+            <div className="formPai" id="form_regrasfw">
 
                 <div className="formDiv">
-                        <div className="divson" htmlFor="action">Localidade</div>
-                        <select 
-                            name="localidade" 
-                            id="localidade" 
-                            value={action} 
-                            onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
-                        >
-                            <option value="">Localidade 1</option>
-                            <option value="">Localidade 2</option>
-                        </select>
+                        <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
+                        {isLoadingLocalidades ? (
+                            <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
+                        ) : (
+                            <select 
+                                name="localidade" 
+                                id="localidade" 
+                                value={action} 
+                                onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                            >
+                                {localidades.map((localidade, index) => (
+                                    <option key={index} value={localidade.nome}>
+                                        {localidade.nome}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
 
                     <div className="formDiv">
@@ -116,7 +141,7 @@ function FormRegraFW() {
                     <div className="formDiv">   
                         <div className="divson" htmlFor="objetodestino">Destino</div>
                         <input 
-                          placeholder="ex: AD, DataBase, FileServer"
+                            placeholder="ex: AD, DataBase, FileServer"
                             type="text" 
                             id="objetodestino" 
                             value={objetodestino} 
@@ -158,7 +183,7 @@ function FormRegraFW() {
                         />
                     </div>
                     
-                    <BtnSubmit disabled={isButtonDisabled('regrafw')} isLoading={isLoading} />
+                    <BtnSubmit disabled={isButtonDisabled()} isLoading={isLoading} />
                 </div>
             </form>
             <ToastContainer />
@@ -216,6 +241,5 @@ function sendFormDataComponent(
         setLoading(false); // Atualizar estado de carregamento após o envio
     });
 }
-
 
 export default FormRegraFW;
