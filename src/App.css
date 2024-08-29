@@ -254,6 +254,14 @@ margin-bottom: 0;
   width: 504px;
 }
 
+.editableText{
+  width: 500px;
+}
+
+.blcokedInput{
+  cursor: not-allowed;
+}
+
 .h2Obj{
   margin: 0;
   display: inline-flex;
@@ -261,9 +269,49 @@ margin-bottom: 0;
   justify-content: center;
 }
 
+.listaEditableLocalidades{
+  width: 580px;
+  margin: auto;
+  display: grid;
+  gap: 8%;
+}
+
+.blockedInput{
+  cursor: not-allowed;
+  color: #888888;
+  font-weight: bold;
+}
+
+.btn-addLocalidade{
+  background-color:#ffffff;
+  border: 0;
+  color: #26773e;
+  border: 1px solid #26773e;
+  border-radius: 2px;
+  width: 95%;
+  margin: auto;
+  height: 100%;
+  border-radius: 5px;
+}
+
+.btn-addLocalidade:hover{
+  background-color:#6c9478;
+  color: white;
+  font-size: 15px;
+}
+
+.EditableLocalidades{
+  display: flex;
+}
+
 .fireImg{
   width: 7%;
   height: 12%;
+}
+
+.gearImg{
+  margin-left: 1%;
+  width: 18%;
 }
 
 .cubeImg{
@@ -274,9 +322,73 @@ margin-bottom: 0;
 .btn-active {
   background-color: #AD49E1; 
   color: white; 
-
 }
 
+.btn-editar {
+  background-color: white;
+  color: #1976D2;
+  border: 1px solid #1976D2;
+  border-radius: 5px;
+  width: 30px;
+  height: 100%;
+  transition: background-color 0.3s, color 0.3s; /* Suaviza a transição */
+}
+
+.btn-editar:hover {
+  background-color: #1976D2; /* Muda a cor de fundo no hover */
+  color: white; /* Muda a cor do texto no hover */
+}
+
+.btn-salvar {
+  background-color: white;
+  color: #388E3C;
+  border: 1px solid #388E3C;
+  border-radius: 5px;
+  width: 30px;
+  height: 100%;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-salvar:hover {
+  background-color: #388E3C;
+  color: white;
+}
+
+.btn-excluir {
+  background-color: white;
+  color: #C62828;
+  border: 1px solid #C62828;
+  border-radius: 5px;
+  width: 30px;
+  height: 100%;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-excluir:hover {
+  background-color: #C62828;
+  color: white;
+}
+
+.btn-cancelar {
+  background-color: white;
+  color: #474747;
+  border: 1px solid #474747;
+  border-radius: 5px;
+  width: 30px;
+  height: 100%;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-cancelar:hover {
+  background-color: #474747;
+  color: white;
+}
+
+  .divDosBotoes{
+    width: 80px;
+    display: flex;
+    justify-content: space-evenly;
+  }
 
 .choiceObjeto{
   width: 585px;
@@ -285,6 +397,21 @@ margin-bottom: 0;
   margin-bottom: 25px;
   gap: 2px;
   margin-top: 1.5%;
+}
+
+.off{
+  display: none;
+}
+
+.bigInput{
+  height: 40px;
+  font-size: 15px;
+  padding: 0 1%;
+}
+
+.swal2-styled.swal2-confirm,
+.swal2-styled.swal2-cancel {
+width: 120px;
 }
 
 .formDiv{
@@ -318,6 +445,10 @@ select:focus{
   100% { transform: rotate(360deg); }
 }
 
+.center{
+  text-align: center;
+  margin: auto;
+}
 
 .formPai{
   width: fit-content;

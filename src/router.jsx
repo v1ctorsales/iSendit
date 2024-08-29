@@ -1,5 +1,6 @@
 import Form from "./components/Form";
 import FormRegraFW from "./components/FormRegraFW";
+import FormConfigurar from "./components/FormConfiguracoes";
 
 
 function FirewallPage() {
@@ -15,7 +16,7 @@ function EnviosPage() {
 }
 
 function ConfiguracoesPage() {
-    return <h2>Página de Configurações</h2>;
+    return <FormConfigurar />
 }
 
 function AjudaPage() {
