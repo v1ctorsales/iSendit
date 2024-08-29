@@ -1,5 +1,3 @@
-const { createClient } = require('@supabase/supabase-js');
-
 import { createClient } from '@supabase/supabase-js';
 
 // Substitua pelos valores da sua configuração Supabase
@@ -10,7 +8,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function sendFormFW(req, res) {
     if (req.method === 'POST') {
-        const { regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action } = req.body;
+        const { regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade } = req.body;
 
         console.log('Tipo do Form:', regrafw);
         console.log('Nome da Regra:', nomeRegra);
@@ -21,12 +19,30 @@ export default async function sendFormFW(req, res) {
         console.log('Objeto Destino:', objetodestino);
         console.log('Descrição:', desc);
         console.log('Ação:', action);
+        console.log('Localidade:', localidade); // Verifica se localidade está sendo recebido
+
+        // Verifica se localidade está presente
+        if (!localidade) {
+            return res.status(400).json({ message: 'Localidade é obrigatória' });
+        }
 
         // Insere os dados na tabela 'tasks'
         const { data, error } = await supabase
             .from('tasks')
             .insert([
-                { autor: 'victor@teste.com', nome: nomeRegra, descricao: desc, type: regrafw, porta, interface_origem: interfaceOrigem, interface_destino: interfaceDestino, objeto_origem: objetoorigem, objeto_destino: objetodestino, acao: action === "accept" ? 1 : 0 }
+                {
+                    autor: 'victor@teste.com',
+                    nome: nomeRegra,
+                    descricao: desc,
+                    type: regrafw,
+                    porta,
+                    interface_origem: interfaceOrigem,
+                    interface_destino: interfaceDestino,
+                    objeto_origem: objetoorigem,
+                    objeto_destino: objetodestino,
+                    acao: action === "accept" ? 1 : 0,
+                    localidade // Inclui a localidade na inserção
+                }
             ]);
 
         if (error) {

@@ -1,5 +1,3 @@
-const { createClient } = require('@supabase/supabase-js');
-
 import { createClient } from '@supabase/supabase-js';
 
 // Substitua pelos valores da sua configuração Supabase
@@ -11,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export default async function sendFormData(req, res) {
     if (req.method === 'POST') {
         // Recebendo os dados do corpo da requisição
-        const { formType, nomeObj, ip, masc, desc, fqdn, membros } = req.body;
+        const { formType, nomeObj, ip, masc, desc, fqdn, membros, localidade } = req.body;
 
         // Fazendo log dos dados recebidos
         console.log('Tipo do Form', formType);
@@ -21,17 +19,34 @@ export default async function sendFormData(req, res) {
         console.log('Descrição:', desc);
         console.log('Fqdn:', fqdn);
         console.log('Membros:', membros);
+        console.log('Localidade:', localidade); // Verifica se localidade está sendo recebido
+
+        // Verifica se localidade está presente
+        if (!localidade) {
+            return res.status(400).json({ message: 'Localidade é obrigatória' });
+        }
+
         const formattedMasc = masc.startsWith('/') ? masc.slice(1) : masc;
 
-        if(formType != "ip"){
-            formattedMasc == null;
+        if (formType !== "ip") {
+            formattedMasc = null;
         }
 
         // Inserindo os dados na tabela 'tasks'
         const { data, error } = await supabase
             .from('tasks')
             .insert([
-                { autor:'victor@teste.com', nome: nomeObj, ip: ip, mascara: formattedMasc, descricao: desc, type: formType, fqdn: fqdn, membros: membros }
+                { 
+                    autor: 'victor@teste.com', 
+                    nome: nomeObj, 
+                    ip: ip, 
+                    mascara: formattedMasc, 
+                    descricao: desc, 
+                    type: formType, 
+                    fqdn: fqdn, 
+                    membros: membros,
+                    localidade // Inclui a localidade na inserção
+                }
             ]);
 
         if (error) {

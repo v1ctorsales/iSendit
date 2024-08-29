@@ -18,17 +18,18 @@ function Form() {
     const [desc, setDesc] = useState('');
     const [fqdn, setfqdn] = useState('');
     const [localidades, setLocalidades] = useState([]);
-    const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); // Estado de carregamento
+    const [localidadeSelecionada, setLocalidadeSelecionada] = useState(''); // Novo estado para armazenar a localidade selecionada
+    const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true);
     const [activeForm, setActiveForm] = useState('ip');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const isButtonDisabled = (formType) => {
         if (formType === 'ip') {
-            return nomeObj.trim() === '' || ip.trim() === '';
+            return nomeObj.trim() === '' || ip.trim() === '' || localidadeSelecionada.trim() === '';
         } else if (formType === 'addressGroup') {
-            return nomeObj.trim() === '' || membros.trim() === '';
+            return nomeObj.trim() === '' || membros.trim() === '' || localidadeSelecionada.trim() === '';
         } else if (formType === 'fqdn') {
-            return nomeObj.trim() === '' || fqdn.trim() === '';
+            return nomeObj.trim() === '' || fqdn.trim() === '' || localidadeSelecionada.trim() === '';
         }
         return true;
     };
@@ -50,7 +51,7 @@ function Form() {
     };
 
     useEffect(() => {
-        fetchLocalidades(); // Carrega as localidades ao montar o componente
+        fetchLocalidades();
     }, []);
 
     const handleSubmit = (formType) => async (e) => {
@@ -95,6 +96,7 @@ function Form() {
         try {
             await sendFormDataComponent(
                 formType, nomeObj, ip, masc, desc, fqdn, membros, 
+                localidadeSelecionada, // Passa a localidade selecionada
                 setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros
             );
         } catch (error) {
@@ -142,13 +144,15 @@ function Form() {
                 <form onSubmit={handleSubmit("fqdn")}>
                     <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_fqdn">
                         <div className="formDiv">
-                        <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
+                            <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
                             {isLoadingLocalidades ? (
                                 <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
                             ) : (
                                 <select 
                                     name="localidade" 
                                     id="localidade"
+                                    value={localidadeSelecionada} // Bind para o estado localidadeSelecionada
+                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)} // Atualiza estado ao selecionar
                                 >
                                     {localidades.map((localidade, index) => (
                                         <option key={index} value={localidade.nome}>
@@ -189,13 +193,15 @@ function Form() {
                 <form onSubmit={handleSubmit("addressGroup")}>
                     <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_addressGroup">
                         <div className="formDiv">
-                        <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
+                            <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
                             {isLoadingLocalidades ? (
                                 <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
                             ) : (
                                 <select 
                                     name="localidade" 
                                     id="localidade"
+                                    value={localidadeSelecionada} // Bind para o estado localidadeSelecionada
+                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)} // Atualiza estado ao selecionar
                                 >
                                     {localidades.map((localidade, index) => (
                                         <option key={index} value={localidade.nome}>
@@ -252,6 +258,8 @@ function Form() {
                                 <select 
                                     name="localidade" 
                                     id="localidade"
+                                    value={localidadeSelecionada} // Bind para o estado localidadeSelecionada
+                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)} // Atualiza estado ao selecionar
                                 >
                                     {localidades.map((localidade, index) => (
                                         <option key={index} value={localidade.nome}>
@@ -318,14 +326,14 @@ function Form() {
     );
 }
 
-async function sendFormDataComponent(formType, nomeObj, ip, masc, desc, fqdn, membros, setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros) {
+async function sendFormDataComponent(formType, nomeObj, ip, masc, desc, fqdn, membros, localidadeSelecionada, setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros) {
     try {
         const response = await fetch('/api/sendFormData', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ formType, nomeObj, ip, masc, desc, fqdn, membros }),
+            body: JSON.stringify({ formType, nomeObj, ip, masc, desc, fqdn, membros, localidade: localidadeSelecionada }), // Adiciona localidadeSelecionada ao corpo da requisição
         });
 
         if (!response.ok) {

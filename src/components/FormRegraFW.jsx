@@ -16,14 +16,15 @@ function FormRegraFW() {
     const [objetodestino, setObjetodestino] = useState('');
     const [desc, setDesc] = useState('');
     const [action, setAction] = useState('accept');
+    const [localidade, setLocalidade] = useState(''); // Adicionar estado para localidade
     const [isSubmitting, setIsSubmitting] = useState(false); // Novo estado para controlar o envio
     const [isLoading, setLoading] = useState(false); // Estado de carregamento
     const [localidades, setLocalidades] = useState([]);
     const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); // Estado para controlar o carregamento das localidades
 
     const isButtonDisabled = () => {
-        return isSubmitting || nomeRegra.trim() === '' || porta.trim() === '' || interfaceOrigem.trim() === '' || interfaceDestino.trim() === '' ||
-            objetoorigem.trim() === '' || objetodestino.trim() === '' || action.trim() === '';
+        return isSubmitting || !nomeRegra.trim() || !porta.trim() || !interfaceOrigem.trim() || !interfaceDestino.trim() ||
+            !objetoorigem.trim() || !objetodestino.trim() || !action.trim() || !localidade.trim(); // Inclui localidade
     };
 
     useEffect(() => {
@@ -35,6 +36,9 @@ function FormRegraFW() {
                 }
                 const data = await response.json();
                 setLocalidades(data);
+                if (data.length > 0) {
+                    setLocalidade(data[0].nome); // Define a primeira localidade como padrão
+                }
             } catch (err) {
                 console.error('Erro ao carregar localidades:', err);
                 notify();
@@ -52,8 +56,8 @@ function FormRegraFW() {
         setLoading(true); // Atualizar estado para iniciar o carregamento
     
         sendFormDataComponent(
-            "regrafw", nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, 
-            setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction,
+            "regrafw", nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade, // Inclui localidade
+            setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction, setLocalidade,
             setIsSubmitting, setLoading // Passar setLoading para atualizar o estado de carregamento
         );
     };
@@ -70,19 +74,20 @@ function FormRegraFW() {
                 <button className={`btn-choice btn-active`}>Regras de Firewall</button>
             </div>
             <form onSubmit={handleSubmit}>
-            <div className="formPai" id="form_regrasfw">
+                <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_regrasfw">
 
-                <div className="formDiv">
-                        <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
-                        {isLoadingLocalidades ? (
+                    <div className="formDiv">
+                    <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
+                            {isLoadingLocalidades ? (
                             <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
                         ) : (
                             <select 
                                 name="localidade" 
                                 id="localidade" 
-                                value={action} 
-                                onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                                value={localidade} // Garantir que o valor da localidade esteja controlado
+                                onChange={(e) => setLocalidade(e.target.value)} // Atualiza estado ao selecionar
                             >
+                                <option value="">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
                                 {localidades.map((localidade, index) => (
                                     <option key={index} value={localidade.nome}>
                                         {localidade.nome}
@@ -108,11 +113,12 @@ function FormRegraFW() {
                         <select 
                             name="interfaceorigem" 
                             id="interfaceorigem" 
-                            value={action} 
-                            onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                            value={interfaceOrigem} // Corrige para usar interfaceOrigem
+                            onChange={(e) => setInterfaceOrigem(e.target.value)} // Atualiza estado ao selecionar
                         >
-                            <option value="">Origem 1</option>
-                            <option value="">Origem 2</option>
+                            <option value="">Selecione uma origem</option> {/* Adiciona uma opção padrão */}
+                            <option value="Origem 1">Origem 1</option>
+                            <option value="Origem 2">Origem 2</option>
                         </select>
                     </div>
                     <div className="formDiv">
@@ -120,11 +126,12 @@ function FormRegraFW() {
                         <select 
                             name="interfacedestino" 
                             id="interfacedestino" 
-                            value={action} 
-                            onChange={(e) => setAction(e.target.value)} // Atualiza estado ao selecionar
+                            value={interfaceDestino} // Corrige para usar interfaceDestino
+                            onChange={(e) => setInterfaceDestino(e.target.value)} // Atualiza estado ao selecionar
                         >
-                            <option value="">Destino 1</option>
-                            <option value="">Destino 2</option>
+                            <option value="">Selecione um destino</option> {/* Adiciona uma opção padrão */}
+                            <option value="Destino 1">Destino 1</option>
+                            <option value="Destino 2">Destino 2</option>
                         </select>
                     </div>
                     <h4>Objetos</h4>
@@ -192,8 +199,8 @@ function FormRegraFW() {
 }
 
 function sendFormDataComponent(
-    regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, 
-    setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction, 
+    regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade, // Inclui localidade
+    setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction, setLocalidade,
     setIsSubmitting, setLoading // Adicionar setLoading como parâmetro
 ) {
     fetch('/api/sendFormFW', {
@@ -210,7 +217,8 @@ function sendFormDataComponent(
             objetoorigem, 
             objetodestino, 
             desc, 
-            action 
+            action, 
+            localidade // Enviar localidade ao backend
         }), 
     })
     .then(response => {
@@ -231,6 +239,7 @@ function sendFormDataComponent(
         setObjetodestino('');
         setDesc('');
         setAction('accept');
+        setLocalidade(''); // Reseta localidade
     })
     .catch(error => {
         console.error('Erro ao enviar requisição ao backend:', error);
