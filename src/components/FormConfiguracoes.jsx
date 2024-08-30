@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import EditableLocalidades from "./EditableLocalidades";
 import gear from "../img/gear.gif";
 import EditableInterfaces from "./EditableInterfaces";
+import Informacoes from "./Informacoes";
 
 function FormConfigurar() {
     const [activeForm, setActiveForm] = useState('informacoes');
@@ -19,12 +20,13 @@ function FormConfigurar() {
                 >
                     Informações
                 </button>
-                <button
-                    className={`btn-choice ${activeForm === 'preferencias' ? 'btn-active' : ''}`}
-                    onClick={() => setActiveForm('preferencias')}
-                >
-                    Preferências
-                </button>
+              {//  <button
+                //    className={`btn-choice ${activeForm === 'preferencias' ? 'btn-active' : ''}`}
+                 //   onClick={() => setActiveForm('preferencias')}
+                //>
+                //</div>    Preferências
+                //</button>
+                }
                 <button
                     className={`btn-choice ${activeForm === 'rede' ? 'btn-active' : ''}`}
                     onClick={() => setActiveForm('rede')}
@@ -37,6 +39,9 @@ function FormConfigurar() {
                 >
                     Interfaces
                 </button>
+            </div>
+            <div className="listaEditableInterfaces">
+                {activeForm === 'informacoes' && <Informacoes />}
             </div>
             <div className="listaEditableLocalidades">
                 {activeForm === 'rede' && <EditableLocalidades />}

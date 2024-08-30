@@ -88,8 +88,8 @@ function EditableInterfaces() {
             icon: 'warning',
             showCancelButton: true,
             reverseButtons: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#a6a6a6',
             cancelButtonText: 'Cancelar',
             confirmButtonText: 'Excluir'
         }).then((result) => {

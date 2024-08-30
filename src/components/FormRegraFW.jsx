@@ -217,7 +217,7 @@ function FormRegraFW() {
                     </div>
 
                     <div className="formDiv formDivDescricao">
-                        <div className="divsondesc" htmlFor="desc">Descrição</div>
+                        <div className="divson divsondesc" htmlFor="desc">Descrição</div>
                         <input 
                             placeholder="opcional"
                             type="text" 

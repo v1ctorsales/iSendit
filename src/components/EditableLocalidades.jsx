@@ -45,12 +45,12 @@ function EditableLocalidades() {
         const localidade = localidades[index];
         MySwal.fire({
             title: `Deseja excluir a localidade ${localidade.nome}?`,
-            text: "Você não poderá reverter isso!",
+            text: "As interfaces associadas também serão excluídas!",
             icon: 'warning',
             showCancelButton: true,
             reverseButtons: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#a6a6a6',
             cancelButtonText: 'Cancelar',
             confirmButtonText: 'Excluir'
         }).then((result) => {

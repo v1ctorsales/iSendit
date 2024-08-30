@@ -13,17 +13,29 @@ export default async function deleteLocalidade(req, res) {
         }
 
         try {
-            const { data, error } = await supabase
+            // Deleta todas as interfaces associadas à localidade
+            const { data: deletedInterfaces, error: deleteInterfacesError } = await supabase
+                .from('interfaces')
+                .delete()
+                .match({ localidade: nome });
+
+            if (deleteInterfacesError) {
+                console.error('Erro ao excluir interfaces:', deleteInterfacesError);
+                return res.status(500).json({ message: 'Erro ao excluir interfaces associadas' });
+            }
+
+            // Deleta a localidade
+            const { data: deletedLocalidade, error: deleteLocalidadeError } = await supabase
                 .from('localidades')
                 .delete()
                 .match({ nome: nome, empresa: empresa });
 
-            if (error) {
-                console.error('Erro ao excluir localidade:', error);
+            if (deleteLocalidadeError) {
+                console.error('Erro ao excluir localidade:', deleteLocalidadeError);
                 return res.status(500).json({ message: 'Erro ao excluir localidade' });
             }
 
-            return res.status(200).json({ success: true, message: 'Localidade excluída com sucesso' });
+            return res.status(200).json({ success: true, message: 'Localidade e interfaces associadas excluídas com sucesso' });
         } catch (err) {
             console.error('Erro ao conectar com Supabase:', err);
             return res.status(500).json({ message: 'Erro interno do servidor' });

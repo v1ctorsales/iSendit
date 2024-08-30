@@ -433,6 +433,7 @@ width: 120px;
 
 .formDivDescricao{
   margin-top: 20px;
+  justify-content: space-between;
 }
 
 select{

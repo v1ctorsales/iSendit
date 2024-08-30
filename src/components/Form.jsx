@@ -173,7 +173,7 @@ function Form() {
                             />
                         </div>
                         <div className="formDiv formDivDescricao">
-                            <div className="divsondesc" htmlFor="desc">Descrição</div>
+                            <div className="divson divsondesc" htmlFor="desc">Descrição</div>
                             <input 
                                 placeholder="opcional"
                                 type="text" 
@@ -232,7 +232,7 @@ function Form() {
                             />
                         </div>
                         <div className="formDiv formDivDescricao">
-                            <div className="divsondesc" htmlFor="desc">Descrição</div>
+                            <div className="divson divsondesc" htmlFor="desc">Descrição</div>
                             <input 
                                 placeholder="opcional"
                                 type="text" 
@@ -307,7 +307,7 @@ function Form() {
                             </select>
                         </div>
                         <div className="formDiv formDivDescricao">
-                            <div className="divsondesc" htmlFor="desc">Descrição</div>
+                            <div className="divson divsondesc" htmlFor="desc">Descrição</div>
                             <input 
                                 placeholder="opcional"
                                 type="text" 
