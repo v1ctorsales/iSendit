@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
+import nodemailer from 'nodemailer';
 
 // Substitua pelos valores da sua configuração Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const supabaseEmailPw = process.env.EMAIL_PW;
+const supabaseEmail = process.env.EMAIL;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -47,10 +51,47 @@ export default async function sendFormFW(req, res) {
 
         if (error) {
             console.error('Erro ao inserir dados:', error);
-            res.status(500).json({ message: 'Erro ao salvar dados' });
-        } else {
-            res.status(200).json({ message: 'Dados recebidos e salvos com sucesso!' });
+            return res.status(500).json({ message: 'Erro ao salvar dados' });
         }
+
+        // Configura o transportador de e-mail usando o Nodemailer
+        const transporter = nodemailer.createTransport({
+            service: 'gmail', // Você pode usar outro serviço de e-mail
+            auth: {
+                user: supabaseEmail, // Substitua pelo seu e-mail
+                pass: supabaseEmailPw, // Substitua pela sua senha ou token de aplicação
+            },
+        });
+
+        // Define as opções do e-mail
+        const mailOptions = {
+            from: {EMAIL}, // Substitua pelo seu e-mail
+            to: 'victor.alves.sales@hotmail.com', // Substitua pelo e-mail do destinatário
+            subject: 'Nova solicitação de regra de Firewall criada',
+            text: `Uma nova solicitação foi criada com os seguintes detalhes:
+            
+            Localidade: "${localidade}"
+            Nome da Regra: "${nomeRegra}"
+            Interface Origem: "${interfaceOrigem}"
+            Interface Destino: "${interfaceDestino}"
+            Objeto Origem: "${objetoorigem}"
+            Objeto Destino: "${objetodestino}"
+            Ação: "${action === "accept" ? "Aceitar" : "Recusar"}"
+            Descrição: "${desc}"
+
+            Essa solicitação foi criada com sucesso.`,
+        };
+
+        // Envia o e-mail
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                console.error('Erro ao enviar e-mail:', err);
+                return res.status(500).json({ message: 'Erro ao enviar e-mail' });
+            } else {
+                console.log('E-mail enviado:', info.response);
+                return res.status(200).json({ message: 'Dados recebidos e salvos com sucesso, e-mail enviado!' });
+            }
+        });
     } else {
         res.status(405).json({ message: 'Método não permitido' });
     }

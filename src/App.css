@@ -133,6 +133,15 @@ button{
   cursor: pointer;
 }
 
+.editableThing{
+  align-items: center;
+}
+
+.bigSelect{
+  height: 35px;
+}
+
+
 .btn-submit{
   margin-top: 5%;
   background-color: #AD49E1;

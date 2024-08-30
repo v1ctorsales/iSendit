@@ -244,6 +244,7 @@ function EditableInterfaces() {
             <div className="formDiv editableThing">
                 <div className="divson" htmlFor="localidade" id="">Localidade</div>
                 <select
+                className="bigSelect"
                     id="localidade"
                     value={selectedLocalidade}
                     onChange={(e) => setSelectedLocalidade(e.target.value)}
