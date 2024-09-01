@@ -8,7 +8,7 @@ import image from "../img/isendit.png";
 import { Link } from 'react-router-dom';
 
 function SideBar() {
-    const [activeButton, setActiveButton] = useState('firewall');
+    const [activeButton, setActiveButton] = useState('ajuda');
 
     return (
         <div className="navbar">
@@ -19,7 +19,7 @@ function SideBar() {
                 </div>
             </div>
             <div className="navBarBody">
-                <Link to="/" onClick={() => setActiveButton('firewall')}>
+                <Link to="/firewall" onClick={() => setActiveButton('firewall')}>
                     <SlideBarButton 
                         icon={<ImFire />} 
                         name="Enviar Regras de Firewall" 

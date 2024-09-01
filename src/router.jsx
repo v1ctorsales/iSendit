@@ -1,7 +1,12 @@
 import Form from "./components/Form";
 import FormRegraFW from "./components/FormRegraFW";
 import FormConfigurar from "./components/FormConfiguracoes";
+import PageLogin from "./components/PageLogin";
+import PageSeeAllTasks from "./components/PageSeeAllTasks";
 
+function LoginPage() {
+    return <PageLogin />
+}
 
 function FirewallPage() {
     return <FormRegraFW />
@@ -12,7 +17,7 @@ function ObjetosPage() {
 }
 
 function EnviosPage() {
-    return <h2>Página de Visualização de Envios</h2>;
+    return <PageSeeAllTasks />
 }
 
 function ConfiguracoesPage() {
@@ -24,6 +29,7 @@ function AjudaPage() {
 }
 
 export {
+    LoginPage,
     FirewallPage,
     ObjetosPage,
     EnviosPage,

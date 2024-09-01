@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import fwimg from "../img/fire.gif";
 import BtnSubmit from "./Botoes/BtnSubmit";
 import { ToastContainer, toast } from 'react-toastify';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { UuidContext } from '../contexts/UuidContext'; // Importa o UuidContext
 
 const notify = () => toast.error("Houve um erro.");
 const notifyOk = () => toast.success("Regra de Firewall enviada!");
@@ -23,6 +24,12 @@ function FormRegraFW() {
     const [interfaces, setInterfaces] = useState([]); 
     const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); 
     const [isLoadingInterfaces, setIsLoadingInterfaces] = useState(false); 
+
+    const { uuid } = useContext(UuidContext); // Acessa o uuid do contexto
+
+    useEffect(() => {
+        console.log('UUID from UuidContext:', uuid); // Adicione este log para verificar se o uuid está sendo acessado corretamente
+    }, [uuid]);
 
     const isButtonDisabled = () => {
         return isSubmitting || !nomeRegra.trim() || !porta.trim() || !interfaceOrigem.trim() || !interfaceDestino.trim() ||
@@ -78,6 +85,7 @@ function FormRegraFW() {
         setLoading(true);
     
         sendFormDataComponent(
+            uuid, // Passa o uuid do contexto aqui
             "regrafw", nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade,
             setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction, setLocalidade,
             setIsSubmitting, setLoading
@@ -216,7 +224,9 @@ function FormRegraFW() {
                         </select>
                     </div>
 
-                    <div className="formDiv formDivDescricao">
+                    <div className="formDiv formDiv
+
+Descricao">
                         <div className="divson divsondesc" htmlFor="desc">Descrição</div>
                         <input 
                             placeholder="opcional"
@@ -236,6 +246,7 @@ function FormRegraFW() {
 }
 
 function sendFormDataComponent(
+    uuid, // Recebe o uuid do contexto aqui
     regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade,
     setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction, setLocalidade,
     setIsSubmitting, setLoading
@@ -246,6 +257,7 @@ function sendFormDataComponent(
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
+            uuid, // Usa o uuid do contexto aqui
             regrafw, 
             nomeRegra, 
             porta, 

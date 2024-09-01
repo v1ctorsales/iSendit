@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import cube from "../img/cube2.gif";
 import BtnSubmit from "./Botoes/BtnSubmit";
+import { UuidContext } from '../contexts/UuidContext'; // Importe o UuidContext
 
 const notify = () => toast.error("Houve um erro.");
-const notifyIp = () => toast.error("Endereço IP inválido!");
 const notifyOk = () => toast.success("Objeto enviado!");
 const notifyFieldRequired = (field) => toast.error(`O campo ${field} é obrigatório.`);
 
 function Form() {
+    const { uuid } = useContext(UuidContext); // Acesse o UUID do contexto
     const [nomeObj, setNomeObj] = useState('');
     const [ip, setIp] = useState('');
     const [masc, setMasc] = useState('/1');
@@ -18,18 +19,18 @@ function Form() {
     const [desc, setDesc] = useState('');
     const [fqdn, setfqdn] = useState('');
     const [localidades, setLocalidades] = useState([]);
-    const [localidadeSelecionada, setLocalidadeSelecionada] = useState(''); // Novo estado para armazenar a localidade selecionada
+    const [localidadeSelecionada, setLocalidadeSelecionada] = useState('');
     const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true);
     const [activeForm, setActiveForm] = useState('ip');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const isButtonDisabled = (formType) => {
-        if (formType === 'ip') {
+        if (formType === 'fqdn') {
+            return nomeObj.trim() === '' || localidadeSelecionada.trim() === '';
+        } else if (formType === 'ip') {
             return nomeObj.trim() === '' || ip.trim() === '' || localidadeSelecionada.trim() === '';
         } else if (formType === 'addressGroup') {
             return nomeObj.trim() === '' || membros.trim() === '' || localidadeSelecionada.trim() === '';
-        } else if (formType === 'fqdn') {
-            return nomeObj.trim() === '' || fqdn.trim() === '' || localidadeSelecionada.trim() === '';
         }
         return true;
     };
@@ -56,19 +57,18 @@ function Form() {
 
     const handleSubmit = (formType) => async (e) => {
         e.preventDefault();
-        if (formType === 'ip') {
+        if (formType === 'fqdn') {
+            if (nomeObj.trim() === '') {
+                notifyFieldRequired('Nome');
+                return;
+            }
+        } else if (formType === 'ip') {
             if (nomeObj.trim() === '') {
                 notifyFieldRequired('Nome');
                 return;
             }
             if (ip.trim() === '') {
                 notifyFieldRequired('IP');
-                return;
-            }
-            const ipv4Pattern = /^(\d{1,3}\.){3}\d{1,3}$/;
-            const ipv6Pattern = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
-            if (!(ipv4Pattern.test(ip) || ipv6Pattern.test(ip))) {
-                notifyIp();
                 return;
             }
         } else if (formType === 'addressGroup') {
@@ -80,24 +80,28 @@ function Form() {
                 notifyFieldRequired('Membros');
                 return;
             }
-        } else if (formType === 'fqdn') {
-            if (nomeObj.trim() === '') {
-                notifyFieldRequired('Nome');
-                return;
-            }
-            if (fqdn.trim() === '') {
-                notifyFieldRequired('FQDN');
-                return;
-            }
         }
     
         setIsSubmitting(true);
     
         try {
             await sendFormDataComponent(
-                formType, nomeObj, ip, masc, desc, fqdn, membros, 
-                localidadeSelecionada, // Passa a localidade selecionada
-                setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros, setLocalidadeSelecionada
+                uuid, // Passe o UUID do contexto aqui
+                formType, 
+                nomeObj, 
+                ip, 
+                masc, 
+                desc, 
+                fqdn, 
+                membros, 
+                localidadeSelecionada,
+                setNomeObj, 
+                setIp, 
+                setMasc, 
+                setDesc, 
+                setfqdn, 
+                setMembros, 
+                setLocalidadeSelecionada
             );
         } catch (error) {
             console.error('Erro ao enviar o formulário:', error);
@@ -151,10 +155,10 @@ function Form() {
                                 <select 
                                     name="localidade" 
                                     id="localidade"
-                                    value={localidadeSelecionada} // Bind para o estado localidadeSelecionada
-                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)} // Atualiza estado ao selecionar
+                                    value={localidadeSelecionada} 
+                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)}
                                 >
-                                    <option value="">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
+                                    <option value="">Selecione uma localidade</option>
                                     {localidades.map((localidade, index) => (
                                         <option key={index} value={localidade.nome}>
                                             {localidade.nome}
@@ -184,7 +188,7 @@ function Form() {
                         </div>
                         <BtnSubmit 
                             disabled={isButtonDisabled('fqdn')} 
-                            isLoading={isSubmitting} // Passa o estado de carregamento
+                            isLoading={isSubmitting} 
                         />
                     </div>
                 </form>
@@ -201,10 +205,10 @@ function Form() {
                                 <select 
                                     name="localidade" 
                                     id="localidade"
-                                    value={localidadeSelecionada} // Bind para o estado localidadeSelecionada
-                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)} // Atualiza estado ao selecionar
+                                    value={localidadeSelecionada} 
+                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)}
                                 >
-                                    <option value="">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
+                                    <option value="">Selecione uma localidade</option>
                                     {localidades.map((localidade, index) => (
                                         <option key={index} value={localidade.nome}>
                                             {localidade.nome}
@@ -243,7 +247,7 @@ function Form() {
                         </div>
                         <BtnSubmit 
                             disabled={isButtonDisabled('addressGroup')} 
-                            isLoading={isSubmitting} // Passa o estado de carregamento
+                            isLoading={isSubmitting} 
                         />
                     </div>
                 </form>
@@ -260,10 +264,10 @@ function Form() {
                                 <select 
                                     name="localidade" 
                                     id="localidade"
-                                    value={localidadeSelecionada} // Bind para o estado localidadeSelecionada
-                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)} // Atualiza estado ao selecionar
+                                    value={localidadeSelecionada} 
+                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)}
                                 >
-                                    <option value="">Selecione uma localidade</option> {/* Adiciona uma opção padrão */}
+                                    <option value="">Selecione uma localidade</option>
                                     {localidades.map((localidade, index) => (
                                         <option key={index} value={localidade.nome}>
                                             {localidade.nome}
@@ -318,7 +322,7 @@ function Form() {
                         </div>
                         <BtnSubmit 
                             disabled={isButtonDisabled('ip')} 
-                            isLoading={isSubmitting} // Passa o estado de carregamento
+                            isLoading={isSubmitting} 
                         />
                     </div>
                 </form>
@@ -329,14 +333,24 @@ function Form() {
     );
 }
 
-async function sendFormDataComponent(formType, nomeObj, ip, masc, desc, fqdn, membros, localidadeSelecionada, setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros, setLocalidadeSelecionada) {
+async function sendFormDataComponent(uuid, formType, nomeObj, ip, masc, desc, fqdn, membros, localidadeSelecionada, setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros, setLocalidadeSelecionada) {
     try {
         const response = await fetch('/api/sendFormData', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ formType, nomeObj, ip, masc, desc, fqdn, membros, localidade: localidadeSelecionada }), // Adiciona localidadeSelecionada ao corpo da requisição
+            body: JSON.stringify({ 
+                uuid, // Utilize o UUID do contexto
+                formType, 
+                nomeObj, 
+                ip, 
+                masc, 
+                desc, 
+                fqdn, 
+                membros, 
+                localidade: localidadeSelecionada 
+            }),
         });
 
         if (!response.ok) {
@@ -354,7 +368,7 @@ async function sendFormDataComponent(formType, nomeObj, ip, masc, desc, fqdn, me
         setDesc('');
         setfqdn('');
         setMembros('');
-        setLocalidadeSelecionada(''); // Resetar a localidade selecionada
+        setLocalidadeSelecionada('');
     } catch (error) {
         console.error('Erro ao enviar requisição ao backend:', error);
         notify();

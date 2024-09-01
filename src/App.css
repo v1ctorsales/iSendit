@@ -141,6 +141,39 @@ button{
   height: 35px;
 }
 
+#formLogin{
+  width: 580px;
+  margin: auto;
+  gap: 2%;
+  display: grid;
+}
+.form-group{
+  display: flex;
+  justify-content: space-between;
+}
+
+.additional-options{
+  margin-top: 5%;
+  display: flex;
+  justify-content: space-around;
+}
+
+.adopt{
+color: #7D33A3;
+}
+
+.btn-submit2{
+  margin-top: 1%;
+  background-color: #AD49E1;
+  height: 50px;
+  color: white;
+  border: 0;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  width: 100%;
+}
+
 
 .btn-submit{
   margin-top: 5%;
@@ -177,7 +210,7 @@ input{
 }
 
 .navbar{
-  position: absolute;
+  position: fixed;
   top: 0;
   width: 20%;
   height: 100%;
@@ -207,7 +240,7 @@ select{
 }
 
 .divson{
-  width: 80px;
+  width: 15%;
 }
 
 .divson2{
@@ -260,7 +293,7 @@ margin-bottom: 0;
 
 
 #action, #localidade, #interfaceorigem, #interfacedestino{
-  width: 504px;
+  width: 85%;
 }
 
 .editableText{
@@ -412,7 +445,7 @@ span{
   }
 
 .choiceObjeto{
-  width: 585px;
+  width: 30%;
   margin:auto;
   display: flex;
   margin-bottom: 25px;
@@ -474,6 +507,11 @@ select:focus{
   margin-top: 6%;
 }
 
+.minilogo{
+  width: 25%;
+  margin: 2% 0;
+}
+
 .centerDois{
   text-align: center;
   margin: auto;
@@ -486,4 +524,72 @@ select:focus{
     margin: auto;
     display: grid;
     gap: 5px;
+}
+
+.tasks-table-container{
+  margin: auto;
+  width: 50%;
+  max-width: 50%;
+}
+
+.tasks-table-container {
+
+  margin-top: 20px;
+}
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse; /* Remove espaçamento entre as células */
+  background-color: #f9f9f9;
+  margin-bottom: 20px;
+}
+
+.tasks-table th,
+.tasks-table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.tasks-table th{
+text-align: center;
+}
+
+
+.tasks-table th {
+  background-color: #AD49E1; /* Cor de fundo do cabeçalho */
+  color: white;
+  position: sticky;
+  top: 0; /* Mantém o cabeçalho fixo no topo */
+  z-index: 1;
+}
+
+.tasks-table tr:nth-child(even) {
+  background-color: #f2f2f2; /* Cores alternadas nas linhas */
+}
+
+.tasks-table tr:hover {
+  background-color: #ddd; /* Efeito de hover nas linhas */
+}
+
+.tasks-table td {
+  border-bottom: 1px solid #ddd;
+  color: #333; /* Cor do texto nas células */
+}
+
+.tasks-table th:first-child,
+.tasks-table td:first-child {
+  border-left: 0;
+}
+
+.tasks-table th:last-child,
+.tasks-table td:last-child {
+  border-right: 0;
+}
+
+.row-created-at{
+  color: rgb(126, 126, 126)!important;
+  font-style: italic;
+}
+@media only screen and (max-width: 1300px){
+
 }
