@@ -5,6 +5,7 @@ import { BsFire } from 'react-icons/bs';
 import { IoCube } from 'react-icons/io5';
 import 'react-toastify/dist/ReactToastify.css';
 import { toast } from 'react-toastify';
+import rocket from '../img/rocket.gif';
 
 function PageSeeAllTasks() {
     const { uuid } = useContext(UuidContext);
@@ -77,60 +78,59 @@ function PageSeeAllTasks() {
         }).replace(/\/\d{4}/, ''); // Remove o ano do formato da data
     };
 
-    if (isLoading) {
-        return <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /> Carregando tarefas...</div>;
-    }
-
-    if (error) {
-        return <div>Erro: {error}</div>;
-    }
-
     return (
         <div>
             <div className="topForm">
                 <div className="h2Obj">
                     <h2>Tarefas Recentes</h2>
+                    <img className="rocketImg" src={rocket} alt="Cube" />
                 </div>
             </div>
-            <div className="tasks-table-container">
-                <table className="tasks-table">
-                    <thead>
-                        <tr>
-                            <th className="col-created-at">Data de Criação</th>
-                            <th className="col-type">Tipo de Regra</th>
-                            <th className="col-name">Nome</th>
-                            <th className="col-location">Localidade</th>
-                            <th className="col-actions">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tasks.length > 0 ? (
-                            tasks.map((task, index) => (
-                                <tr key={index}>
-                                    <td className="row-created-at">{formatDate(task.created_at)}</td>
-                                    <td className="row-type">
-                                        {mapTypeToLabel(task.type).icon} {mapTypeToLabel(task.type).label}
-                                    </td> 
-                                    <td className="row-name">{task.nome}</td>
-                                    <td className="row-location">{task.localidade}</td>
-                                    <td className="row-actions">
-                                        <button 
-                                            className="btn-details"
-                                            onClick={() => handleViewDetails(task)}
-                                        >
-                                            Detalhes
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
+            {isLoading ? (
+                <div className="center"><AiOutlineLoading3Quarters className="loading-icon" /></div>
+            ) : error ? (
+                <div>Erro: {error}</div>
+            ) : (
+                <div className="tasks-table-container">
+                    <table className="tasks-table">
+                        <thead>
                             <tr>
-                                <td className="row-empty" colSpan="5">Nenhuma tarefa encontrada.</td>
+                                <th className="col-created-at">Data de Criação</th>
+                                <th className="col-type">Tipo de Regra</th>
+                                <th className="col-name">Nome</th>
+                                <th className="col-location">Localidade</th>
+                                <th className="col-actions">Ações</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {tasks.length > 0 ? (
+                                tasks.map((task, index) => (
+                                    <tr key={index}>
+                                        <td className="row-created-at">{formatDate(task.created_at)}</td>
+                                        <td className="row-type">
+                                            {mapTypeToLabel(task.type).icon} {mapTypeToLabel(task.type).label}
+                                        </td> 
+                                        <td className="row-name">{task.nome}</td>
+                                        <td className="row-location">{task.localidade}</td>
+                                        <td className="row-actions">
+                                            <button 
+                                                className="btn-details"
+                                                onClick={() => handleViewDetails(task)}
+                                            >
+                                                Detalhes
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td className="row-empty" colSpan="5">Nenhuma tarefa encontrada.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }

@@ -139,12 +139,13 @@ function EditableInterfaces() {
         setIsSaving(true);
         
         try {
-            const response = await fetch('/api/sendNewInterface', {
+            const response = await fetch('/api/sendNewInterfaceOuLocalidade', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    type: 'interfaces', // Indica que a criação é de uma interface
                     nome: newInterface.trim(),
                     localidade: selectedLocalidade.trim(),
                     empresa: 'empresa_teste', // Adiciona o nome da empresa hardcoded
@@ -168,6 +169,7 @@ function EditableInterfaces() {
             setIsSaving(false);
         }
     };
+    
 
     const handleEditClick = (index) => {
         setEditIndex(index);
@@ -186,12 +188,13 @@ function EditableInterfaces() {
         const newName = editedName;
     
         try {
-            const response = await fetch('/api/updateInterface', {
+            const response = await fetch('/api/updateInterfaceOuLocalidade', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    type: 'interfaces', // Indica que a atualização é de uma interface
                     oldName: oldName,
                     newName: newName,
                     localidade: selectedLocalidade,
@@ -223,6 +226,7 @@ function EditableInterfaces() {
             setIsSaving(false); // Desativa o estado de salvamento
         }
     };
+    
 
     if (isLoading) {
         return <div className="center"><AiOutlineLoading3Quarters className="loading-icon" /></div>;

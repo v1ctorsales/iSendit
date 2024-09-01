@@ -23,8 +23,6 @@ export default async function getTasks(req, res) {
                 .order('created_at', { ascending: false })
                 .limit(10);
 
-            console.log('Tarefas retornadas:', tasks);
-
             if (error) {
                 console.error('Erro ao buscar tarefas do Supabase:', error);
                 throw new Error('Erro ao buscar tarefas do Supabase');

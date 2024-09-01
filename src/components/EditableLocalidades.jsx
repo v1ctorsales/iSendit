@@ -98,26 +98,27 @@ function EditableLocalidades() {
         setIsSaving(true);
         
         try {
-            const response = await fetch('/api/sendNewLocalidade', {
+            const response = await fetch('/api/sendNewInterfaceOuLocalidade', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    nome: newLocalidade,
-                    empresa: 'empresa_teste',
+                    type: 'localidades', // Indica que a criação é de uma localidade
+                    nome: newLocalidade.trim(),
+                    empresa: 'empresa_teste', // Adiciona o nome da empresa hardcoded
                 }),
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 toast.error(errorData.message || 'Erro ao adicionar localidade');
                 throw new Error(errorData.message || 'Erro ao adicionar localidade');
             }
-
+    
             const data = await response.json();
             toast.success('Localidade adicionada com sucesso!');
-            setLocalidades([...localidades, { nome: newLocalidade }]);
+            setLocalidades([...localidades, { nome: newLocalidade.trim() }]);
             setNewLocalidade(''); // Limpa o campo de input após o sucesso
         } catch (err) {
             console.error('Erro ao adicionar localidade:', err);
@@ -126,6 +127,7 @@ function EditableLocalidades() {
             setIsSaving(false);
         }
     };
+    
 
     const handleEditClick = (index) => {
         setEditIndex(index);
@@ -142,20 +144,21 @@ function EditableLocalidades() {
         setIsSaving(true); // Ativa o estado de salvamento
         const oldName = localidades[index].nome; // Armazena o nome antigo para possíveis restaurações
         const newName = editedName;
-    
+        
         try {
-            const response = await fetch('/api/updateLocalidade', {
+            const response = await fetch('/api/updateInterfaceOuLocalidade', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    type: 'localidades', // Indica que a atualização é de uma localidade
                     oldName: oldName,
                     newName: newName,
                     empresa: 'empresa_teste',
                 }),
             });
-    
+        
             if (!response.ok) {
                 const errorData = await response.json();
                 if (response.status === 409) {
@@ -181,6 +184,7 @@ function EditableLocalidades() {
             setIsSaving(false); // Desativa o estado de salvamento
         }
     };
+    
     
 
     if (isLoading) {

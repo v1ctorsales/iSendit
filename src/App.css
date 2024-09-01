@@ -373,6 +373,10 @@ span{
   width: 10%;
 }
 
+.rocketImg{
+  width: 12%;
+}
+
 .btn-active {
   background-color: #AD49E1; 
   color: white; 
@@ -550,9 +554,7 @@ select:focus{
   text-align: left;
 }
 
-.tasks-table th{
-text-align: center;
-}
+
 
 
 .tasks-table th {
