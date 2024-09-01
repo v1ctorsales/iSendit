@@ -22,8 +22,6 @@ export default async function getEmpresaInfo(req, res) {
                 return res.status(500).json({ message: 'Erro ao buscar dados da empresa filha' });
             }
 
-            console.log('Dados da empresa filha:', empresaFilha);
-
             // 2. Se houver uma empresa pai, buscar os dados da empresa pai
             if (empresaFilha.empresaPai_uuid) {
                 const { data: empresaPai, error: errorPai } = await supabase
@@ -36,8 +34,6 @@ export default async function getEmpresaInfo(req, res) {
                     console.error('Erro ao buscar dados da empresa pai:', errorPai);
                     return res.status(500).json({ message: 'Erro ao buscar dados da empresa pai' });
                 }
-
-                console.log('Dados da empresa pai:', empresaPai);
 
                 // 3. Retornar os dados da empresa filha junto com os dados da empresa pai
                 return res.status(200).json({

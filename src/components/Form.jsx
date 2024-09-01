@@ -37,7 +37,7 @@ function Form() {
 
     const fetchLocalidades = async () => {
         try {
-            const response = await fetch('/api/getLocalidade');
+            const response = await fetch('/api/getInterfaceOuLocalidade?type=localidades');
             if (!response.ok) {
                 throw new Error('Erro ao buscar localidades');
             }

@@ -23,7 +23,7 @@ function EditableLocalidades() {
     useEffect(() => {
         const fetchLocalidades = async () => {
             try {
-                const response = await fetch('/api/getLocalidade');
+                const response = await fetch('/api/getInterfaceOuLocalidade?type=localidades');
                 if (!response.ok) {
                     throw new Error('Erro ao buscar localidades');
                 }
@@ -55,12 +55,13 @@ function EditableLocalidades() {
             confirmButtonText: 'Excluir'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/api/deleteLocalidade', {
+                fetch('/api/deleteInterfaceOuLocalidade', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        type: 'localidades', // Indica que a exclusão é de uma localidade
                         nome: localidade.nome,
                         empresa: 'empresa_teste'
                     })

@@ -39,7 +39,7 @@ function FormRegraFW() {
     useEffect(() => {
         const fetchLocalidades = async () => {
             try {
-                const response = await fetch('/api/getLocalidade');
+                const response = await fetch('/api/getInterfaceOuLocalidade?type=localidades');
                 if (!response.ok) {
                     throw new Error('Erro ao buscar localidades');
                 }
@@ -61,7 +61,7 @@ function FormRegraFW() {
             const fetchInterfaces = async () => {
                 try {
                     setIsLoadingInterfaces(true);
-                    const response = await fetch(`/api/getInterfaces?localidade=${localidade}`);
+                    const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${localidade}`);
                     if (!response.ok) {
                         throw new Error('Erro ao buscar interfaces');
                     }
@@ -224,9 +224,7 @@ function FormRegraFW() {
                         </select>
                     </div>
 
-                    <div className="formDiv formDiv
-
-Descricao">
+                    <div className="formDiv formDivDescricao">
                         <div className="divson divsondesc" htmlFor="desc">Descrição</div>
                         <input 
                             placeholder="opcional"
