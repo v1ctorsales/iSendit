@@ -26,7 +26,6 @@ function FormRegraFW() {
     const [isLoadingInterfaces, setIsLoadingInterfaces] = useState(false); 
     const [obs, setObs] = useState(''); // Novo estado para observação
 
-
     const { uuid } = useContext(UuidContext); // Acessa o uuid do contexto
 
     useEffect(() => {
@@ -86,34 +85,43 @@ function FormRegraFW() {
         setIsSubmitting(true);
         setLoading(true);
     
-        sendFormDataComponent(
-            uuid, 
-            "regrafw", 
-            nomeRegra, 
-            porta, 
-            interfaceOrigem, 
-            interfaceDestino, 
-            objetoorigem, 
-            objetodestino, 
-            desc, 
-            obs, // Adiciona o valor de observação aqui
-            action, 
-            localidade,
-            setNomeRegra, 
-            setPorta, 
-            setInterfaceOrigem, 
-            setInterfaceDestino, 
-            setObjetoorigem, 
-            setObjetodestino, 
-            setDesc, 
-            setObs, // Adiciona o setter para resetar o campo de observação
-            setAction, 
-            setLocalidade,
-            setIsSubmitting, 
-            setLoading
-        );
+        sendFormDataComponent({
+            uuid,
+            regrafw: "regrafw",
+            nomeRegra,
+            porta,
+            interfaceOrigem,
+            interfaceDestino,
+            objetoorigem,
+            objetodestino,
+            desc,
+            obs,
+            action,
+            localidade
+        })
+        .then(() => {
+            // Resetar os campos após o envio
+            setNomeRegra('');
+            setPorta('');
+            setInterfaceOrigem('');
+            setInterfaceDestino('');
+            setObjetoorigem('');
+            setObjetodestino('');
+            setDesc('');
+            setAction('accept');
+            setLocalidade('');
+            setObs('');
+            notifyOk();
+        })
+        .catch((error) => {
+            console.error('Erro ao enviar requisição ao backend:', error);
+            notify();
+        })
+        .finally(() => {
+            setIsSubmitting(false);
+            setLoading(false);
+        });
     };
-    
 
     return (
         <>
@@ -201,7 +209,6 @@ function FormRegraFW() {
                         </>
                     )}
 
-
                     <h4>Objetos</h4>
                     <div className="formDiv">   
                         <div className="divson" htmlFor="objetoorigem">Origem</div>
@@ -278,58 +285,19 @@ function FormRegraFW() {
     );
 }
 
-function sendFormDataComponent(
-    uuid, // Recebe o uuid do contexto aqui
-    regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade,
-    setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction, setLocalidade,
-    setIsSubmitting, setLoading
-) {
-    fetch('/api/sendFormFW', {
+function sendFormDataComponent(data) {
+    return fetch('/api/sendFormFW', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-            uuid, // Usa o uuid do contexto aqui
-            regrafw, 
-            nomeRegra, 
-            porta, 
-            interfaceOrigem, 
-            interfaceDestino, 
-            objetoorigem, 
-            objetodestino, 
-            desc, 
-            action, 
-            localidade 
-        }), 
+        body: JSON.stringify(data),
     })
     .then(response => {
         if (!response.ok) {
             throw new Error('Erro na requisição');
         }
         return response.json();
-    })
-    .then(data => {
-        console.log('done', data);
-        notifyOk(); 
-
-        setNomeRegra('');
-        setPorta('');
-        setInterfaceOrigem('');
-        setInterfaceDestino('');
-        setObjetoorigem('');
-        setObjetodestino('');
-        setDesc('');
-        setAction('accept');
-        setLocalidade(''); // Reseta localidade
-    })
-    .catch(error => {
-        console.error('Erro ao enviar requisição ao backend:', error);
-        notify(); 
-    })
-    .finally(() => {
-        setIsSubmitting(false); 
-        setLoading(false); 
     });
 }
 
