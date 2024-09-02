@@ -17,6 +17,7 @@ function Form() {
     const [masc, setMasc] = useState('/1');
     const [membros, setMembros] = useState('');
     const [desc, setDesc] = useState('');
+    const [obs, setObs] = useState(''); // Novo estado para observação
     const [fqdn, setfqdn] = useState('');
     const [localidades, setLocalidades] = useState([]);
     const [localidadeSelecionada, setLocalidadeSelecionada] = useState('');
@@ -26,7 +27,7 @@ function Form() {
 
     const isButtonDisabled = (formType) => {
         if (formType === 'fqdn') {
-            return nomeObj.trim() === '' || localidadeSelecionada.trim() === '';
+            return nomeObj.trim() === '' || fqdn.trim() === '' || localidadeSelecionada.trim() === '';
         } else if (formType === 'ip') {
             return nomeObj.trim() === '' || ip.trim() === '' || localidadeSelecionada.trim() === '';
         } else if (formType === 'addressGroup') {
@@ -34,7 +35,6 @@ function Form() {
         }
         return true;
     };
-
     const fetchLocalidades = async () => {
         try {
             const response = await fetch('/api/getInterfaceOuLocalidade?type=localidades');
@@ -56,10 +56,27 @@ function Form() {
     }, []);
 
     const handleSubmit = (formType) => async (e) => {
+        console.log('Valor da mascara:', masc);
         e.preventDefault();
+    
+        console.log('Valores ao submeter:', {
+            nomeObj,
+            ip,
+            masc,
+            desc,
+            obs,
+            fqdn,
+            membros,
+            localidadeSelecionada,
+        });
+    
         if (formType === 'fqdn') {
             if (nomeObj.trim() === '') {
                 notifyFieldRequired('Nome');
+                return;
+            }
+            if (fqdn.trim() === '') {
+                notifyFieldRequired('FQDN');
                 return;
             }
         } else if (formType === 'ip') {
@@ -86,21 +103,23 @@ function Form() {
     
         try {
             await sendFormDataComponent(
-                uuid, // Passe o UUID do contexto aqui
-                formType, 
-                nomeObj, 
-                ip, 
-                masc, 
-                desc, 
-                fqdn, 
-                membros, 
+                uuid, 
+                formType,
+                nomeObj,
+                ip,
+                masc,
+                desc,
+                obs,
+                fqdn,
+                membros,
                 localidadeSelecionada,
-                setNomeObj, 
-                setIp, 
-                setMasc, 
-                setDesc, 
-                setfqdn, 
-                setMembros, 
+                setNomeObj,
+                setIp,
+                setMasc,
+                setDesc,
+                setObs,
+                setfqdn,
+                setMembros,
                 setLocalidadeSelecionada
             );
         } catch (error) {
@@ -110,6 +129,83 @@ function Form() {
             setIsSubmitting(false);
         }
     };
+    
+    async function sendFormDataComponent(
+        uuid,
+        formType,
+        nomeObj,
+        ip,
+        masc,
+        desc,
+        obs,
+        fqdn,
+        membros,
+        localidadeSelecionada,
+        setNomeObj,
+        setIp,
+        setMasc,
+        setDesc,
+        setObs,
+        setfqdn,
+        setMembros,
+        setLocalidadeSelecionada
+    ) {
+        try {
+            console.log('Enviando dados para o backend:', {
+                uuid,
+                formType,
+                nomeObj,
+                ip,
+                masc,
+                desc,
+                obs,
+                fqdn,
+                membros,
+                localidade: localidadeSelecionada,
+            });
+    
+            const response = await fetch('/api/sendFormData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    uuid, // Utilize o UUID do contexto
+                    formType,
+                    nomeObj,
+                    ip,
+                    masc,
+                    desc,
+                    obs, // Envia o campo de observação ao backend
+                    fqdn,
+                    membros,
+                    localidade: localidadeSelecionada,
+                }),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Erro na requisição');
+            }
+    
+            const data = await response.json();
+            console.log('Resposta do backend:', data);
+            notifyOk();
+    
+            // Resetar todos os campos
+            setNomeObj('');
+            setIp('');
+            setMasc('/1');
+            setDesc('');
+            setObs(''); // Reseta o campo de observação
+            setfqdn('');
+            setMembros('');
+            setLocalidadeSelecionada('');
+        } catch (error) {
+            console.error('Erro ao enviar requisição ao backend:', error);
+            notify();
+        }
+    }
+    
 
     const handleSelectChange = (e) => {
         setMasc(e.target.value);
@@ -145,54 +241,75 @@ function Form() {
             </div>
             
             {activeForm === 'fqdn' && (
-                <form onSubmit={handleSubmit("fqdn")}>
-                    <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_fqdn">
-                        <div className="formDiv">
-                            <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
-                            {isLoadingLocalidades ? (
-                                <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
-                            ) : (
-                                <select 
-                                    name="localidade" 
-                                    id="localidade"
-                                    value={localidadeSelecionada} 
-                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)}
-                                >
-                                    <option value="">Selecione uma localidade</option>
-                                    {localidades.map((localidade, index) => (
-                                        <option key={index} value={localidade.nome}>
-                                            {localidade.nome}
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
-                        </div>
-                        <div className="formDiv">
-                            <div className="divson" htmlFor="nomeObj">Nome</div>
-                            <input 
-                                type="text" 
-                                id="nomeObj" 
-                                value={nomeObj} 
-                                onChange={(e) => setNomeObj(e.target.value)} 
-                            />
-                        </div>
-                        <div className="formDiv formDivDescricao">
-                            <div className="divson divsondesc" htmlFor="desc">Descrição</div>
-                            <input 
-                                placeholder="opcional"
-                                type="text" 
-                                id="desc" 
-                                value={desc} 
-                                onChange={(e) => setDesc(e.target.value)} 
-                            />
-                        </div>
-                        <BtnSubmit 
-                            disabled={isButtonDisabled('fqdn')} 
-                            isLoading={isSubmitting} 
+    <form onSubmit={handleSubmit("fqdn")}>
+        <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_fqdn">
+            <div className="formDiv">
+                <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
+                {isLoadingLocalidades ? (
+                    <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
+                ) : (
+                    <select 
+                        name="localidade" 
+                        id="localidade"
+                        value={localidadeSelecionada} 
+                        onChange={(e) => setLocalidadeSelecionada(e.target.value)}
+                    >
+                        <option value="">Selecione uma localidade</option>
+                        {localidades.map((localidade, index) => (
+                            <option key={index} value={localidade.nome}>
+                                {localidade.nome}
+                            </option>
+                        ))}
+                    </select>
+                )}
+            </div>
+            <div className="formDiv">
+                <div className="divson" htmlFor="nomeObj">Nome</div>
+                <input 
+                    type="text" 
+                    id="nomeObj" 
+                    value={nomeObj} 
+                    onChange={(e) => setNomeObj(e.target.value)} 
+                />
+            </div>
+            <div className="formDiv">
+                <div className="divson" htmlFor="fqdn">FQDN</div>
+                <input 
+                    type="text" 
+                    id="fqdn" 
+                    value={fqdn} 
+                    onChange={(e) => setfqdn(e.target.value)} 
+                />
+            </div>
+            <div className="formDiv formDivDescricao">
+                        <div className="divson divsondesc" htmlFor="desc">Descrição</div>
+                        <input 
+                            placeholder="Um comentário que irá pro Firewall"
+                            type="text" 
+                            id="desc" 
+                            value={desc} 
+                            onChange={(e) => setDesc(e.target.value)} 
                         />
                     </div>
-                </form>
-            )}
+                    <div className="formDiv">
+                    <div className="divson divsondesc" htmlFor="obs">Observação</div>
+                    <input 
+                    className="inputObs"
+                        type="textarea"
+                        placeholder="Uma mensagem para quem for criar a regra"
+                        id="obs" 
+                        value={obs} 
+                        onChange={(e) => setObs(e.target.value)} 
+                    />
+                </div>
+            <BtnSubmit 
+                disabled={isButtonDisabled('fqdn')} 
+                isLoading={isSubmitting} 
+            />
+        </div>
+    </form>
+)}
+
 
             {activeForm === 'addressGroup' && (
                 <form onSubmit={handleSubmit("addressGroup")}>
@@ -229,6 +346,7 @@ function Form() {
                         <div className="formDiv">
                             <div className="divson" htmlFor="membros">Membros</div>
                             <input 
+                            placeholder="ex: AD, DataBase, FileServer"
                                 type="text" 
                                 id="membros" 
                                 value={membros} 
@@ -236,15 +354,26 @@ function Form() {
                             />
                         </div>
                         <div className="formDiv formDivDescricao">
-                            <div className="divson divsondesc" htmlFor="desc">Descrição</div>
-                            <input 
-                                placeholder="opcional"
-                                type="text" 
-                                id="desc" 
-                                value={desc} 
-                                onChange={(e) => setDesc(e.target.value)} 
-                            />
-                        </div>
+                        <div className="divson divsondesc" htmlFor="desc">Descrição</div>
+                        <input 
+                            placeholder="Um comentário que irá pro Firewall"
+                            type="text" 
+                            id="desc" 
+                            value={desc} 
+                            onChange={(e) => setDesc(e.target.value)} 
+                        />
+                    </div>
+                    <div className="formDiv">
+                    <div className="divson divsondesc" htmlFor="obs">Observação</div>
+                    <input 
+                    className="inputObs"
+                        type="textarea"
+                        placeholder="Uma mensagem para quem for criar a regra"
+                        id="obs" 
+                        value={obs} 
+                        onChange={(e) => setObs(e.target.value)} 
+                    />
+                </div>
                         <BtnSubmit 
                             disabled={isButtonDisabled('addressGroup')} 
                             isLoading={isSubmitting} 
@@ -311,15 +440,26 @@ function Form() {
                             </select>
                         </div>
                         <div className="formDiv formDivDescricao">
-                            <div className="divson divsondesc" htmlFor="desc">Descrição</div>
-                            <input 
-                                placeholder="opcional"
-                                type="text" 
-                                id="desc" 
-                                value={desc} 
-                                onChange={(e) => setDesc(e.target.value)} 
-                            />
-                        </div>
+                        <div className="divson divsondesc" htmlFor="desc">Descrição</div>
+                        <input 
+                            placeholder="Um comentário que irá pro Firewall"
+                            type="text" 
+                            id="desc" 
+                            value={desc} 
+                            onChange={(e) => setDesc(e.target.value)} 
+                        />
+                    </div>
+                    <div className="formDiv">
+                    <div className="divson divsondesc" htmlFor="obs">Observação</div>
+                    <input 
+                    className="inputObs"
+                        type="textarea"
+                        placeholder="Uma mensagem para quem for criar a regra"
+                        id="obs" 
+                        value={obs} 
+                        onChange={(e) => setObs(e.target.value)} 
+                    />
+                </div>
                         <BtnSubmit 
                             disabled={isButtonDisabled('ip')} 
                             isLoading={isSubmitting} 
@@ -333,7 +473,7 @@ function Form() {
     );
 }
 
-async function sendFormDataComponent(uuid, formType, nomeObj, ip, masc, desc, fqdn, membros, localidadeSelecionada, setNomeObj, setIp, setMasc, setDesc, setfqdn, setMembros, setLocalidadeSelecionada) {
+async function sendFormDataComponent(uuid, formType, nomeObj, ip, masc, desc, obs, fqdn, membros, localidadeSelecionada, setNomeObj, setIp, setMasc, setDesc, setObs, setfqdn, setMembros, setLocalidadeSelecionada) {
     try {
         const response = await fetch('/api/sendFormData', {
             method: 'POST',
@@ -347,6 +487,7 @@ async function sendFormDataComponent(uuid, formType, nomeObj, ip, masc, desc, fq
                 ip, 
                 masc, 
                 desc, 
+                obs, // Envia o campo de observação ao backend
                 fqdn, 
                 membros, 
                 localidade: localidadeSelecionada 
@@ -366,6 +507,7 @@ async function sendFormDataComponent(uuid, formType, nomeObj, ip, masc, desc, fq
         setIp('');
         setMasc('/1');
         setDesc('');
+        setObs(''); // Reseta o campo de observação
         setfqdn('');
         setMembros('');
         setLocalidadeSelecionada('');

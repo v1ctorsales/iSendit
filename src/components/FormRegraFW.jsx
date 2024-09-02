@@ -24,6 +24,8 @@ function FormRegraFW() {
     const [interfaces, setInterfaces] = useState([]); 
     const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); 
     const [isLoadingInterfaces, setIsLoadingInterfaces] = useState(false); 
+    const [obs, setObs] = useState(''); // Novo estado para observação
+
 
     const { uuid } = useContext(UuidContext); // Acessa o uuid do contexto
 
@@ -85,12 +87,33 @@ function FormRegraFW() {
         setLoading(true);
     
         sendFormDataComponent(
-            uuid, // Passa o uuid do contexto aqui
-            "regrafw", nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade,
-            setNomeRegra, setPorta, setInterfaceOrigem, setInterfaceDestino, setObjetoorigem, setObjetodestino, setDesc, setAction, setLocalidade,
-            setIsSubmitting, setLoading
+            uuid, 
+            "regrafw", 
+            nomeRegra, 
+            porta, 
+            interfaceOrigem, 
+            interfaceDestino, 
+            objetoorigem, 
+            objetodestino, 
+            desc, 
+            obs, // Adiciona o valor de observação aqui
+            action, 
+            localidade,
+            setNomeRegra, 
+            setPorta, 
+            setInterfaceOrigem, 
+            setInterfaceDestino, 
+            setObjetoorigem, 
+            setObjetodestino, 
+            setDesc, 
+            setObs, // Adiciona o setter para resetar o campo de observação
+            setAction, 
+            setLocalidade,
+            setIsSubmitting, 
+            setLoading
         );
     };
+    
 
     return (
         <>
@@ -227,13 +250,25 @@ function FormRegraFW() {
                     <div className="formDiv formDivDescricao">
                         <div className="divson divsondesc" htmlFor="desc">Descrição</div>
                         <input 
-                            placeholder="opcional"
+                            placeholder="Um comentário que irá pro Firewall"
                             type="text" 
                             id="desc" 
                             value={desc} 
                             onChange={(e) => setDesc(e.target.value)} 
                         />
                     </div>
+                    <div className="formDiv">
+                    <div className="divson divsondesc" htmlFor="obs">Observação</div>
+                    <input 
+                    className="inputObs"
+                        type="textarea"
+                        placeholder="Uma mensagem para quem for criar a regra"
+                        id="obs" 
+                        value={obs} 
+                        onChange={(e) => setObs(e.target.value)} 
+                    />
+                </div>
+
                     
                     <BtnSubmit disabled={isButtonDisabled()} isLoading={isLoading} />
                 </div>

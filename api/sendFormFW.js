@@ -12,17 +12,15 @@ const supabaseEmail = process.env.EMAIL;
 
 export default async function sendFormFW(req, res) {
     if (req.method === 'POST') {
-        const { uuid, regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, action, localidade } = req.body;
+        const { uuid, regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, obs, action, localidade } = req.body;
 
         console.log('Uuid:', uuid);
         console.log('Tipo do Form:', regrafw);
 
-        // Verifica se localidade está presente
         if (!localidade) {
             return res.status(400).json({ message: 'Localidade é obrigatória' });
         }
 
-        // Consulta para obter os dados da empresa filha
         const { data: empresaFilhaData, error: empresaFilhaError } = await supabase
             .from('empresas')
             .select('nome, empresaPai_uuid')
@@ -37,7 +35,6 @@ export default async function sendFormFW(req, res) {
         const empresaNome = empresaFilhaData?.nome;
         const empresaPaiUuid = empresaFilhaData?.empresaPai_uuid;
 
-        // Consulta para obter os dados da empresa pai, incluindo o e-mail
         let empresaPaiNome = null;
         let empresaPaiEmail = null;
         if (empresaPaiUuid) {
@@ -56,7 +53,29 @@ export default async function sendFormFW(req, res) {
             empresaPaiEmail = empresaPaiData?.email;
         }
 
-        // Insere os dados na tabela 'tasks', incluindo o uuid na coluna 'empresa_origem_uuid'
+        let firewallScript = `
+        config firewall policy
+        edit 0
+        set name <span style='color: #FFB86C;'>"${nomeRegra}"</span>
+        set srcintf <span style='color: #FFB86C;'>"${interfaceOrigem}"</span>
+        set dstintf <span style='color: #FFB86C;'>"${interfaceDestino}"</span>
+        set action <span style='color: #FFB86C;'>"${action === "accept" ? "accept" : "deny"}"</span>
+        set srcaddr <span style='color: #FFB86C;'>"${objetoorigem}"</span>
+        set dstaddr <span style='color: #FFB86C;'>"${objetodestino}"</span>
+        set schedule <span style='color: #FFB86C;'>"always"</span>
+        set service <span style='color: #FFB86C;'>"${porta}"</span>`;
+
+        if (desc.trim() !== '') {
+            firewallScript += `
+        set comment <span style='color: #FFB86C;'>"${desc}"</span>`;
+        }
+
+        firewallScript += `
+        next
+        end`;
+        // Adiciona log para o script gerado
+        console.log('Script gerado:', firewallScript.trim());
+
         const { data, error } = await supabase
             .from('tasks')
             .insert([
@@ -64,6 +83,7 @@ export default async function sendFormFW(req, res) {
                     autor: 'victor@teste.com',
                     nome: nomeRegra,
                     descricao: desc,
+                    observacao: obs,
                     type: regrafw,
                     porta: porta,
                     interface_origem: interfaceOrigem,
@@ -71,10 +91,11 @@ export default async function sendFormFW(req, res) {
                     objeto_origem: objetoorigem,
                     objeto_destino: objetodestino,
                     acao: action === "accept" ? 1 : 0,
-                    localidade, // Inclui a localidade na inserção
-                    empresa_origem: empresaNome, // Nome da empresa de origem
-                    empresa_destino: empresaPaiNome, // Nome da empresa pai (destino)
-                    empresa_origem_uuid: uuid // Salva o uuid na coluna empresa_origem_uuid
+                    localidade,
+                    empresa_origem: empresaNome,
+                    empresa_destino: empresaPaiNome,
+                    empresa_origem_uuid: uuid,
+                    script: firewallScript.trim(),  // Adiciona o script gerado à coluna script
                 }
             ]);
 
@@ -83,55 +104,50 @@ export default async function sendFormFW(req, res) {
             return res.status(500).json({ message: 'Erro ao salvar dados' });
         }
 
-        // Configura o transportador de e-mail usando o Nodemailer
+        let observacaoHtml = '';
+        if (obs && obs.trim() !== '') {
+            observacaoHtml = `
+<hr />
+<p><strong>Observação:</strong></p>
+<p style="background-color: #f0f0f0; padding: 10px;">${obs}</p>`;
+        }
+
         const transporter = nodemailer.createTransport({
-            service: 'gmail', // Você pode usar outro serviço de e-mail
+            service: 'gmail',
             auth: {
-                user: supabaseEmail, // Seu e-mail
-                pass: supabaseEmailPw, // Sua senha ou token de aplicação
+                user: supabaseEmail,
+                pass: supabaseEmailPw,
             },
         });
 
-        // Define as opções do e-mail
         const mailOptions = {
-            from: supabaseEmail, // Seu e-mail
-            to: empresaPaiEmail, // E-mail do destinatário obtido da empresa pai
+            from: supabaseEmail,
+            to: empresaPaiEmail,
             subject: 'Nova solicitação de regra de Firewall criada',
             html: `
-                <h2>Script para a criação da regra:</h2>
-                <pre id="firewallScript" style="padding-top: 15px; background-color: #282A36; color:#50FA7B; font-size: medium ; 
-                font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
-                config firewall policy
-                edit 0
-                set name <span style='color: #FFB86C;'>"${nomeRegra}"</span>
-                set srcintf <span style='color: #FFB86C;'>"${interfaceOrigem}"</span>
-                set dstintf <span style='color: #FFB86C;'>"${interfaceDestino}"</span>
-                set action <span style='color: #FFB86C;'>"${action === "accept" ? "accept" : "deny"}"</span>
-                set srcaddr <span style='color: #FFB86C;'>"${objetoorigem}"</span>
-                set dstaddr <span style='color: #FFB86C;'>"${objetodestino}"</span>
-                set schedule <span style='color: #FFB86C;'>"always"</span>
-                set service <span style='color: #FFB86C;'>"${porta}"</span>
-                next
-                end
-                </pre>
+<h2>Script para a criação da regra:</h2>
+<pre id="firewallScript" style="padding: 15px; background-color: #282A36; color:#50FA7B; font-size: medium ; 
+font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
+${firewallScript.trim()}
+</pre>
 
-                <hr />
-                <h2>Informações detalhadas:</h2>
-                <p><strong>Localidade:</strong> "${localidade}"</p>
-                <p><strong>Nome da Regra:</strong> "${nomeRegra}"</p>
-                <p><strong>Interface Origem:</strong> "${interfaceOrigem}"</p>
-                <p><strong>Interface Destino:</strong> "${interfaceDestino}"</p>
-                <p><strong>Objeto Origem:</strong> "${objetoorigem}"</p>
-                <p><strong>Objeto Destino:</strong> "${objetodestino}"</p>
-                <p><strong>Ação:</strong> "${action === "accept" ? "Aceitar" : "Recusar"}"</p>
-                <p><strong>Porta:</strong> "${porta}"</p>
-                <p><strong>Descrição:</strong> "${desc}"</p>
-                <hr />
-                <p>Este email foi enviado através da plataforma iSendit</p>
+<hr />
+<h2>Informações detalhadas:</h2>
+${observacaoHtml}
+<p><strong>Localidade:</strong> "${localidade}"</p>
+<p><strong>Nome da Regra:</strong> "${nomeRegra}"</p>
+<p><strong>Interface Origem:</strong> "${interfaceOrigem}"</p>
+<p><strong>Interface Destino:</strong> "${interfaceDestino}"</p>
+<p><strong>Objeto Origem:</strong> "${objetoorigem}"</p>
+<p><strong>Objeto Destino:</strong> "${objetodestino}"</p>
+<p><strong>Ação:</strong> "${action === "accept" ? "Aceitar" : "Recusar"}"</p>
+<p><strong>Porta:</strong> "${porta}"</p>
+<p><strong>Descrição:</strong> "${desc}"</p>
+<hr />
+<p>Este email foi enviado através da plataforma iSendit</p>
             `,
         };
 
-        // Envia o e-mail
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
                 console.error('Erro ao enviar e-mail:', err);

@@ -36,7 +36,7 @@ function SideBar() {
                 <Link to="/envios" onClick={() => setActiveButton('envios')}>
                     <SlideBarButton 
                         icon={<FaList />} 
-                        name="Ver envios"
+                        name="Ver Tarefas"
                         isActive={activeButton === 'envios'}
                     />
                 </Link>

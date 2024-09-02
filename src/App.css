@@ -449,7 +449,7 @@ span{
   }
 
 .choiceObjeto{
-  width: 30%;
+  width: 31%;
   margin:auto;
   display: flex;
   margin-bottom: 25px;
@@ -465,6 +465,7 @@ span{
   height: 40px;
   font-size: 15px;
   padding: 0 1%;
+  width: 86.2%;
 }
 
 .swal2-styled.swal2-confirm,
@@ -521,13 +522,19 @@ select:focus{
   margin: auto;
   margin-top: 0;
 }
+.centerTres{
+margin-left: auto;
+text-align: center;
+padding: 0;
+}
 
 .formPai{
+  grid-gap: 5px;
+  display: grid;
+  gap: 5px;
+  margin: auto;
+  text-align: left;
   width: fit-content;
-    text-align: left;
-    margin: auto;
-    display: grid;
-    gap: 5px;
 }
 
 .tasks-table-container{
@@ -576,7 +583,10 @@ select:focus{
 .tasks-table td {
   border-bottom: 1px solid #ddd;
   color: #333; /* Cor do texto nas células */
+  padding: 0; /* Remove o padding para permitir que o conteúdo ocupe toda a altura */
+  height: 40px; /* Garante que a célula use 100% da altura */
 }
+
 
 .tasks-table th:first-child,
 .tasks-table td:first-child {
@@ -594,4 +604,73 @@ select:focus{
 }
 @media only screen and (max-width: 1300px){
 
+}
+
+.row-actions {
+  padding: 0;
+  height: 100%; /* Garante que a célula use 100% da altura */
+  vertical-align: middle; /* Centraliza o conteúdo verticalmente */
+}
+
+.inputWithIcon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.questionIcon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #007bff;
+}
+
+.btn-details {
+color: grey;
+background-color: rgba(128, 128, 128, 0);
+border: 0;
+gap: 2px;
+display: flex;
+margin: auto;
+}
+
+/* Estilo de hover */
+.btn-details:hover {
+  border-radius: 0px;
+  color: #AD49E1;
+  border: 0;
+}
+
+.swal-custom-icon .swal2-icon-content {
+  color: #AD49E1 !important; /* Cor do 'i' */
+}
+
+.swal-custom-icon.swal2-info {
+  border-color: #AD49E1 !important; /* Cor do círculo ao redor do 'i' */
+}
+
+.swal-custom-confirm-button {
+  background-color: #AD49E1 !important; /* Cor do botão de fechar */
+  color: white !important; /* Cor do texto no botão */
+}
+
+.btn-copy{
+  position: absolute; top: -40px; right: 0; background-color: white; color: #AD49E1; border: 1px solid #AD49E1; borde-radius: 5px; cursor: pointer; padding: 10px 20px; border-radius: 5px;
+}
+
+.btn-copy:hover{
+  background-color: rgb(255, 235, 252);
+}
+
+.btn-details[disabled] {
+  font-style: italic;
+  color: #A9A9A9; /* Cor cinza */
+  cursor: not-allowed; /* Indica que o botão não é clicável */
+  border-color: #d3d3d3; /* Bordas mais claras */
+}
+
+/* Remove o efeito de hover */
+.btn-details[disabled]:hover {
+  color: #A9A9A9;
+  border-color: #d3d3d3;
 }
