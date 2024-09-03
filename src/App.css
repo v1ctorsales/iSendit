@@ -141,11 +141,25 @@ button{
   height: 35px;
 }
 
+.pageloginBg{
+  background-color: #7D33A3;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
 #formLogin{
-  width: 580px;
+  width: 30%;
   margin: auto;
   gap: 2%;
   display: grid;
+  height: 100%;
+  margin-top: 5%;
+  background-color: white;
+  padding: 2%;
+  border-radius: 5%;
+  border: 1px solid #7D33A3;
 }
 .form-group{
   display: flex;
@@ -673,4 +687,12 @@ margin: auto;
 .btn-details[disabled]:hover {
   color: #A9A9A9;
   border-color: #d3d3d3;
+}
+
+.login-container{
+  height: 45vh;
+}
+
+.h2acesse{
+  color: #7D33A3;
 }

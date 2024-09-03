@@ -8,6 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import { UuidContext } from '../contexts/UuidContext'; // Importa o contexto
+import ShootingStars from "./ShootingStars";
 
 function PageLogin({ setIsAuthenticated }) {
     const [username, setUsername] = useState('');
@@ -62,13 +63,15 @@ function PageLogin({ setIsAuthenticated }) {
 
     return (
         <>
+        <div className="pageloginBg">
+        <ShootingStars /> 
             <div className="login-container">
                 <form id="formLogin" onSubmit={handleSubmit}>
                     <div className="logo">
                         <img className="logoholder minilogo" src={image} alt="" />
                         <div className="logoText"></div> 
                     </div>
-                    <h3>Acesse sua conta</h3>
+                    <h2 className="h2acesse">Digite suas credenciais</h2>
                     <div className="form-group">
                         <label htmlFor="username">E-mail</label>
                         <input
@@ -115,6 +118,8 @@ function PageLogin({ setIsAuthenticated }) {
                 </form>
                 <ToastContainer />
             </div>
+                        
+        </div>
         </>
     );
 }
