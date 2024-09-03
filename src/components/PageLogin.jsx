@@ -73,8 +73,9 @@ function PageLogin({ setIsAuthenticated }) {
                     </div>
                     <h2 className="h2acesse">Digite suas credenciais</h2>
                     <div className="form-group">
-                        <label htmlFor="username">E-mail</label>
+                        <label className="responsiveLabel" htmlFor="username">E-mail</label>
                         <input
+                        className="responsiveInput"
                             type="text"
                             id="username"
                             value={username}
@@ -83,8 +84,9 @@ function PageLogin({ setIsAuthenticated }) {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="password">Senha</label>
+                        <label className="responsiveLabel" htmlFor="password">Senha</label>
                         <input
+                        className="responsiveInput"
                             type="password"
                             id="password"
                             value={password}

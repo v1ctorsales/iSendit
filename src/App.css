@@ -571,7 +571,7 @@ padding: 0;
 
 .tasks-table th,
 .tasks-table td {
-  padding: 12px 15px;
+  padding: 12px 0px;
   text-align: left;
 }
 
@@ -598,7 +598,7 @@ padding: 0;
   border-bottom: 1px solid #ddd;
   color: #333; /* Cor do texto nas células */
   padding: 0; /* Remove o padding para permitir que o conteúdo ocupe toda a altura */
-  height: 40px; /* Garante que a célula use 100% da altura */
+  height: 4.5vh /* Garante que a célula use 100% da altura */
 }
 
 
@@ -645,7 +645,7 @@ background-color: rgba(128, 128, 128, 0);
 border: 0;
 gap: 2px;
 display: flex;
-margin: auto;
+margin-right: auto;
 }
 
 /* Estilo de hover */
@@ -695,4 +695,18 @@ margin: auto;
 
 .h2acesse{
   color: #7D33A3;
+}
+
+.responsiveInput{
+  width: 90%;
+}
+
+
+.responsiveLabel{
+  width: 10%;
+  min-width: 50px;
+  text-align: left;
+}
+.tasks-table th:last-child{
+  padding-left: 8px;
 }
