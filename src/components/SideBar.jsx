@@ -33,11 +33,11 @@ function SideBar() {
                         isActive={activeButton === 'objetos'}
                     />
                 </Link>
-                <Link to="/envios" onClick={() => setActiveButton('envios')}>
+                <Link to="/tarefas" onClick={() => setActiveButton('tarefas')}>
                     <SlideBarButton 
                         icon={<FaList />} 
                         name="Ver Tarefas"
-                        isActive={activeButton === 'envios'}
+                        isActive={activeButton === 'tarefas'}
                     />
                 </Link>
                 <Link to="/configuracoes" onClick={() => setActiveButton('configuracoes')}>

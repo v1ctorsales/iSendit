@@ -669,7 +669,7 @@ margin-right: auto;
 }
 
 .btn-copy{
-  position: absolute; top: -40px; right: 0; background-color: white; color: #AD49E1; border: 1px solid #AD49E1; borde-radius: 5px; cursor: pointer; padding: 10px 20px; border-radius: 5px;
+  position: absolute; right: 0; background-color: white; color: #AD49E1; border: 1px solid #AD49E1; borde-radius: 5px; cursor: pointer; padding: 10px 20px; border-radius: 5px;
 }
 
 .btn-copy:hover{
@@ -709,4 +709,17 @@ margin-right: auto;
 }
 .tasks-table th:last-child{
   padding-left: 8px;
+}
+
+.textoAtt{
+  width: 35%;
+  margin: auto;
+  text-align: left;
+}
+
+.attData{
+  margin: auto;
+  color: grey;
+  font-style: italic;
+  text-align: right;
 }

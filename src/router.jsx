@@ -3,6 +3,7 @@ import FormRegraFW from "./components/FormRegraFW";
 import FormConfigurar from "./components/FormConfiguracoes";
 import PageLogin from "./components/PageLogin";
 import PageSeeAllTasks from "./components/PageSeeAllTasks";
+import PageAjuda from "./components/PageAjuda";
 
 function LoginPage() {
     return <PageLogin />
@@ -25,7 +26,7 @@ function ConfiguracoesPage() {
 }
 
 function AjudaPage() {
-    return <h2>Página de Ajuda</h2>;
+    return <PageAjuda />
 }
 
 export {

@@ -16,7 +16,7 @@ function App() {
           <Route path="/login" element={<PageLogin setIsAuthenticated={setIsAuthenticated} />} />
           <Route path="/firewall" element={isAuthenticated ? <FirewallPage /> : <Navigate to="/login" />} />
           <Route path="/objetos" element={isAuthenticated ? <ObjetosPage /> : <Navigate to="/login" />} />
-          <Route path="/envios" element={isAuthenticated ? <EnviosPage /> : <Navigate to="/login" />} />
+          <Route path="/tarefas" element={isAuthenticated ? <EnviosPage /> : <Navigate to="/login" />} />
           <Route path="/configuracoes" element={isAuthenticated ? <ConfiguracoesPage /> : <Navigate to="/login" />} />
           <Route path="/ajuda" element={isAuthenticated ? <AjudaPage /> : <Navigate to="/login" />} />
           <Route path="*" element={<Navigate to="/login" />} />
