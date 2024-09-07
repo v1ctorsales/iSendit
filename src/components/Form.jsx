@@ -293,7 +293,7 @@ function Form() {
                     </div>
                     <div className="formDiv">
                     <div className="divson divsondesc" htmlFor="obs">Observação</div>
-                    <input 
+                    <textarea 
                     className="inputObs"
                         type="textarea"
                         placeholder="Uma mensagem para quem for criar a regra"
@@ -365,7 +365,7 @@ function Form() {
                     </div>
                     <div className="formDiv">
                     <div className="divson divsondesc" htmlFor="obs">Observação</div>
-                    <input 
+                    <textarea 
                     className="inputObs"
                         type="textarea"
                         placeholder="Uma mensagem para quem for criar a regra"
@@ -451,7 +451,7 @@ function Form() {
                     </div>
                     <div className="formDiv">
                     <div className="divson divsondesc" htmlFor="obs">Observação</div>
-                    <input 
+                    <textarea 
                     className="inputObs"
                         type="textarea"
                         placeholder="Uma mensagem para quem for criar a regra"

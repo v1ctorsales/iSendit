@@ -4,6 +4,7 @@ import BtnSubmit from "./Botoes/BtnSubmit";
 import { ToastContainer, toast } from 'react-toastify';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { UuidContext } from '../contexts/UuidContext'; // Importa o UuidContext
+import { AuthContext } from "../contexts/AuthContext";
 
 const notify = () => toast.error("Houve um erro.");
 const notifyOk = () => toast.success("Regra de Firewall enviada!");
@@ -26,13 +27,18 @@ function FormRegraFW() {
     const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); 
     const [isLoadingInterfaces, setIsLoadingInterfaces] = useState(false); 
     const [obs, setObs] = useState(''); 
+    
 
     const { uuid } = useContext(UuidContext); 
+    const { isAuthenticated, destinataria } = useContext(AuthContext); 
 
     useEffect(() => {
-        console.log('UUID from UuidContext:', uuid); 
-    }, [uuid]);
-
+        if (uuid && destinataria !== undefined) {
+            console.log('UUID from UuidContext:', uuid); 
+            console.log('isDestinatario from AuthContext:', destinataria); 
+        }
+    }, [uuid, destinataria]);
+    
     const isButtonDisabled = () => {
         return isSubmitting || !nomeRegra.trim() || !porta.trim() || !interfaceOrigem.trim() || !interfaceDestino.trim() ||
             !objetoorigem.trim() || !objetodestino.trim() || !action.trim() || !localidade.trim();
@@ -285,14 +291,14 @@ function FormRegraFW() {
                     </div>
                     <div className="formDiv">
                     <div className="divson divsondesc" htmlFor="obs">Observação</div>
-                    <input 
+                    <textarea 
                     className="inputObs"
                         type="textarea"
                         placeholder="Uma mensagem para quem for criar a regra"
                         id="obs" 
                         value={obs} 
                         onChange={(e) => setObs(e.target.value)} 
-                    />
+                        textarea/>
                 </div>
 
                     

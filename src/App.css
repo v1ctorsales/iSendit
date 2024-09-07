@@ -706,6 +706,58 @@ margin-right: auto;
   background-color: rgb(255, 235, 252);
 }
 
+.swal2-custom-modal {
+  background-color: #f9f9f9; /* Cor de fundo personalizada */
+  border-radius: 10px;
+  padding: 50px 20px;
+}
+
+.swal2-custom-modal .swal2-input {
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin: 20px 0;
+}
+
+.swal2-custom-modal .swal2-title {
+  font-size: 24px;
+  color: #333;
+}
+
+.swal2-custom-modal .swal2-confirm {
+  background-color: #ad49e1 !important;
+  color: #fff !important;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.swal2-custom-modal .swal2-cancel {
+  background-color: #f0f0f0 !important;
+  color: #333 !important;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.swal2-custom-modal .swal2-actions {
+  display: flex;
+  justify-content: flex-end; /* Alinha os botões à direita */
+}
+
+.swal2-custom-modal .swal2-actions .swal2-confirm {
+  order: 1; /* Define a ordem do botão de confirmação */
+}
+
+.swal2-custom-modal .swal2-actions .swal2-cancel {
+  order: 0; /* Define a ordem do botão de cancelamento */
+}
+.inputObs{
+  width: 85%;
+  height: 8vh;
+  resize: vertical;
+}
+
 .btn-details[disabled] {
   font-style: italic;
   color: #A9A9A9; /* Cor cinza */
@@ -752,4 +804,26 @@ margin-right: auto;
   color: grey;
   font-style: italic;
   text-align: right;
+}
+
+.reset-password-container{
+  width: 25%;
+  display: inline-block;
+  text-align: center;
+}
+
+.form-group2{
+  justify-content: space-between;
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.titlepwreset{
+  width:  8.5rem;
+  text-align: left;
+}
+
+#password2, #confirmPassword2{
+  width: 20rem;
+  text-align: left;
 }

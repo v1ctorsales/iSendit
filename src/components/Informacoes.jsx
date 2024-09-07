@@ -50,8 +50,9 @@ function Informacoes() {
     return (
         <> 
         <div className="formPai" id="form_ip">
+        <h3>Minha Empresa</h3>
             <div className="formDiv">
-                <div className="divson">Empresa</div>
+                <div className="divson">Nome</div>
                 <input
                     className="blockedInput" 
                     type="text" 
@@ -69,10 +70,11 @@ function Informacoes() {
                 />
             </div>
         </div>
-        <br></br>
+
         <div className="formPai" id="form_ip">
+        <h3>Empresa Parceira</h3>
             <div className="formDiv">
-                <div className="divson">Parceiro</div>
+                <div className="divson">Nome</div>
                 <input
                     className="blockedInput" 
                     type="text" 
