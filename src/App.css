@@ -13,6 +13,10 @@
   }
 }
 
+.swal2-actions{
+  margin-top: 0;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -40,6 +44,10 @@
 .navBarHeader{
   margin-top: 10%;
   margin-bottom: 10%;
+}
+
+pre{
+  margin: 5px;
 }
 
 #objetodestino{
@@ -306,7 +314,7 @@ margin-bottom: 0;
 }
 
 
-#action, #localidade, #interfaceorigem, #interfacedestino{
+#action, #localidade, #interfaceorigem, #interfacedestino, #nat{
   width: 85%;
 }
 
@@ -648,11 +656,33 @@ display: flex;
 margin-right: auto;
 }
 
+.swal2-html-container{
+  padding: 0;
+}
+
 /* Estilo de hover */
 .btn-details:hover {
   border-radius: 0px;
   color: #AD49E1;
   border: 0;
+}
+
+.swal-custom-icon {
+  margin-top: 0;
+  width: 48px !important;
+  height: 48px !important;
+
+}
+
+.swal2-title{
+  padding: 0!important;
+  font-size: 1.5rem;
+}
+
+.swal2-icon-content{
+  font-size: 4vh!important;
+  text-align: center;
+  margin: auto;
 }
 
 .swal-custom-icon .swal2-icon-content {
@@ -669,7 +699,7 @@ margin-right: auto;
 }
 
 .btn-copy{
-  position: absolute; right: 0; background-color: white; color: #AD49E1; border: 1px solid #AD49E1; borde-radius: 5px; cursor: pointer; padding: 10px 20px; border-radius: 5px;
+  position: absolute; right: 5px; top: 05px; background-color: white; color: #AD49E1; border: 1px solid #AD49E1; borde-radius: 5px; cursor: pointer; padding: 10px 20px; border-radius: 5px;
 }
 
 .btn-copy:hover{

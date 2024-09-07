@@ -8,7 +8,7 @@ import image from "../img/isendit.png";
 import { Link } from 'react-router-dom';
 
 function SideBar() {
-    const [activeButton, setActiveButton] = useState('ajuda');
+    const [activeButton, setActiveButton] = useState('firewall');
 
     return (
         <div className="navbar">

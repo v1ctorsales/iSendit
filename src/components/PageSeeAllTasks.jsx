@@ -84,34 +84,71 @@ function PageSeeAllTasks() {
             delete taskDetails.empresa_origem_uuid;
     
             const formatKey = (key) => {
+                if (key === 'script') return 'Script';  // Evitar modificações na chave 'script'
                 key = key.replace(/_/g, ' '); // Substitui underscore por espaços
                 if (key === 'created at') return 'Criado em';
                 if (key === 'type') return 'Tipo';
+                if (key === 'descricao') return 'Descrição';  // Mapeamento de 'Descricao'
+                if (key === 'acao') return 'Ação';  // Mapeamento de 'Acao'
                 return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
             };
-    
+            
             const formatValue = (key, value) => {
+                console.log(`Formatando chave: ${key}, valor recebido:`, value);  // Log inicial para o valor recebido
+            
                 if (key === 'created_at') {
                     const date = new Date(value);
-                    return date.toLocaleString('pt-BR', {
+                    const formattedDate = date.toLocaleString('pt-BR', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
                     });
+                    console.log(`Data formatada: ${formattedDate}`);  // Log para a data formatada
+                    return formattedDate;
                 }
+            
                 if (key === 'script') {
                     const uniqueId = `copy-button-${task.id}`;
+                    console.log('Script original:', value);  // Log do script original recebido do backend
+                    
+                    // Remover espaços no início da primeira linha e ajustar o restante
+                    const formattedScript = value
+                        .trimStart() // Remove espaços no início da primeira linha
+                        .split('\n') // Quebra em linhas
+                        .map(line => line.trim()) // Remove espaços no início e no fim de cada linha
+                        .join('\n'); // Junta as linhas novamente
+            
+                    console.log('Script formatado (sem espaços no início):', formattedScript);  // Log do script após a remoção de espaços
+            
                     return `
-                    <div style="position: relative;">
-                        <button id="${uniqueId}" class="btn-copy">Copiar</button>
-                        <pre style="background-color: #282A36; color: #50FA7B; padding: 10px; margin-top: 10px;">${value}</pre>
-                    </div>`;
+            <div style="position: relative; display: flex; justify-content: space-between;">
+                <pre style="background-color: #282A36; color: #50FA7B; padding: 10px; white-space: pre-wrap; word-wrap: break-word; flex-grow: 1; text-align: left;">${formattedScript}
+                </pre>
+                <button id="${uniqueId}" class="btn-copy"">Copiar</button>
+            </div>`;
                 }
+            
+                if (key === 'acao') {
+                    const actionValue = value ? 'Aceitar' : 'Recusar';
+                    console.log(`Valor de Ação: ${actionValue}`);  // Log para valores de ação
+                    return actionValue;
+                }
+            
+                if (key === 'nat') {
+                    const natValue = value === 'enable' ? 'Habilitar' : (value ? 'Habilitar' : 'Desabilitar');
+                    console.log(`Valor de NAT: ${natValue}`);  // Log para valores de NAT
+                    return natValue;
+                }
+            
+                console.log(`Valor final formatado para chave ${key}:`, value);  // Log para o valor final formatado de qualquer outra chave
                 return value;
             };
-    
+            
+            
+            
+            
             const taskInfo = Object.entries(taskDetails)
                 .filter(([key, value]) => value !== null && value !== '' && value !== undefined)
                 .map(([key, value]) => {
@@ -121,39 +158,43 @@ function PageSeeAllTasks() {
                 })
                 .join('');
     
-            MySwal.fire({
-                title: `<strong>Detalhes da Tarefa</strong>`,
-                html: taskInfo,
-                icon: 'info',
-                confirmButtonText: 'Fechar',
-                width: '600px',
-                padding: '3em',
-                background: '#fff',
-                customClass: {
-                    popup: 'swal-wide',
-                    icon: 'swal-custom-icon', // Classe para o ícone e círculo
-                    confirmButton: 'swal-custom-confirm-button', // Classe para o botão de fechar
-                },
-                didOpen: () => {
-                    const swalIcon = document.querySelector('.swal2-icon');
-                    if (swalIcon) {
-                        swalIcon.style.marginTop = '0';
-                    }
-    
-                    const swalContent = document.querySelector('.swal2-html-container');
-                    if (swalContent) {
-                        swalContent.style.textAlign = 'left';
-                    }
-    
-                    // Adicionar evento de clique ao botão de copiar
-                    const copyButton = document.getElementById(`copy-button-${task.id}`);
-                    if (copyButton) {
-                        copyButton.addEventListener('click', () => {
-                            copyToClipboard(taskDetails.script);
-                        });
-                    }
-                },
-            });
+                MySwal.fire({
+                    title: `<strong>Detalhes da Tarefa</strong>`,
+                    html: taskInfo,
+                    icon: 'info',
+                    confirmButtonText: 'Fechar',
+                    width: '600px',
+                    padding: '1em 3em',
+                    background: '#fff',
+                    customClass: {
+                        popup: 'swal-wide',
+                        icon: 'swal-custom-icon', // Aplicando a classe customizada
+                        confirmButton: 'swal-custom-confirm-button', // Classe para o botão de fechar
+                    },
+                    didOpen: () => {
+                        const swalIcon = document.querySelector('.swal-custom-icon');
+                        if (swalIcon) {
+                            swalIcon.style.width = '48px';  // Ajuste da largura do ícone
+                            swalIcon.style.height = '48px'; // Ajuste da altura do ícone
+                            swalIcon.style.fontSize = '20px'; // Ajuste do tamanho da fonte
+                            swalIcon.style.lineHeight = '48px'; // Centraliza o "i"
+                        }
+                
+                        const swalContent = document.querySelector('.swal2-html-container');
+                        if (swalContent) {
+                            swalContent.style.textAlign = 'left';
+                        }
+                
+                        // Adicionar evento de clique ao botão de copiar
+                        const copyButton = document.getElementById(`copy-button-${task.id}`);
+                        if (copyButton) {
+                            copyButton.addEventListener('click', () => {
+                                copyToClipboard(taskDetails.script);
+                            });
+                        }
+                    },
+                });
+                
         } catch (error) {
             console.error('Erro ao buscar detalhes da tarefa:', error);
             toast.error("Erro ao buscar detalhes da tarefa");
@@ -164,14 +205,20 @@ function PageSeeAllTasks() {
     
     // Função para copiar o texto para o clipboard sem HTML
     const copyToClipboard = (text) => {
-        const tempElement = document.createElement('div');
-        tempElement.innerHTML = text;
-        const plainText = tempElement.textContent || tempElement.innerText || "";
+        // Substitui tags HTML e formata o texto corretamente para o terminal
+        const cleanText = text
+            .replace(/<span[^>]*>/g, '')  // Remove as tags <span>
+            .replace(/<\/span>/g, '')     // Remove as tags </span>
+            .replace(/<br\s*\/?>/g, '\n') // Substitui <br> por quebras de linha
+            .replace(/\s{2,}/g, ' ')      // Substitui múltiplos espaços por um único espaço
+            .replace(/&quot;/g, '"')      // Converte &quot; para aspas duplas
+            .replace(/&nbsp;/g, ' ')      // Substitui &nbsp; por espaços normais
+            .trim();                      // Remove espaços no início e fim
     
-        navigator.clipboard.writeText(plainText).then(() => {
-            toast.info('Script copiado!');
+        navigator.clipboard.writeText(cleanText).then(() => {
+            toast.info('Script copiado com sucesso!');
         }).catch(err => {
-            console.error('Erro ao copiar o script!:', err);
+            console.error('Erro ao copiar o script:', err);
             toast.error('Erro ao copiar o script!');
         });
     };

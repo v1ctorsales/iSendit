@@ -12,7 +12,7 @@ const supabaseEmail = process.env.EMAIL;
 
 export default async function sendFormFW(req, res) {
     if (req.method === 'POST') {
-        const { uuid, regrafw, nomeRegra, porta, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, obs, action, localidade } = req.body;
+        const { uuid, regrafw, nomeRegra, porta, nat, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, obs, action, localidade } = req.body;
 
         console.log('Uuid:', uuid);
         console.log('Tipo do Form:', regrafw);
@@ -20,6 +20,9 @@ export default async function sendFormFW(req, res) {
         if (!localidade) {
             return res.status(400).json({ message: 'Localidade é obrigatória' });
         }
+
+        // Transformar o valor do NAT em binário (0 para desativado, 1 para ativado)
+        const natBinary = nat === 'enable' ? 1 : 0;
 
         const { data: empresaFilhaData, error: empresaFilhaError } = await supabase
             .from('empresas')
@@ -53,29 +56,41 @@ export default async function sendFormFW(req, res) {
             empresaPaiEmail = empresaPaiData?.email;
         }
 
+        // Função para formatar campos que podem ter múltiplos valores com aspas ao redor de cada valor sem vírgula
+        const formatMultipleValues = (value) => {
+            if (typeof value === 'string') {
+                // Se o valor contém múltiplos itens separados por vírgula, dividir e adicionar aspas
+                return value.split(',').map(item => `"${item.trim()}"`).join(' ');
+            }
+            return `"${value}"`; // Se for um único valor, adicionar aspas
+        };
+
+        // Script sem estilização para salvar no banco
         let firewallScript = `
         config firewall policy
         edit 0
-        set name <span style='color: #FFB86C;'>"${nomeRegra}"</span>
-        set srcintf <span style='color: #FFB86C;'>"${interfaceOrigem}"</span>
-        set dstintf <span style='color: #FFB86C;'>"${interfaceDestino}"</span>
-        set action <span style='color: #FFB86C;'>"${action === "accept" ? "accept" : "deny"}"</span>
-        set srcaddr <span style='color: #FFB86C;'>"${objetoorigem}"</span>
-        set dstaddr <span style='color: #FFB86C;'>"${objetodestino}"</span>
-        set schedule <span style='color: #FFB86C;'>"always"</span>
-        set service <span style='color: #FFB86C;'>"${porta}"</span>`;
+        set name "${nomeRegra}"
+        set srcintf "${interfaceOrigem}"
+        set dstintf "${interfaceDestino}"
+        set action "${action === "accept" ? "accept" : "deny"}"
+        set srcaddr ${formatMultipleValues(objetoorigem)}
+        set dstaddr ${formatMultipleValues(objetodestino)}
+        set schedule "always"
+        set service ${formatMultipleValues(porta)}
+        set nat "${natBinary === 1 ? 'enable' : 'disable'}"`;
 
         if (desc.trim() !== '') {
             firewallScript += `
-        set comment <span style='color: #FFB86C;'>"${desc}"</span>`;
+        set comment "${desc}"`;
         }
 
         firewallScript += `
         next
         end`;
-        // Adiciona log para o script gerado
+
         console.log('Script gerado:', firewallScript.trim());
 
+        // Inserção no banco de dados sem estilização
         const { data, error } = await supabase
             .from('tasks')
             .insert([
@@ -86,6 +101,7 @@ export default async function sendFormFW(req, res) {
                     observacao: obs,
                     type: regrafw,
                     porta: porta,
+                    nat: natBinary, // Insere o valor do NAT como binário
                     interface_origem: interfaceOrigem,
                     interface_destino: interfaceDestino,
                     objeto_origem: objetoorigem,
@@ -95,7 +111,7 @@ export default async function sendFormFW(req, res) {
                     empresa_origem: empresaNome,
                     empresa_destino: empresaPaiNome,
                     empresa_origem_uuid: uuid,
-                    script: firewallScript.trim(),  // Adiciona o script gerado à coluna script
+                    script: firewallScript.trim(),  // Salva o script gerado sem estilização
                 }
             ]);
 
@@ -111,6 +127,29 @@ export default async function sendFormFW(req, res) {
 <p><strong>Observação:</strong></p>
 <p style="background-color: #f0f0f0; padding: 10px;">${obs}</p>`;
         }
+
+        // Script com estilização para o e-mail
+        let firewallScriptEmail = `
+        config firewall policy
+        edit 0
+        set name <span style='color: #FFB86C;'>"${nomeRegra}"</span>
+        set srcintf <span style='color: #FFB86C;'>"${interfaceOrigem}"</span>
+        set dstintf <span style='color: #FFB86C;'>"${interfaceDestino}"</span>
+        set action <span style='color: #FFB86C;'>"${action === "accept" ? "accept" : "deny"}"</span>
+        set srcaddr <span style='color: #FFB86C;'>${formatMultipleValues(objetoorigem)}</span>
+        set dstaddr <span style='color: #FFB86C;'>${formatMultipleValues(objetodestino)}</span>
+        set schedule <span style='color: #FFB86C;'>"always"</span>
+        set service <span style='color: #FFB86C;'>${formatMultipleValues(porta)}</span>
+        set nat <span style='color: #FFB86C;'>"${natBinary === 1 ? 'enable' : 'disable'}"</span>`;
+
+        if (desc.trim() !== '') {
+            firewallScriptEmail += `
+        set comment <span style='color: #FFB86C;'>"${desc}"</span>`;
+        }
+
+        firewallScriptEmail += `
+        next
+        end`;
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -128,7 +167,7 @@ export default async function sendFormFW(req, res) {
 <h2>Script para a criação da regra:</h2>
 <pre id="firewallScript" style="padding: 15px; background-color: #282A36; color:#50FA7B; font-size: medium ; 
 font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
-${firewallScript.trim()}
+${firewallScriptEmail.trim()}
 </pre>
 
 <hr />
@@ -138,10 +177,11 @@ ${observacaoHtml}
 <p><strong>Nome da Regra:</strong> "${nomeRegra}"</p>
 <p><strong>Interface Origem:</strong> "${interfaceOrigem}"</p>
 <p><strong>Interface Destino:</strong> "${interfaceDestino}"</p>
-<p><strong>Objeto Origem:</strong> "${objetoorigem}"</p>
-<p><strong>Objeto Destino:</strong> "${objetodestino}"</p>
+<p><strong>Objeto Origem:</strong> "${formatMultipleValues(objetoorigem)}"</p>
+<p><strong>Objeto Destino:</strong> "${formatMultipleValues(objetodestino)}"</p>
 <p><strong>Ação:</strong> "${action === "accept" ? "Aceitar" : "Recusar"}"</p>
-<p><strong>Porta:</strong> "${porta}"</p>
+<p><strong>Porta:</strong> "${formatMultipleValues(porta)}"</p>
+<p><strong>NAT:</strong> "${natBinary === 1 ? 'Ativado' : 'Desativado'}"</p>
 <p><strong>Descrição:</strong> "${desc}"</p>
 <hr />
 <p>Este email foi enviado através da plataforma iSendit</p>

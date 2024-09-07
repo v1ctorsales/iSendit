@@ -11,25 +11,26 @@ const notifyOk = () => toast.success("Regra de Firewall enviada!");
 function FormRegraFW() {
     const [nomeRegra, setNomeRegra] = useState('');
     const [porta, setPorta] = useState('');
+    const [nat, setNat] = useState('disable'); // Novo estado para NAT
     const [interfaceOrigem, setInterfaceOrigem] = useState('');
     const [interfaceDestino, setInterfaceDestino] = useState('');
     const [objetoorigem, setObjetoorigem] = useState('');
     const [objetodestino, setObjetodestino] = useState('');
     const [desc, setDesc] = useState('');
     const [action, setAction] = useState('accept');
-    const [localidade, setLocalidade] = useState(''); // Começa como string vazia
+    const [localidade, setLocalidade] = useState(''); 
     const [isSubmitting, setIsSubmitting] = useState(false); 
     const [isLoading, setLoading] = useState(false); 
     const [localidades, setLocalidades] = useState([]);
     const [interfaces, setInterfaces] = useState([]); 
     const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); 
     const [isLoadingInterfaces, setIsLoadingInterfaces] = useState(false); 
-    const [obs, setObs] = useState(''); // Novo estado para observação
+    const [obs, setObs] = useState(''); 
 
-    const { uuid } = useContext(UuidContext); // Acessa o uuid do contexto
+    const { uuid } = useContext(UuidContext); 
 
     useEffect(() => {
-        console.log('UUID from UuidContext:', uuid); // Adicione este log para verificar se o uuid está sendo acessado corretamente
+        console.log('UUID from UuidContext:', uuid); 
     }, [uuid]);
 
     const isButtonDisabled = () => {
@@ -58,7 +59,7 @@ function FormRegraFW() {
     }, []);
 
     useEffect(() => {
-        if (localidade && localidade !== 'default') { // Verifica se a localidade foi selecionada
+        if (localidade && localidade !== 'default') {
             const fetchInterfaces = async () => {
                 try {
                     setIsLoadingInterfaces(true);
@@ -85,11 +86,14 @@ function FormRegraFW() {
         setIsSubmitting(true);
         setLoading(true);
     
+        // Converter o campo porta para uppercase
+        const portaUppercase = porta.toUpperCase();
+    
         sendFormDataComponent({
             uuid,
             regrafw: "regrafw",
             nomeRegra,
-            porta,
+            porta: portaUppercase,  // Enviar o valor como uppercase
             interfaceOrigem,
             interfaceDestino,
             objetoorigem,
@@ -122,6 +126,7 @@ function FormRegraFW() {
             setLoading(false);
         });
     };
+    
 
     return (
         <>
@@ -147,7 +152,7 @@ function FormRegraFW() {
                                 value={localidade}
                                 onChange={(e) => setLocalidade(e.target.value)}
                             >
-                                <option value="default">Selecione uma localidade</option> {/* Opção padrão */}
+                                <option value="default">Selecione uma localidade</option> 
                                 {localidades.map((localidade, index) => (
                                     <option key={index} value={localidade.nome}>
                                         {localidade.nome}
@@ -213,7 +218,7 @@ function FormRegraFW() {
                     <div className="formDiv">   
                         <div className="divson" htmlFor="objetoorigem">Origem</div>
                         <input 
-                            placeholder="ex: AD, DataBase, FileServer"
+                            placeholder="AD, DataBase, FileServer"
                             type="text" 
                             id="objetoorigem" 
                             value={objetoorigem} 
@@ -223,7 +228,7 @@ function FormRegraFW() {
                     <div className="formDiv">   
                         <div className="divson" htmlFor="objetodestino">Destino</div>
                         <input 
-                            placeholder="ex: AD, DataBase, FileServer"
+                            placeholder="AD, DataBase, FileServer"
                             type="text" 
                             id="objetodestino" 
                             value={objetodestino} 
@@ -234,13 +239,27 @@ function FormRegraFW() {
                     <div className="formDiv">
                         <div className="divson" htmlFor="porta">Porta(s)</div>
                         <input 
-                            placeholder="ex: HTTPS, HTTP, 3389"
+                            placeholder="ALL, HTTPS, 3389"
                             type="text" 
                             id="porta" 
                             value={porta} 
                             onChange={(e) => setPorta(e.target.value)} 
                         />
                     </div>
+                    
+                    <div className="formDiv">
+                        <div className="divson" htmlFor="nat">NAT</div>
+                        <select 
+                            name="nat" 
+                            id="nat" 
+                            value={nat} 
+                            onChange={(e) => setNat(e.target.value)}
+                        >
+                            <option value="disable">Desativado</option>
+                            <option value="enable">Ativado</option>
+                        </select>
+                    </div>
+
                     <div className="formDiv">
                         <div className="divson" htmlFor="action">Ação</div>
                         <select 
