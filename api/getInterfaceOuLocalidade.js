@@ -1,23 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Substitua pelos valores da sua configuração Supabase
+// Configurações do Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function getInterfaceOuLocalidade(req, res) {
     if (req.method === 'GET') {
-        const { type, localidade } = req.query;
+        const { type, localidade, empresa } = req.query;  // Agora recebendo o UUID da empresa pelo query
 
         if (!type) {
             console.error('Tipo de consulta não especificado');
             return res.status(400).json({ message: 'Tipo de consulta não especificado' });
         }
 
+        if (!empresa) {
+            console.error('UUID da empresa não especificado');
+            return res.status(400).json({ message: 'UUID da empresa não especificado' });
+        }
+
         try {
             let data, error;
             if (type === 'interfaces') {
+                console.log(`Buscando interfaces para localidade: ${localidade} e empresa: ${empresa}`);
                 if (!localidade) {
                     console.error('Localidade não especificada');
                     return res.status(400).json({ message: 'Localidade não especificada' });
@@ -25,13 +30,13 @@ export default async function getInterfaceOuLocalidade(req, res) {
                 ({ data, error } = await supabase
                     .from('interfaces')
                     .select('nome')
-                    .eq('localidade', localidade));
+                    .eq('localidade', localidade)
+                    .eq('empresa', empresa));  // Filtra também pela empresa
             } else if (type === 'localidades') {
-                const empresa = "empresa_teste";
                 ({ data, error } = await supabase
                     .from('localidades')
                     .select('nome')
-                    .eq('empresa', empresa));
+                    .eq('empresa', empresa));  // Filtra pela empresa
             } else {
                 console.error('Tipo de consulta inválido');
                 return res.status(400).json({ message: 'Tipo de consulta inválido' });

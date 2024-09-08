@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { UuidContext } from '../contexts/UuidContext'; // Importa o contexto do UUID
 import { FaPlus } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
@@ -22,12 +23,13 @@ function EditableInterfaces() {
     const [editedName, setEditedName] = useState(''); // Estado para armazenar o novo nome da interface
     const [isSaving, setIsSaving] = useState(false); // Estado para controlar a atividade de salvamento
     const [isFetchSuccessful, setIsFetchSuccessful] = useState(false); // Novo estado para controlar o sucesso da busca
+    const { uuid } = useContext(UuidContext); // Obtém o UUID da empresa a partir do contexto
 
     // Carrega as localidades ao montar o componente
     useEffect(() => {
         const fetchLocalidades = async () => {
             try {
-                const response = await fetch('/api/getInterfaceOuLocalidade?type=localidades');
+                const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${uuid}`);
                 if (!response.ok) {
                     throw new Error('Erro ao buscar localidades');
                 }
@@ -40,8 +42,10 @@ function EditableInterfaces() {
             }
         };
 
-        fetchLocalidades();
-    }, []);
+        if (uuid) { // Garante que o uuid está disponível
+            fetchLocalidades();
+        }
+    }, [uuid]);
 
     // Carrega as interfaces da localidade selecionada
     useEffect(() => {
@@ -50,13 +54,12 @@ function EditableInterfaces() {
                 try {
                     setIsLoadingInterfaces(true);
                     setInterfaces([]); // Limpa as interfaces antes de carregar as novas
-                    const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${selectedLocalidade}`);
+                    const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${selectedLocalidade}&empresa=${uuid}`);
                     if (!response.ok) {
                         setIsFetchSuccessful(false); // Define como falso se a resposta não for 200
                         throw new Error('Erro ao buscar interfaces');
                     }
                     const data = await response.json();
-                    console.log('Interfaces recebidas do backend:', data); // Log das interfaces recebidas
                     setInterfaces(data);
                     setIsFetchSuccessful(true); // Define como verdadeiro se a resposta for 200
                 } catch (err) {
@@ -67,18 +70,19 @@ function EditableInterfaces() {
                 }
             };
     
-            fetchInterfaces();
+            if (uuid) {
+                fetchInterfaces();
+            }
         } else {
             setIsFetchSuccessful(false); // Reseta o estado se nenhuma localidade estiver selecionada
         }
-    }, [selectedLocalidade]);
+    }, [selectedLocalidade, uuid]);
 
     const MySwal = withReactContent(Swal);
 
     const handleDeleteClick = (index) => {
         const iface = interfaces[index];
-        console.log('Tentando excluir interface:', iface.nome, 'na localidade:', selectedLocalidade);
-    
+
         MySwal.fire({
             title: `Deseja excluir a interface ${iface.nome}?`,
             text: "Você não poderá reverter isso!",
@@ -100,6 +104,7 @@ function EditableInterfaces() {
                         type: 'interfaces', // Indica que a exclusão é de uma interface
                         nome: iface.nome,
                         localidade: selectedLocalidade,
+                        empresa: uuid, // Inclui o UUID da empresa
                     })
                 })
                 .then(response => {
@@ -130,14 +135,14 @@ function EditableInterfaces() {
             toast.error("Por favor, insira um nome para a nova interface.");
             return;
         }
-    
+
         if (!selectedLocalidade) {
             toast.error("Por favor, selecione uma localidade.");
             return;
         }
-        
+
         setIsSaving(true);
-        
+
         try {
             const response = await fetch('/api/sendNewInterfaceOuLocalidade', {
                 method: 'POST',
@@ -148,16 +153,16 @@ function EditableInterfaces() {
                     type: 'interfaces', // Indica que a criação é de uma interface
                     nome: newInterface.trim(),
                     localidade: selectedLocalidade.trim(),
-                    empresa: 'empresa_teste', // Adiciona o nome da empresa hardcoded
+                    empresa: uuid, // Inclui o UUID da empresa
                 }),
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
                 toast.error(errorData.message || 'Erro ao adicionar interface');
                 throw new Error(errorData.message || 'Erro ao adicionar interface');
             }
-    
+
             const data = await response.json();
             toast.success('Interface adicionada com sucesso!');
             setInterfaces([...interfaces, { nome: newInterface.trim() }]);
@@ -169,7 +174,6 @@ function EditableInterfaces() {
             setIsSaving(false);
         }
     };
-    
 
     const handleEditClick = (index) => {
         setEditIndex(index);
@@ -186,7 +190,7 @@ function EditableInterfaces() {
         setIsSaving(true); // Ativa o estado de salvamento
         const oldName = interfaces[index].nome; // Armazena o nome antigo para possíveis restaurações
         const newName = editedName;
-    
+
         try {
             const response = await fetch('/api/updateInterfaceOuLocalidade', {
                 method: 'POST',
@@ -198,9 +202,10 @@ function EditableInterfaces() {
                     oldName: oldName,
                     newName: newName,
                     localidade: selectedLocalidade,
+                    empresa: uuid, // Inclui o UUID da empresa
                 }),
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
                 if (response.status === 409) {
@@ -226,7 +231,6 @@ function EditableInterfaces() {
             setIsSaving(false); // Desativa o estado de salvamento
         }
     };
-    
 
     if (isLoading) {
         return <div className="center"><AiOutlineLoading3Quarters className="loading-icon" /></div>;
@@ -261,7 +265,7 @@ function EditableInterfaces() {
             ) : (
                 selectedLocalidade && (
                     <>
-                        <h3>Interfaces disponíveis em <span>{selectedLocalidade}</span></h3> {/* Novo h3 */}
+                        <h3>Interfaces disponíveis em <span>{selectedLocalidade}</span></h3>
                         {interfaces.map((iface, index) => (
                             <div key={index} className="EditableInterfaces">
                                 <input
@@ -276,7 +280,7 @@ function EditableInterfaces() {
                                         className={`btn-excluir ${editIndex === index ? 'off' : ''}`}
                                         onClick={() => handleDeleteClick(index)}
                                         disabled={isSaving}
-                                        title="Excluir" // Tooltip adicionado aqui
+                                        title="Excluir"
                                     >
                                         <FaTrash />
                                     </button>
@@ -284,7 +288,7 @@ function EditableInterfaces() {
                                         className={`btn-editar ${editIndex === index ? 'off' : ''}`}
                                         onClick={() => handleEditClick(index)}
                                         disabled={isSaving}
-                                        title="Editar" // Tooltip adicionado aqui
+                                        title="Editar"
                                     >
                                         <BsPencilFill />
                                     </button>
@@ -292,7 +296,7 @@ function EditableInterfaces() {
                                         className={`btn-cancelar ${editIndex === index ? '' : 'off'}`}
                                         onClick={handleCancelClick}
                                         disabled={isSaving}
-                                        title="Cancelar" // Tooltip adicionado aqui
+                                        title="Cancelar"
                                     >
                                         <FaArrowRotateLeft />
                                     </button>
@@ -300,7 +304,7 @@ function EditableInterfaces() {
                                         className={`btn-salvar ${editIndex === index ? '' : 'off'}`}
                                         onClick={() => handleSaveClick(index)}
                                         disabled={isSaving}
-                                        title="Salvar" // Tooltip adicionado aqui
+                                        title="Salvar"
                                     >
                                         <FaCheck />
                                     </button>
@@ -312,14 +316,14 @@ function EditableInterfaces() {
             )}
             <div className="EditableInterfaces">
                 <input
-                    className={`editableText bigInput ${!isFetchSuccessful ? 'off' : ''}`} // Adiciona a classe 'off' se a requisição não for bem-sucedida
+                    className={`editableText bigInput ${!isFetchSuccessful ? 'off' : ''}`}
                     type="text"
                     placeholder="Nome da interface"
                     value={newInterface}
-                    onChange={(e) => setNewInterface(e.target.value)} // Atualiza o valor da nova interface
-                    disabled={!isFetchSuccessful} // Desativa o input se a requisição não for bem-sucedida
+                    onChange={(e) => setNewInterface(e.target.value)}
+                    disabled={!isFetchSuccessful}
                 />
-                <div className={`divDosBotoes ${!isFetchSuccessful ? 'off' : ''}`}> {/* Adiciona a classe 'off' ao div dos botões */}
+                <div className={`divDosBotoes ${!isFetchSuccessful ? 'off' : ''}`}>
                     <button
                         className="btn-addInterface"
                         onClick={handleAddClick}

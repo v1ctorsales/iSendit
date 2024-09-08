@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { UuidContext } from '../contexts/UuidContext';
 
 import { FaPlus } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
@@ -19,11 +20,12 @@ function EditableLocalidades() {
     const [editIndex, setEditIndex] = useState(null); // Estado para gerenciar qual item está sendo editado
     const [editedName, setEditedName] = useState(''); // Estado para armazenar o novo nome da localidade
     const [isSaving, setIsSaving] = useState(false); // Estado para controlar a atividade de salvamento
+    const { uuid } = useContext(UuidContext); // Obtém o uuid da empresa a partir do contexto
 
     useEffect(() => {
         const fetchLocalidades = async () => {
             try {
-                const response = await fetch('/api/getInterfaceOuLocalidade?type=localidades');
+                const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${uuid}`); // Inclui o uuid da empresa na query
                 if (!response.ok) {
                     throw new Error('Erro ao buscar localidades');
                 }
@@ -36,8 +38,10 @@ function EditableLocalidades() {
             }
         };
 
-        fetchLocalidades();
-    }, []);
+        if (uuid) { // Garante que o uuid está disponível
+            fetchLocalidades();
+        }
+    }, [uuid]);
 
     const MySwal = withReactContent(Swal);
 
@@ -61,42 +65,38 @@ function EditableLocalidades() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        type: 'localidades', // Indica que a exclusão é de uma localidade
+                        type: 'localidades',
                         nome: localidade.nome,
-                        empresa: 'empresa_teste'
+                        empresa: uuid, // Inclui o uuid da empresa
                     })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(data => Promise.reject(data));
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        const updatedLocalidades = localidades.filter((_, i) => i !== index);
-                        setLocalidades(updatedLocalidades);
-                        toast.success(data.message);
+                }).then(async (res) => {
+                    if (res.ok) {
+                        setLocalidades(localidades.filter((_, i) => i !== index));
+                        toast.success("Localidade excluída com sucesso");
                     } else {
-                        toast.error(data.message || 'Erro ao excluir localidade.');
+                        const error = await res.json();
+                        toast.error(error.message || "Erro ao excluir localidade");
                     }
-                })
-                .catch(error => {
-                    console.error('Erro ao excluir localidade:', error);
-                    toast.error('Erro ao excluir localidade: ' + (error.message || 'Erro desconhecido'));
+                }).catch(err => {
+                    toast.error("Erro ao excluir localidade: " + err.message);
                 });
             }
         });
     };
-    
+
     const handleAddClick = async () => {
         if (!newLocalidade.trim()) {
             toast.error("Por favor, insira um nome para a nova localidade.");
             return;
         }
-        
+
+        if (!uuid) {
+            toast.error("Erro ao obter o UUID da empresa.");
+            return;
+        }
+
         setIsSaving(true);
-        
+
         try {
             const response = await fetch('/api/sendNewInterfaceOuLocalidade', {
                 method: 'POST',
@@ -104,22 +104,22 @@ function EditableLocalidades() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    type: 'localidades', // Indica que a criação é de uma localidade
+                    type: 'localidades',
                     nome: newLocalidade.trim(),
-                    empresa: 'empresa_teste', // Adiciona o nome da empresa hardcoded
+                    empresa: uuid, // Inclui o uuid da empresa no corpo da requisição
                 }),
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
                 toast.error(errorData.message || 'Erro ao adicionar localidade');
                 throw new Error(errorData.message || 'Erro ao adicionar localidade');
             }
-    
+
             const data = await response.json();
             toast.success('Localidade adicionada com sucesso!');
             setLocalidades([...localidades, { nome: newLocalidade.trim() }]);
-            setNewLocalidade(''); // Limpa o campo de input após o sucesso
+            setNewLocalidade('');
         } catch (err) {
             console.error('Erro ao adicionar localidade:', err);
             toast.error('Erro ao adicionar localidade: ' + err.message);
@@ -127,7 +127,6 @@ function EditableLocalidades() {
             setIsSaving(false);
         }
     };
-    
 
     const handleEditClick = (index) => {
         setEditIndex(index);
@@ -141,10 +140,10 @@ function EditableLocalidades() {
     };
 
     const handleSaveClick = async (index) => {
-        setIsSaving(true); // Ativa o estado de salvamento
-        const oldName = localidades[index].nome; // Armazena o nome antigo para possíveis restaurações
+        setIsSaving(true);
+        const oldName = localidades[index].nome;
         const newName = editedName;
-        
+
         try {
             const response = await fetch('/api/updateInterfaceOuLocalidade', {
                 method: 'POST',
@@ -152,40 +151,31 @@ function EditableLocalidades() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    type: 'localidades', // Indica que a atualização é de uma localidade
+                    type: 'localidades',
                     oldName: oldName,
                     newName: newName,
-                    empresa: 'empresa_teste',
+                    empresa: uuid, // Inclui o uuid da empresa
                 }),
             });
-        
+
             if (!response.ok) {
                 const errorData = await response.json();
-                if (response.status === 409) {
-                    toast.error(errorData.message);
-                    setEditedName(oldName); // Restaura o nome original no input se houver conflito
-                } else {
-                    toast.error(errorData.message);
-                    throw new Error(errorData.message || 'Erro desconhecido ao salvar a localidade');
-                }
-            } else {
-                toast.success('Localidade salva com sucesso!');
-                // Atualiza a lista de localidades com o novo nome
-                const updatedLocalidades = [...localidades];
-                updatedLocalidades[index].nome = newName;
-                setLocalidades(updatedLocalidades);
-                setEditIndex(null); // Fecha o modo de edição em caso de sucesso
-                setEditedName('');
+                toast.error(errorData.message || 'Erro ao salvar localidade');
+                return;
             }
+
+            const updatedLocalidade = [...localidades];
+            updatedLocalidade[index].nome = newName;
+            setLocalidades(updatedLocalidade);
+            setEditIndex(null);
+            setEditedName('');
+            toast.success('Localidade atualizada com sucesso!');
         } catch (err) {
             toast.error('Erro ao salvar localidade: ' + err.message);
-            setError(err.message);
         } finally {
-            setIsSaving(false); // Desativa o estado de salvamento
+            setIsSaving(false);
         }
     };
-    
-    
 
     if (isLoading) {
         return <div className="center"><AiOutlineLoading3Quarters className="loading-icon" /></div>

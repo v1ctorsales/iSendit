@@ -37,7 +37,7 @@ function Form() {
     };
     const fetchLocalidades = async () => {
         try {
-            const response = await fetch('/api/getInterfaceOuLocalidade?type=localidades');
+            const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${uuid}`);
             if (!response.ok) {
                 throw new Error('Erro ao buscar localidades');
             }
@@ -50,10 +50,13 @@ function Form() {
             setIsLoadingLocalidades(false);
         }
     };
+    
 
     useEffect(() => {
-        fetchLocalidades();
-    }, []);
+        if (uuid) { // Garante que o UUID está disponível
+            fetchLocalidades();
+        }
+    }, [uuid]); 
 
     const handleSubmit = (formType) => async (e) => {
         console.log('Valor da mascara:', masc);
@@ -151,35 +154,22 @@ function Form() {
         setLocalidadeSelecionada
     ) {
         try {
-            console.log('Enviando dados para o backend:', {
-                uuid,
-                formType,
-                nomeObj,
-                ip,
-                masc,
-                desc,
-                obs,
-                fqdn,
-                membros,
-                localidade: localidadeSelecionada,
-            });
-    
             const response = await fetch('/api/sendFormData', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
+                body: JSON.stringify({ 
                     uuid, // Utilize o UUID do contexto
-                    formType,
-                    nomeObj,
-                    ip,
-                    masc,
-                    desc,
+                    formType, 
+                    nomeObj, 
+                    ip, 
+                    masc, 
+                    desc, 
                     obs, // Envia o campo de observação ao backend
-                    fqdn,
-                    membros,
-                    localidade: localidadeSelecionada,
+                    fqdn, 
+                    membros, 
+                    localidade: localidadeSelecionada 
                 }),
             });
     
@@ -188,7 +178,6 @@ function Form() {
             }
     
             const data = await response.json();
-            console.log('Resposta do backend:', data);
             notifyOk();
     
             // Resetar todos os campos
@@ -205,6 +194,7 @@ function Form() {
             notify();
         }
     }
+    
     
 
     const handleSelectChange = (e) => {

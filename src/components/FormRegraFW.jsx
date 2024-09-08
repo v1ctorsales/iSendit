@@ -47,7 +47,7 @@ function FormRegraFW() {
     useEffect(() => {
         const fetchLocalidades = async () => {
             try {
-                const response = await fetch('/api/getInterfaceOuLocalidade?type=localidades');
+                const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${uuid}`);
                 if (!response.ok) {
                     throw new Error('Erro ao buscar localidades');
                 }
@@ -60,16 +60,20 @@ function FormRegraFW() {
                 setIsLoadingLocalidades(false);
             }
         };
-
-        fetchLocalidades();
-    }, []);
+    
+        if (uuid) {
+            fetchLocalidades();
+        }
+    }, [uuid]);
+    
 
     useEffect(() => {
         if (localidade && localidade !== 'default') {
             const fetchInterfaces = async () => {
                 try {
                     setIsLoadingInterfaces(true);
-                    const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${localidade}`);
+                    console.log(localidade, uuid)
+                    const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${localidade}&empresa=${uuid}`);
                     if (!response.ok) {
                         throw new Error('Erro ao buscar interfaces');
                     }
@@ -82,10 +86,14 @@ function FormRegraFW() {
                     setIsLoadingInterfaces(false);
                 }
             };
-
-            fetchInterfaces();
+    
+            if (uuid) {
+                fetchInterfaces();
+            }
         }
-    }, [localidade]);
+    }, [localidade, uuid]);
+    
+    
 
     const handleSubmit = (e) => {
         e.preventDefault();

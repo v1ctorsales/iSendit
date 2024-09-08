@@ -8,17 +8,18 @@ export default async function deleteInterfaceOuLocalidade(req, res) {
     if (req.method === 'POST') {
         const { type, nome, localidade, empresa } = req.body;
 
-        if (!type || !nome || (type === 'interfaces' && !localidade) || (type === 'localidades' && !empresa)) {
+        // Verificação para garantir que todos os dados necessários estejam presentes
+        if (!type || !nome || !empresa || (type === 'interfaces' && !localidade)) {
             return res.status(400).json({ message: 'Dados incompletos' });
         }
 
         try {
             if (type === 'interfaces') {
-                // Proceder com a exclusão da interface
+                // Excluir interface filtrando por nome, localidade e empresa
                 const { data, error } = await supabase
                     .from('interfaces')
                     .delete()
-                    .match({ nome: nome, localidade: localidade });
+                    .match({ nome, localidade, empresa });
 
                 if (error) {
                     console.error('Erro ao excluir interface:', error);
@@ -26,23 +27,24 @@ export default async function deleteInterfaceOuLocalidade(req, res) {
                 }
 
                 return res.status(200).json({ success: true, message: 'Interface excluída com sucesso' });
+
             } else if (type === 'localidades') {
-                // Deleta todas as interfaces associadas à localidade
-                const { data: deletedInterfaces, error: deleteInterfacesError } = await supabase
+                // Deletar todas as interfaces associadas à localidade
+                const { error: deleteInterfacesError } = await supabase
                     .from('interfaces')
                     .delete()
-                    .match({ localidade: nome });
+                    .match({ localidade: nome, empresa });
 
                 if (deleteInterfacesError) {
-                    console.error('Erro ao excluir interfaces:', deleteInterfacesError);
+                    console.error('Erro ao excluir interfaces associadas:', deleteInterfacesError);
                     return res.status(500).json({ message: 'Erro ao excluir interfaces associadas' });
                 }
 
-                // Deleta a localidade
-                const { data: deletedLocalidade, error: deleteLocalidadeError } = await supabase
+                // Deletar a localidade associada à empresa
+                const { error: deleteLocalidadeError } = await supabase
                     .from('localidades')
                     .delete()
-                    .match({ nome: nome, empresa: empresa });
+                    .match({ nome, empresa });
 
                 if (deleteLocalidadeError) {
                     console.error('Erro ao excluir localidade:', deleteLocalidadeError);
@@ -50,9 +52,11 @@ export default async function deleteInterfaceOuLocalidade(req, res) {
                 }
 
                 return res.status(200).json({ success: true, message: 'Localidade e interfaces associadas excluídas com sucesso' });
+
             } else {
                 return res.status(400).json({ message: 'Tipo de exclusão inválido' });
             }
+
         } catch (err) {
             console.error('Erro ao conectar com Supabase:', err);
             return res.status(500).json({ message: 'Erro interno do servidor' });

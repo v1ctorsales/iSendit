@@ -18,7 +18,8 @@ export default async function updateItem(req, res) {
                 .from('interfaces')
                 .select('*')
                 .eq('nome', newName)
-                .eq('localidade', localidade);
+                .eq('localidade', localidade)
+                .eq('empresa', empresa);
 
             if (searchError) {
                 console.error('Erro ao buscar por interfaces duplicadas:', searchError);
@@ -35,7 +36,8 @@ export default async function updateItem(req, res) {
                 .from('interfaces')
                 .update({ nome: newName })
                 .eq('nome', oldName)
-                .eq('localidade', localidade);
+                .eq('localidade', localidade)
+                .eq('empresa', empresa);
 
             if (updateError) {
                 console.error('Erro ao atualizar interface:', updateError);

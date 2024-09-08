@@ -753,9 +753,16 @@ margin-right: auto;
   order: 0; /* Define a ordem do botão de cancelamento */
 }
 .inputObs{
-  width: 85%;
-  height: 8vh;
+  min-height: 50px;
+  max-height: 200px;
+  height: 90px;
+  width: 86%;
   resize: vertical;
+  font-family: sans-serif;
+  background-color: rgb(245, 245, 245);
+  border: 0;
+  border-radius: 2px;
+  padding-top: 4px;
 }
 
 .btn-details[disabled] {
