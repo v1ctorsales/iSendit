@@ -12,7 +12,7 @@ const supabaseEmail = process.env.EMAIL;
 
 export default async function sendFormFW(req, res) {
     if (req.method === 'POST') {
-        const { uuid, regrafw, nomeRegra, porta, nat, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, obs, action, localidade } = req.body;
+        const { uuid, regrafw, nomeRegra, porta, nat, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, obs, action, localidade, empresaPai } = req.body;
 
         console.log('Uuid:', uuid);
         console.log('Tipo do Form:', regrafw);
@@ -111,6 +111,7 @@ export default async function sendFormFW(req, res) {
                     empresa_origem: empresaNome,
                     empresa_destino: empresaPaiNome,
                     empresa_origem_uuid: uuid,
+                    empresa_destino_uuid: empresaPai,
                     script: firewallScript.trim(),  // Salva o script gerado sem estilização
                 }
             ]);

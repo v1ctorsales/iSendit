@@ -112,6 +112,7 @@ end`;
                         empresa_origem: empresaNome,
                         empresa_destino: empresaPaiNome,
                         empresa_origem_uuid: uuid,
+                        empresa_destino_uuid: empresaPaiUuid,
                         script: script.trim(),
                     }
                 ]);

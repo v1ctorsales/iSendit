@@ -4,14 +4,14 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import cube from "../img/cube2.gif";
 import BtnSubmit from "./Botoes/BtnSubmit";
-import { UuidContext } from '../contexts/UuidContext'; // Importe o UuidContext
+import { AuthContext } from '../contexts/AuthContext';
 
 const notify = () => toast.error("Houve um erro.");
 const notifyOk = () => toast.success("Objeto enviado!");
 const notifyFieldRequired = (field) => toast.error(`O campo ${field} é obrigatório.`);
 
 function Form() {
-    const { uuid } = useContext(UuidContext); // Acesse o UUID do contexto
+    const { uuid, empresaPai } = useContext(AuthContext);// Acesse o UUID do contexto
     const [nomeObj, setNomeObj] = useState('');
     const [ip, setIp] = useState('');
     const [masc, setMasc] = useState('/1');
@@ -61,6 +61,8 @@ function Form() {
     const handleSubmit = (formType) => async (e) => {
         console.log('Valor da mascara:', masc);
         e.preventDefault();
+
+        const empresaDestinoUuid = empresaPai;
     
         console.log('Valores ao submeter:', {
             nomeObj,
@@ -71,6 +73,7 @@ function Form() {
             fqdn,
             membros,
             localidadeSelecionada,
+            empresaDestinoUuid
         });
     
         if (formType === 'fqdn') {
@@ -116,6 +119,7 @@ function Form() {
                 fqdn,
                 membros,
                 localidadeSelecionada,
+                empresaDestinoUuid,
                 setNomeObj,
                 setIp,
                 setMasc,
@@ -144,6 +148,7 @@ function Form() {
         fqdn,
         membros,
         localidadeSelecionada,
+        empresaDestinoUuid,
         setNomeObj,
         setIp,
         setMasc,
@@ -169,7 +174,8 @@ function Form() {
                     obs, // Envia o campo de observação ao backend
                     fqdn, 
                     membros, 
-                    localidade: localidadeSelecionada 
+                    localidade: localidadeSelecionada,
+                    empresa_destino_uuid: empresaDestinoUuid
                 }),
             });
     

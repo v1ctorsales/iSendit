@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { UuidContext } from '../contexts/UuidContext';
+import { AuthContext } from '../contexts/AuthContext';
 
 import { FaPlus } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
@@ -20,7 +20,7 @@ function EditableLocalidades() {
     const [editIndex, setEditIndex] = useState(null); // Estado para gerenciar qual item está sendo editado
     const [editedName, setEditedName] = useState(''); // Estado para armazenar o novo nome da localidade
     const [isSaving, setIsSaving] = useState(false); // Estado para controlar a atividade de salvamento
-    const { uuid } = useContext(UuidContext); // Obtém o uuid da empresa a partir do contexto
+    const { uuid } = useContext(AuthContext); // Obtém o uuid da empresa a partir do contexto
 
     useEffect(() => {
         const fetchLocalidades = async () => {

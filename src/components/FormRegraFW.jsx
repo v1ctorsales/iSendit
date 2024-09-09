@@ -3,7 +3,6 @@ import fwimg from "../img/fire.gif";
 import BtnSubmit from "./Botoes/BtnSubmit";
 import { ToastContainer, toast } from 'react-toastify';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import { UuidContext } from '../contexts/UuidContext'; // Importa o UuidContext
 import { AuthContext } from "../contexts/AuthContext";
 
 const notify = () => toast.error("Houve um erro.");
@@ -29,13 +28,12 @@ function FormRegraFW() {
     const [obs, setObs] = useState(''); 
     
 
-    const { uuid } = useContext(UuidContext); 
+    const { uuid, empresaPai  } = useContext(AuthContext);
     const { isAuthenticated, destinataria } = useContext(AuthContext); 
 
     useEffect(() => {
         if (uuid && destinataria !== undefined) {
             console.log('UUID from UuidContext:', uuid); 
-            console.log('isDestinatario from AuthContext:', destinataria); 
         }
     }, [uuid, destinataria]);
     
@@ -105,6 +103,7 @@ function FormRegraFW() {
     
         sendFormDataComponent({
             uuid,
+            empresaPai,
             regrafw: "regrafw",
             nomeRegra,
             porta: portaUppercase,  // Enviar o valor como uppercase

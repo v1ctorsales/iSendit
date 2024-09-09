@@ -18,7 +18,7 @@ export default async function verifyLogin(req, res) {
             // Busca o hash da senha no banco de dados baseado no username (email)
             const { data: user, error } = await supabase
                 .from('empresas')
-                .select('uuid, email, destinataria, senha') // Seleciona 'senha' para verificar com bcrypt
+                .select('uuid, email, destinataria, senha, empresaPai_uuid') // Adiciona 'empresaPai_uuid' à seleção
                 .eq('email', username)
                 .single();
 
@@ -43,7 +43,8 @@ export default async function verifyLogin(req, res) {
                 { 
                     userId: user.uuid, 
                     email: user.email, 
-                    destinataria: user.destinataria  // Inclui 'destinataria' no token
+                    destinataria: user.destinataria,  // Inclui 'destinataria' no token
+                    empresaPai: user.empresaPai_uuid  // Inclui o 'empresaPai_uuid' no token
                 }, 
                 SECRET_KEY, 
                 { expiresIn: '1h' }
@@ -51,13 +52,14 @@ export default async function verifyLogin(req, res) {
 
             console.log('Token JWT gerado:', token);
 
-            // Retornar o token e o valor 'destinataria' para o frontend
+            // Retornar o token e o valor 'destinataria' e 'empresaPai_uuid' para o frontend
             return res.status(200).json({ 
                 success: true, 
                 token, 
                 message: 'Autenticação bem-sucedida', 
                 uuid: user.uuid, 
-                destinataria: user.destinataria // Retorna 'destinataria' explicitamente
+                destinataria: user.destinataria, // Retorna 'destinataria' explicitamente
+                empresaPai_uuid: user.empresaPai_uuid // Retorna 'empresaPai_uuid' explicitamente
             });
         } catch (error) {
             console.error('Erro ao processar a autenticação:', error.message);
