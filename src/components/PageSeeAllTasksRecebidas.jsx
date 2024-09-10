@@ -29,14 +29,21 @@ function PageSeeAllTasksRecebidas() {
                     },
                     body: JSON.stringify({ uuid }),
                 });
-
+    
                 if (!response.ok) {
                     throw new Error('Erro ao buscar tarefas recebidas');
                 }
-
+    
                 const data = await response.json();
                 console.log('Tarefas recebidas pela empresa do backend:', data.tasks);
-                setTasks(data.tasks.slice(-10)); // Pegando as 10 últimas tarefas recebidas
+    
+                // Remover a coluna 'empresa_destino_uuid' antes de definir o estado
+                const filteredTasks = data.tasks.map(task => {
+                    const { empresa_destino_uuid, ...rest } = task;
+                    return rest;  // Retorna todas as propriedades exceto 'empresa_destino_uuid'
+                });
+    
+                setTasks(filteredTasks.slice(-10)); // Pegando as 10 últimas tarefas recebidas
             } catch (error) {
                 console.error('Erro ao buscar tarefas recebidas:', error);
                 toast.error("Erro ao buscar tarefas recebidas");
@@ -45,7 +52,7 @@ function PageSeeAllTasksRecebidas() {
                 setIsLoading(false);
             }
         };
-
+    
         if (uuid) {
             fetchTasks();
         } else {
@@ -53,10 +60,11 @@ function PageSeeAllTasksRecebidas() {
             setIsLoading(false);
         }
     }, [uuid]);
+    
 
     const handleViewDetails = async (task) => {
         setLoadingTaskId(task.id); // Definir o ID da tarefa para exibir o carregamento
-
+    
         try {
             const response = await fetch('/api/getTasksDestinataria', {
                 method: 'POST',
@@ -79,9 +87,10 @@ function PageSeeAllTasksRecebidas() {
     
             const taskDetails = data.task;
     
-            // Remover os campos indesejados
+            // Remover os campos indesejados, incluindo 'empresa_destino_uuid'
             delete taskDetails.autor;
             delete taskDetails.empresa_origem_uuid;
+            delete taskDetails.empresa_destino_uuid; // Remover explicitamente empresa_destino_uuid
     
             const formatKey = (key) => {
                 if (key === 'script') return 'Script';
@@ -117,7 +126,7 @@ function PageSeeAllTasksRecebidas() {
             <div style="position: relative; display: flex; justify-content: space-between;">
                 <pre style="background-color: #282A36; color: #50FA7B; padding: 10px; white-space: pre-wrap; word-wrap: break-word; flex-grow: 1; text-align: left;">${formattedScript}
                 </pre>
-                <button id="${uniqueId}" class="btn-copy"">Copiar</button>
+                <button id="${uniqueId}" class="btn-copy">Copiar</button>
             </div>`;
                 }
     
@@ -171,6 +180,7 @@ function PageSeeAllTasksRecebidas() {
             setLoadingTaskId(null);
         }
     };
+    
 
     const copyToClipboard = (text) => {
         const cleanText = text

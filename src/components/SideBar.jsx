@@ -1,15 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
 import SlideBarButton from "./SlideBarButton";
-import { FaPaperPlane, FaList } from "react-icons/fa";
+import { FaPaperPlane, FaList, FaCalendarTimes } from "react-icons/fa";
 import { IoMdSettings, IoIosHelpCircle } from "react-icons/io";
 import { ImFire } from "react-icons/im";
 import { IoCube } from "react-icons/io5";   
 import image from "../img/isendit.png";
-import { Link } from 'react-router-dom';
+import { Link, redirect } from 'react-router-dom';
 import { AuthContext } from "../contexts/AuthContext";
+import { ImExit } from "react-icons/im";
 
 function SideBar() {
-    const [activeButton, setActiveButton] = useState('firewall');
+    const [activeButton, setActiveButton] = useState('tarefas');
     const { isAuthenticated, destinataria, empresaPai } = useContext(AuthContext); // Acessando a variável correta: empresaPai
 
     useEffect(() => {
@@ -19,6 +20,7 @@ function SideBar() {
 
     return (
         <div className="navbar">
+            <div>
             <div className="navBarHeader">
                 <div className="logo">
                     <img className="logoholder" src={image} alt="" />
@@ -63,6 +65,15 @@ function SideBar() {
                         icon={<IoIosHelpCircle />} 
                         name="Ajuda"
                         isActive={activeButton === 'ajuda'}
+                    />
+                </Link>
+            </div>       
+            </div>
+            <div className="navBarFooter">
+            <Link to="/login" onClick={() => console.log('a')}>
+                    <SlideBarButton 
+                        icon={ <ImExit />} 
+                        name="Sair"
                     />
                 </Link>
             </div>

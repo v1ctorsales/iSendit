@@ -46,6 +46,23 @@
   margin-bottom: 10%;
 }
 
+.navBarFooter{
+  margin-top: auto;
+  margin-bottom: 5%;
+  color: #7D33A3;
+  cursor: pointer;
+  align-items: center;
+  height: 4vh
+}
+
+.navBarFooterText{
+  display: inline-flex;
+  margin-left: 3px;
+  margin-top: 3px;
+  height: 100%;
+  align-items: center;
+}
+
 pre{
   margin: 5px;
 }
@@ -238,6 +255,8 @@ input{
   height: 100%;
   background-color: #ffffff;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  display: grid;
+  justify-content: space-between;
 }
 
 .inputIp{
@@ -575,6 +594,7 @@ padding: 0;
   border-collapse: collapse; /* Remove espaçamento entre as células */
   background-color: #f9f9f9;
   margin-bottom: 20px;
+  border: 2px solid #AD49E1;
 }
 
 .tasks-table th,
@@ -613,6 +633,8 @@ padding: 0;
 .tasks-table th:first-child,
 .tasks-table td:first-child {
   border-left: 0;
+  padding-left: 2%;
+
 }
 
 .tasks-table th:last-child,
@@ -682,7 +704,6 @@ margin-right: auto;
 .swal2-icon-content{
   font-size: 4vh!important;
   text-align: center;
-  margin: auto;
 }
 
 .swal-custom-icon .swal2-icon-content {

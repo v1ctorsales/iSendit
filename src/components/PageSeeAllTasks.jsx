@@ -57,7 +57,7 @@ function PageSeeAllTasks() {
 
     const handleViewDetails = async (task) => {
         setLoadingTaskId(task.id); // Definir o ID da tarefa para exibir o carregamento
-
+    
         try {
             const response = await fetch('/api/getTasks', {
                 method: 'POST',
@@ -80,9 +80,10 @@ function PageSeeAllTasks() {
     
             const taskDetails = data.task;
     
-            // Remover os campos indesejados
+            // Remover os campos indesejados, incluindo 'empresa_destino_uuid'
             delete taskDetails.autor;
             delete taskDetails.empresa_origem_uuid;
+            delete taskDetails.empresa_destino_uuid; // Remover explicitamente o campo empresa_destino_uuid
     
             const formatKey = (key) => {
                 if (key === 'script') return 'Script';  // Evitar modificações na chave 'script'
@@ -95,60 +96,43 @@ function PageSeeAllTasks() {
             };
             
             const formatValue = (key, value) => {
-                console.log(`Formatando chave: ${key}, valor recebido:`, value);  // Log inicial para o valor recebido
-            
                 if (key === 'created_at') {
                     const date = new Date(value);
-                    const formattedDate = date.toLocaleString('pt-BR', {
+                    return date.toLocaleString('pt-BR', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
                     });
-                    console.log(`Data formatada: ${formattedDate}`);  // Log para a data formatada
-                    return formattedDate;
                 }
-            
+    
                 if (key === 'script') {
                     const uniqueId = `copy-button-${task.id}`;
-                    console.log('Script original:', value);  // Log do script original recebido do backend
-                    
-                    // Remover espaços no início da primeira linha e ajustar o restante
                     const formattedScript = value
-                        .trimStart() // Remove espaços no início da primeira linha
-                        .split('\n') // Quebra em linhas
-                        .map(line => line.trim()) // Remove espaços no início e no fim de cada linha
-                        .join('\n'); // Junta as linhas novamente
-            
-                    console.log('Script formatado (sem espaços no início):', formattedScript);  // Log do script após a remoção de espaços
-            
+                        .trimStart() 
+                        .split('\n') 
+                        .map(line => line.trim()) 
+                        .join('\n'); 
+    
                     return `
             <div style="position: relative; display: flex; justify-content: space-between;">
                 <pre style="background-color: #282A36; color: #50FA7B; padding: 10px; white-space: pre-wrap; word-wrap: break-word; flex-grow: 1; text-align: left;">${formattedScript}
                 </pre>
-                <button id="${uniqueId}" class="btn-copy"">Copiar</button>
+                <button id="${uniqueId}" class="btn-copy">Copiar</button>
             </div>`;
                 }
-            
+    
                 if (key === 'acao') {
-                    const actionValue = value ? 'Aceitar' : 'Recusar';
-                    console.log(`Valor de Ação: ${actionValue}`);  // Log para valores de ação
-                    return actionValue;
+                    return value ? 'Aceitar' : 'Recusar';
                 }
-            
+    
                 if (key === 'nat') {
-                    const natValue = value === 'enable' ? 'Habilitar' : (value ? 'Habilitar' : 'Desabilitar');
-                    console.log(`Valor de NAT: ${natValue}`);  // Log para valores de NAT
-                    return natValue;
+                    return value === 'enable' ? 'Habilitar' : 'Desabilitar';
                 }
-            
-                console.log(`Valor final formatado para chave ${key}:`, value);  // Log para o valor final formatado de qualquer outra chave
+    
                 return value;
             };
-            
-            
-            
             
             const taskInfo = Object.entries(taskDetails)
                 .filter(([key, value]) => value !== null && value !== '' && value !== undefined)
@@ -159,50 +143,37 @@ function PageSeeAllTasks() {
                 })
                 .join('');
     
-                MySwal.fire({
-                    title: `<strong>Detalhes da Tarefa</strong>`,
-                    html: taskInfo,
-                    icon: 'info',
-                    confirmButtonText: 'Fechar',
-                    width: '600px',
-                    padding: '1em 3em',
-                    background: '#fff',
-                    customClass: {
-                        popup: 'swal-wide',
-                        icon: 'swal-custom-icon', // Aplicando a classe customizada
-                        confirmButton: 'swal-custom-confirm-button', // Classe para o botão de fechar
-                    },
-                    didOpen: () => {
-                        const swalIcon = document.querySelector('.swal-custom-icon');
-                        if (swalIcon) {
-                            swalIcon.style.width = '48px';  // Ajuste da largura do ícone
-                            swalIcon.style.height = '48px'; // Ajuste da altura do ícone
-                            swalIcon.style.fontSize = '20px'; // Ajuste do tamanho da fonte
-                            swalIcon.style.lineHeight = '48px'; // Centraliza o "i"
-                        }
-                
-                        const swalContent = document.querySelector('.swal2-html-container');
-                        if (swalContent) {
-                            swalContent.style.textAlign = 'left';
-                        }
-                
-                        // Adicionar evento de clique ao botão de copiar
-                        const copyButton = document.getElementById(`copy-button-${task.id}`);
-                        if (copyButton) {
-                            copyButton.addEventListener('click', () => {
-                                copyToClipboard(taskDetails.script);
-                            });
-                        }
-                    },
-                });
-                
+            MySwal.fire({
+                title: `<strong>Detalhes da Tarefa</strong>`,
+                html: taskInfo,
+                icon: 'info',
+                confirmButtonText: 'Fechar',
+                width: '600px',
+                padding: '1em 3em',
+                background: '#fff',
+                customClass: {
+                    popup: 'swal-wide',
+                    icon: 'swal-custom-icon',
+                    confirmButton: 'swal-custom-confirm-button',
+                },
+                didOpen: () => {
+                    const copyButton = document.getElementById(`copy-button-${task.id}`);
+                    if (copyButton) {
+                        copyButton.addEventListener('click', () => {
+                            copyToClipboard(taskDetails.script);
+                        });
+                    }
+                },
+            });
+    
         } catch (error) {
             console.error('Erro ao buscar detalhes da tarefa:', error);
             toast.error("Erro ao buscar detalhes da tarefa");
         } finally {
-            setLoadingTaskId(null); // Redefinir após o carregamento
+            setLoadingTaskId(null); 
         }
     };
+    
     
     // Função para copiar o texto para o clipboard sem HTML
     const copyToClipboard = (text) => {
