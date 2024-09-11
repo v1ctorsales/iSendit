@@ -34,7 +34,7 @@ function PageLogin({ setIsAuthenticated }) {
                 notifySuccess();
                 setIsAuthenticated(true);
                 setUuid(result.uuid); // Armazena o UUID no contexto
-                navigate('/firewall');
+                navigate('/tarefas');
             } else {
                 notifyError(result.message || 'Usuário ou senha incorretos');
             }
