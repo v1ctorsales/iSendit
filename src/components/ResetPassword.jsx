@@ -10,7 +10,7 @@ const ResetPassword = () => {
     const [isTokenValid, setIsTokenValid] = useState(true); // Estado para verificar se o token é válido
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    
+
     const notifyError = (message) => toast.error(message);
     const notifySuccess = () => toast.success('Senha redefinida com sucesso!');
 
@@ -47,17 +47,17 @@ const ResetPassword = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (password !== confirmPassword) {
             return notifyError('As senhas não coincidem.');
         }
-    
+
         if (password.length < 6) {
             return notifyError('A senha deve ter pelo menos 6 caracteres.');
         }
-    
+
         setIsSubmitting(true); // Desativa o botão ao iniciar o envio
-    
+
         try {
             const response = await fetch('/api/handleAccount', {
                 method: 'POST',
@@ -66,9 +66,9 @@ const ResetPassword = () => {
                 },
                 body: JSON.stringify({ action: 'setNewPassword', token, newPassword: password }),
             });
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 notifySuccess();
                 setTimeout(() => navigate('/login'), 2000); // Redireciona após 2 segundos

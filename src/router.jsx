@@ -7,6 +7,7 @@ import PageLogin from "./components/PageLogin";
 import PageSeeAllTasks from "./components/PageSeeAllTasks";
 import PageAjuda from "./components/PageAjuda";
 import PageSeeAllTasksRecebidas from "./components/PageSeeAllTasksRecebidas";
+import ResetPassword from "./components/ResetPassword"
 
 function LoginPage() {
     return <PageLogin />
@@ -35,11 +36,16 @@ function AjudaPage() {
     return <PageAjuda />
 }
 
+function ResetPW(){
+    return <ResetPassword />
+}
+
 export {
     LoginPage,
     FirewallPage,
     ObjetosPage,
     EnviosPage,
     ConfiguracoesPage,
-    AjudaPage
+    AjudaPage,
+    ResetPW
 };

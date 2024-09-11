@@ -46,7 +46,7 @@ export default async function handleAccount(req, res) {
             }
 
             const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '30m' });
-            
+
             const resetLink = `${BASE_URL}/reset-password?token=${token}`;
 
             const transporter = nodemailer.createTransport({
