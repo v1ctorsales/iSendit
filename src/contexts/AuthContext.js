@@ -46,13 +46,13 @@ export const AuthProvider = ({ children }) => {
                 setUuid(data.uuid);  // Aqui armazena o uuid
                 setDestinataria(data.destinataria);
                 setEmpresaPai(data.empresaPai_uuid); // Armazena o empresaPai_uuid
-
+            
                 // Salva os dados no localStorage
                 localStorage.setItem('authToken', data.token);
                 localStorage.setItem('uuid', data.uuid); // Armazena uuid no localStorage
                 localStorage.setItem('destinataria', data.destinataria);
                 localStorage.setItem('empresaPai_uuid', data.empresaPai_uuid); // Armazena empresaPai_uuid no localStorage
-    
+            
                 return { success: true, uuid: data.uuid, destinataria: data.destinataria, empresaPai: data.empresaPai_uuid }; // Retorna uuid e empresaPai_uuid
             } else {
                 return { success: false, message: data.message };
