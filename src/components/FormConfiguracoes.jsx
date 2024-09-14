@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import EditableLocalidades from "./EditableLocalidades";
 import gear from "../img/gear.gif";
 import EditableInterfaces from "./EditableInterfaces";
 import Informacoes from "./Informacoes";
+import { AuthContext } from '../contexts/AuthContext';
 
 function FormConfigurar() {
     const [activeForm, setActiveForm] = useState('informacoes');
+    const { destinataria } = useContext(AuthContext);
 
     return (
         <>
@@ -20,35 +22,36 @@ function FormConfigurar() {
                 >
                     Informações
                 </button>
-              {//  <button
-                //    className={`btn-choice ${activeForm === 'preferencias' ? 'btn-active' : ''}`}
-                 //   onClick={() => setActiveForm('preferencias')}
-                //>
-                //</div>    Preferências
-                //</button>
-                }
-                <button
-                    className={`btn-choice ${activeForm === 'rede' ? 'btn-active' : ''}`}
-                    onClick={() => setActiveForm('rede')}
-                >
-                    Localidades
-                </button>
-                <button
-                    className={`btn-choice ${activeForm === 'interfaces' ? 'btn-active' : ''}`}
-                    onClick={() => setActiveForm('interfaces')}
-                >
-                    Interfaces
-                </button>
+                {destinataria === false && (
+                    <>
+                        <button
+                            className={`btn-choice ${activeForm === 'rede' ? 'btn-active' : ''}`}
+                            onClick={() => setActiveForm('rede')}
+                        >
+                            Localidades
+                        </button>
+                        <button
+                            className={`btn-choice ${activeForm === 'interfaces' ? 'btn-active' : ''}`}
+                            onClick={() => setActiveForm('interfaces')}
+                        >
+                            Interfaces
+                        </button>
+                    </>
+                )}
             </div>
             <div className="listaEditableInterfaces">
                 {activeForm === 'informacoes' && <Informacoes />}
             </div>
-            <div className="listaEditableLocalidades">
-                {activeForm === 'rede' && <EditableLocalidades />}
-            </div>
-            <div className="listaEditableInterfaces">
-                {activeForm === 'interfaces' && <EditableInterfaces />}
-            </div>
+            {destinataria === false && (
+                <>
+                    <div className="listaEditableLocalidades">
+                        {activeForm === 'rede' && <EditableLocalidades />}
+                    </div>
+                    <div className="listaEditableInterfaces">
+                        {activeForm === 'interfaces' && <EditableInterfaces />}
+                    </div>
+                </>
+            )}
         </>
     );
 }

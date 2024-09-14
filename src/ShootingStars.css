@@ -61,7 +61,7 @@ body {
     top: 0;
     right: 0;
     left: initial;
-    animation-delay: 1.5s;
+    animation-delay: 8s;
     animation-duration: 8s;
 }
 
@@ -71,24 +71,24 @@ body {
     top: 0;
     right: 100vh;
     left: initial;
-    animation-delay: 0s;
-    animation-duration: 7s;
+    animation-delay: 0.5s;
+    animation-duration: 9s;
 }
 
 
 .shooting-stars span:nth-child(2) {
-    top: 0;
+    top: 10px;
     right: 135vh;
     left: initial;
-    animation-delay: 3s;
+    animation-delay: 15s;
     animation-duration: 10s;
 }
 
 
 .shooting-stars span:nth-child(3) {
-    top: 0;
+    top: 0px;
     right: 25vh;
     left: initial;
-    animation-delay: 10s;
+    animation-delay: 0s;
     animation-duration: 12s;
 }

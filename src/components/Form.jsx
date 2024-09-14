@@ -175,7 +175,8 @@ function Form() {
                     fqdn, 
                     membros, 
                     localidade: localidadeSelecionada,
-                    empresa_destino_uuid: empresaDestinoUuid
+                    empresa_destino_uuid: empresaDestinoUuid,
+                    status: "em_aberto"
                 }),
             });
     

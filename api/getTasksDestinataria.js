@@ -31,7 +31,7 @@ export default async function getTasksDestinataria(req, res) {
                 // Caso contrário, buscar as últimas 10 tarefas recebidas
                 ({ data: tasksData, error: tasksError } = await supabase
                     .from('tasks')
-                    .select('id, created_at, type, nome, localidade, descricao, observacao')  // Seleciona as colunas desejadas
+                    .select('id, created_at, type, nome, localidade, descricao, observacao, status, empresa_origem')  // Seleciona as colunas desejadas
                     .eq('empresa_destino_uuid', uuid)  // Filtra pela empresa destinatária
                     .order('created_at', { ascending: false })  // Ordena por data de criação
                     .limit(10));  // Limita a 10 resultados

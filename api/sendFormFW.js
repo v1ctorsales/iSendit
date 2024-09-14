@@ -12,7 +12,7 @@ const supabaseEmail = process.env.EMAIL;
 
 export default async function sendFormFW(req, res) {
     if (req.method === 'POST') {
-        const { uuid, regrafw, nomeRegra, porta, nat, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, obs, action, localidade, empresaPai } = req.body;
+        const { uuid, regrafw, nomeRegra, porta, nat, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, obs, action, localidade, empresaPai, status } = req.body;
 
         console.log('Uuid:', uuid);
         console.log('Tipo do Form:', regrafw);
@@ -95,6 +95,7 @@ export default async function sendFormFW(req, res) {
             .from('tasks')
             .insert([
                 {
+                    status: status,
                     autor: 'victor@teste.com',
                     nome: nomeRegra,
                     descricao: desc,

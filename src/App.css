@@ -17,6 +17,11 @@
   margin-top: 0;
 }
 
+.swal2-loader{
+  border-top: 2px solid #AD49E1;
+  border-bottom: 2px solid #AD49E1;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -854,4 +859,17 @@ margin-right: auto;
 #password2, #confirmPassword2{
   width: 20rem;
   text-align: left;
+}
+
+.titleStatus{
+  display: inline-flex;
+  align-items: baseline;
+}
+
+#statusDropdown{
+  height: 2em!important;
+  margin: 0!important;
+  margin-left: 1em!important;
+  font-size: 1.2rem!important;
+  width: 15rem!important;
 }

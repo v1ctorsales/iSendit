@@ -31,7 +31,7 @@ export default async function getTasks(req, res) {
                 // Caso contrário, buscar as últimas 10 tarefas
                 ({ data, error } = await supabase
                     .from('tasks')
-                    .select('id, created_at, type, nome, localidade') // Adiciona 'id' à seleção para identificação única
+                    .select('id, created_at, type, nome, localidade, status') // Adiciona 'id' à seleção para identificação única
                     .eq('empresa_origem_uuid', uuid)
                     .order('created_at', { ascending: false })
                     .limit(10));

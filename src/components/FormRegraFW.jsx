@@ -114,7 +114,8 @@ function FormRegraFW() {
             desc,
             obs,
             action,
-            localidade
+            localidade,
+            status: "aberto"
         })
         .then(() => {
             // Resetar os campos após o envio

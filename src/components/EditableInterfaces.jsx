@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { UuidContext } from '../contexts/UuidContext'; // Importa o contexto do UUID
+import { AuthContext } from '../contexts/AuthContext';
 import { FaPlus } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
@@ -23,7 +23,7 @@ function EditableInterfaces() {
     const [editedName, setEditedName] = useState(''); // Estado para armazenar o novo nome da interface
     const [isSaving, setIsSaving] = useState(false); // Estado para controlar a atividade de salvamento
     const [isFetchSuccessful, setIsFetchSuccessful] = useState(false); // Novo estado para controlar o sucesso da busca
-    const { uuid } = useContext(UuidContext); // Obtém o UUID da empresa a partir do contexto
+    const { uuid } = useContext(AuthContext);// Obtém o UUID da empresa a partir do contexto
 
     // Carrega as localidades ao montar o componente
     useEffect(() => {

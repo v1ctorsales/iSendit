@@ -12,7 +12,7 @@ const supabaseEmail = process.env.EMAIL;
 
 export default async function sendFormData(req, res) {
     if (req.method === 'POST') {
-        const { uuid, formType, nomeObj, ip, masc, desc, obs, fqdn, membros, localidade } = req.body;
+        const { uuid, formType, nomeObj, ip, masc, desc, obs, fqdn, membros, localidade, status } = req.body;
 
         if (!uuid) {
             console.error('UUID não fornecido ou inválido');
@@ -101,6 +101,7 @@ end`;
                 .from('tasks')
                 .insert([
                     {
+                        status: status,
                         autor: 'victor@teste.com',
                         nome: nomeObj,
                         descricao: desc,
