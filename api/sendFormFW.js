@@ -14,9 +14,6 @@ export default async function sendFormFW(req, res) {
     if (req.method === 'POST') {
         const { uuid, regrafw, nomeRegra, porta, nat, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, obs, action, localidade, empresaPai, status } = req.body;
 
-        console.log('Uuid:', uuid);
-        console.log('Tipo do Form:', regrafw);
-
         if (!localidade) {
             return res.status(400).json({ message: 'Localidade é obrigatória' });
         }
@@ -60,37 +57,37 @@ export default async function sendFormFW(req, res) {
         const formatMultipleValues = (value) => {
             if (typeof value === 'string') {
                 // Se o valor contém múltiplos itens separados por vírgula, dividir e adicionar aspas
-                return value.split(',').map(item => `"${item.trim()}"`).join(' ');
+                return value.split(',').map(item => `<span style='color: #FFB86C;'>${item.trim()}</span>`).join(' ');
             }
-            return `"${value}"`; // Se for um único valor, adicionar aspas
+            return `<span style='color: #FFB86C;'>${value}</span>`; // Se for um único valor, adicionar aspas
         };
 
-        // Script sem estilização para salvar no banco
+        // Script estilizado para salvar no banco e enviar por e-mail
         let firewallScript = `
-        config firewall policy
-        edit 0
-        set name "${nomeRegra}"
-        set srcintf "${interfaceOrigem}"
-        set dstintf "${interfaceDestino}"
-        set action "${action === "accept" ? "accept" : "deny"}"
-        set srcaddr ${formatMultipleValues(objetoorigem)}
-        set dstaddr ${formatMultipleValues(objetodestino)}
-        set schedule "always"
-        set service ${formatMultipleValues(porta)}
-        set nat "${natBinary === 1 ? 'enable' : 'disable'}"`;
+config firewall policy
+&nbsp;&nbsp;&nbsp;&nbsp;edit 0
+&nbsp;&nbsp;&nbsp;&nbsp;set name <span style='color: #FFB86C;'>"${nomeRegra}"</span>
+&nbsp;&nbsp;&nbsp;&nbsp;set srcintf <span style='color: #FFB86C;'>"${interfaceOrigem}"</span>
+&nbsp;&nbsp;&nbsp;&nbsp;set dstintf <span style='color: #FFB86C;'>"${interfaceDestino}"</span>
+&nbsp;&nbsp;&nbsp;&nbsp;set action <span style='color: #FFB86C;'>"${action === "accept" ? "accept" : "deny"}"</span>
+&nbsp;&nbsp;&nbsp;&nbsp;set srcaddr ${formatMultipleValues(objetoorigem)}
+&nbsp;&nbsp;&nbsp;&nbsp;set dstaddr ${formatMultipleValues(objetodestino)}
+&nbsp;&nbsp;&nbsp;&nbsp;set schedule <span style='color: #FFB86C;'>"always"</span>
+&nbsp;&nbsp;&nbsp;&nbsp;set service ${formatMultipleValues(porta)}
+&nbsp;&nbsp;&nbsp;&nbsp;set nat <span style='color: #FFB86C;'>"${natBinary === 1 ? 'enable' : 'disable'}"</span>`;
 
         if (desc.trim() !== '') {
             firewallScript += `
-        set comment "${desc}"`;
+&nbsp;&nbsp;&nbsp;&nbsp;set comment <span style='color: #FFB86C;'>"${desc}"</span>`;
         }
 
         firewallScript += `
-        next
-        end`;
+next
+end`;
 
         console.log('Script gerado:', firewallScript.trim());
 
-        // Inserção no banco de dados sem estilização
+        // Inserção no banco de dados com script estilizado
         const { data, error } = await supabase
             .from('tasks')
             .insert([
@@ -113,7 +110,7 @@ export default async function sendFormFW(req, res) {
                     empresa_destino: empresaPaiNome,
                     empresa_origem_uuid: uuid,
                     empresa_destino_uuid: empresaPai,
-                    script: firewallScript.trim(),  // Salva o script gerado sem estilização
+                    script: firewallScript.trim(),  // Salva o script gerado com estilização
                 }
             ]);
 
@@ -129,29 +126,6 @@ export default async function sendFormFW(req, res) {
 <p><strong>Observação:</strong></p>
 <p style="background-color: #f0f0f0; padding: 10px;">${obs}</p>`;
         }
-
-        // Script com estilização para o e-mail
-        let firewallScriptEmail = `
-        config firewall policy
-        edit 0
-        set name <span style='color: #FFB86C;'>"${nomeRegra}"</span>
-        set srcintf <span style='color: #FFB86C;'>"${interfaceOrigem}"</span>
-        set dstintf <span style='color: #FFB86C;'>"${interfaceDestino}"</span>
-        set action <span style='color: #FFB86C;'>"${action === "accept" ? "accept" : "deny"}"</span>
-        set srcaddr <span style='color: #FFB86C;'>${formatMultipleValues(objetoorigem)}</span>
-        set dstaddr <span style='color: #FFB86C;'>${formatMultipleValues(objetodestino)}</span>
-        set schedule <span style='color: #FFB86C;'>"always"</span>
-        set service <span style='color: #FFB86C;'>${formatMultipleValues(porta)}</span>
-        set nat <span style='color: #FFB86C;'>"${natBinary === 1 ? 'enable' : 'disable'}"</span>`;
-
-        if (desc.trim() !== '') {
-            firewallScriptEmail += `
-        set comment <span style='color: #FFB86C;'>"${desc}"</span>`;
-        }
-
-        firewallScriptEmail += `
-        next
-        end`;
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -169,7 +143,7 @@ export default async function sendFormFW(req, res) {
 <h2>Script para a criação da regra:</h2>
 <pre id="firewallScript" style="padding: 15px; background-color: #282A36; color:#50FA7B; font-size: medium ; 
 font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
-${firewallScriptEmail.trim()}
+${firewallScript.trim()}
 </pre>
 
 <hr />

@@ -176,7 +176,7 @@ function Form() {
                     membros, 
                     localidade: localidadeSelecionada,
                     empresa_destino_uuid: empresaDestinoUuid,
-                    status: "em_aberto"
+                    status: "aberto"
                 }),
             });
     
