@@ -54,17 +54,17 @@ export default async function sendFormFW(req, res) {
         }
 
         // Função para formatar campos que podem ter múltiplos valores com aspas ao redor de cada valor sem vírgula
-        const formatMultipleValues = (value) => {
-            if (typeof value === 'string') {
-                // Se o valor contém múltiplos itens separados por vírgula, dividir e adicionar aspas
-                return value.split(',').map(item => `<span style='color: #FFB86C;'>${item.trim()}</span>`).join(' ');
-            }
-            return `<span style='color: #FFB86C;'>${value}</span>`; // Se for um único valor, adicionar aspas
-        };
+        // Função para formatar campos que podem ter múltiplos valores com aspas ao redor de cada valor e aplicar a cor
+const formatMultipleValues = (value) => {
+    if (typeof value === 'string') {
+        // Se o valor contém múltiplos itens separados por vírgula, dividir e adicionar estilização
+        return value.split(',').map(item => `<span style='color: #FFB86C;'>${item.trim()}</span>`).join(' ');
+    }
+    return `<span style='color: #FFB86C;'>${value}</span>`; // Se for um único valor, adicionar estilização
+};
 
-        // Script estilizado para salvar no banco e enviar por e-mail
-        let firewallScript = `
-config firewall policy
+// Script estilizado para salvar no banco e enviar por e-mail
+let firewallScript = `config firewall policy
 &nbsp;&nbsp;&nbsp;&nbsp;edit 0
 &nbsp;&nbsp;&nbsp;&nbsp;set name <span style='color: #FFB86C;'>"${nomeRegra}"</span>
 &nbsp;&nbsp;&nbsp;&nbsp;set srcintf <span style='color: #FFB86C;'>"${interfaceOrigem}"</span>
@@ -76,14 +76,17 @@ config firewall policy
 &nbsp;&nbsp;&nbsp;&nbsp;set service ${formatMultipleValues(porta)}
 &nbsp;&nbsp;&nbsp;&nbsp;set nat <span style='color: #FFB86C;'>"${natBinary === 1 ? 'enable' : 'disable'}"</span>`;
 
-        if (desc.trim() !== '') {
-            firewallScript += `
+if (desc.trim() !== '') {
+    firewallScript += `
 &nbsp;&nbsp;&nbsp;&nbsp;set comment <span style='color: #FFB86C;'>"${desc}"</span>`;
-        }
+}
 
-        firewallScript += `
+firewallScript += `
 next
 end`;
+
+// Agora, o restante do código permanece o mesmo...
+
 
         console.log('Script gerado:', firewallScript.trim());
 
@@ -140,29 +143,30 @@ end`;
             to: empresaPaiEmail,
             subject: 'Nova solicitação de regra de Firewall criada',
             html: `
-<h2>Script para a criação da regra:</h2>
-<pre id="firewallScript" style="padding: 15px; background-color: #282A36; color:#50FA7B; font-size: medium ; 
-font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
-${firewallScript.trim()}
-</pre>
-
-<hr />
-<h2>Informações detalhadas:</h2>
-${observacaoHtml}
-<p><strong>Localidade:</strong> "${localidade}"</p>
-<p><strong>Nome da Regra:</strong> "${nomeRegra}"</p>
-<p><strong>Interface Origem:</strong> "${interfaceOrigem}"</p>
-<p><strong>Interface Destino:</strong> "${interfaceDestino}"</p>
-<p><strong>Objeto Origem:</strong> "${formatMultipleValues(objetoorigem)}"</p>
-<p><strong>Objeto Destino:</strong> "${formatMultipleValues(objetodestino)}"</p>
-<p><strong>Ação:</strong> "${action === "accept" ? "Aceitar" : "Recusar"}"</p>
-<p><strong>Porta:</strong> "${formatMultipleValues(porta)}"</p>
-<p><strong>NAT:</strong> "${natBinary === 1 ? 'Ativado' : 'Desativado'}"</p>
-<p><strong>Descrição:</strong> "${desc}"</p>
-<hr />
-<p>Este email foi enviado através da plataforma iSendit</p>
+        <h2>Script para a criação da regra:</h2>
+        <pre id="firewallScript" style="padding: 15px; background-color: #282A36; color:#50FA7B; font-size: medium ; 
+        font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
+        ${firewallScript.trim()}
+        </pre>
+        
+        <hr />
+        <h2>Informações detalhadas:</h2>
+        <p><strong>Localidade:</strong> "${localidade}"</p>
+        <p><strong>Nome da Regra:</strong> "${nomeRegra}"</p>
+        <p><strong>Interface Origem:</strong> "${interfaceOrigem}"</p>
+        <p><strong>Interface Destino:</strong> "${interfaceDestino}"</p>
+        <p><strong>Objeto Origem:</strong> "${objetoorigem}"</p>
+        <p><strong>Objeto Destino:</strong> "${objetodestino}"</p>
+        <p><strong>Ação:</strong> "${action === "accept" ? "Aceitar" : "Recusar"}"</p>
+        <p><strong>Porta:</strong> "${porta}"</p>
+        <p><strong>NAT:</strong> "${natBinary === 1 ? 'Ativado' : 'Desativado'}"</p>
+        <p><strong>Descrição:</strong> "${desc}"</p>
+        ${observacaoHtml}
+        <hr />
+        <p>Este email foi enviado através da plataforma iSendit</p>
             `,
         };
+        
 
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
