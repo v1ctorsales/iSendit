@@ -419,7 +419,7 @@ function Form() {
                                 minLength="7" 
                                 maxLength="15" 
                                 size="15" 
-                                pattern="^(?>(\d|[1-9]\d{2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?1)$"
+                                pattern="^(?>(\d|[1-9]\d{2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?1)$" // Adicionar validaçao pra ipv4/ipv6
                                 id="ip" 
                                 value={ip} 
                                 onChange={(e) => setIp(e.target.value)} 

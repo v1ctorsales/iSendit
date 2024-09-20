@@ -115,6 +115,7 @@ function FormRegraFW() {
             obs,
             action,
             localidade,
+            nat, // Adicionar o campo NAT aqui
             status: "aberto"
         })
         .then(() => {
@@ -128,6 +129,7 @@ function FormRegraFW() {
             setDesc('');
             setAction('accept');
             setLocalidade('');
+            setNat('disable'); // Resetar o valor de NAT
             setObs('');
             notifyOk();
         })
@@ -140,6 +142,7 @@ function FormRegraFW() {
             setLoading(false);
         });
     };
+    
     
 
     return (
