@@ -361,7 +361,7 @@ function PageSeeAllTasksRecebidas() {
                     <table className="tasks-table">
                     <thead>
                     <tr>
-                        <th className="col-created-at">Data de Criação</th>
+                        <th className="col-created-at">Data</th>
                         <th className="col-type">Tipo de Tarefa</th>
                         <th className="col-empresa">Empresa</th>
                         <th className="col-location">Localidade</th>

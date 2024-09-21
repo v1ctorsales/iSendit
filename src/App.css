@@ -585,8 +585,10 @@ padding: 0;
 
 .tasks-table-container{
   margin: auto;
-  width: 50%;
   max-width: 50%;
+  width: 65%;
+  max-width: 65%;
+  margin-left: 22%;
 }
 
 .tasks-table-container {
@@ -638,8 +640,24 @@ padding: 0;
 .tasks-table th:first-child,
 .tasks-table td:first-child {
   border-left: 0;
-  padding-left: 2%;
 
+}
+
+.tasks-table td{
+  padding-left: 0;
+ text-align: center;
+}
+
+.tasks-table th{
+  border-left: 0;
+  text-align: center;
+}
+
+
+
+.tasks-table td {
+  border-left: 0;
+  border: 1px solid rgb(212, 212, 212);
 }
 
 .tasks-table th:last-child,
