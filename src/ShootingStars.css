@@ -77,7 +77,7 @@ body {
 
 
 .shooting-stars span:nth-child(2) {
-    top: 10px;
+    top: -100px;
     right: 135vh;
     left: initial;
     animation-delay: 15s;

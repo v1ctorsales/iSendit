@@ -8,6 +8,7 @@ import PageSeeAllTasks from "./components/PageSeeAllTasks";
 import PageAjuda from "./components/PageAjuda";
 import PageSeeAllTasksRecebidas from "./components/PageSeeAllTasksRecebidas";
 import ResetPassword from "./components/ResetPassword"
+import PagePlano from './components/PagePlano';
 
 function LoginPage() {
     return <PageLogin />
@@ -40,6 +41,10 @@ function ResetPW(){
     return <ResetPassword />
 }
 
+function SignUp(){
+    return <PagePlano />
+}
+
 export {
     LoginPage,
     FirewallPage,
@@ -47,5 +52,6 @@ export {
     EnviosPage,
     ConfiguracoesPage,
     AjudaPage,
-    ResetPW
+    ResetPW,
+    SignUp
 };
