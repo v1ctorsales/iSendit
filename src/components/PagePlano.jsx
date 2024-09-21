@@ -30,7 +30,7 @@ function PagePlano() {
                             <li>Suporte em Horário Comercial</li>
                         </ul>
                         <button className="btn-plano">
-                            <a className="a-btn-white" href="https://web.whatsapp.com/send?phone=553191173876&text=Olá, gostaria de saber mais sobre os planos disponíveis">
+                            <a className="a-btn-white" href="https://web.whatsapp.com/send?phone=553191173876&text=Olá, gostaria de saber mais sobre os planos disponíveis" target="_blank">
                                 Converse com um Especialista
                             </a>
                         </button>
@@ -47,7 +47,7 @@ function PagePlano() {
                             <li>Suporte em Horário Comercial</li>
                         </ul>
                         <button className="btn-plano" id="btn-planoMid">
-                            <a className="a-btn-white" href="https://web.whatsapp.com/send?phone=553191173876&text=Olá, gostaria de saber mais sobre os planos disponíveis">
+                            <a className="a-btn-white" href="https://web.whatsapp.com/send?phone=553191173876&text=Olá, gostaria de saber mais sobre os planos disponíveis" target="_blank">
                                 Converse com um Especialista
                             </a>
                         </button>
@@ -64,7 +64,7 @@ function PagePlano() {
                             <li>Suporte em Horário Comercial</li>
                         </ul>
                         <button className="btn-plano">
-                            <a className="a-btn-white" href="https://web.whatsapp.com/send?phone=553191173876&text=Olá, gostaria de saber mais sobre os planos disponíveis">
+                            <a className="a-btn-white" href="https://web.whatsapp.com/send?phone=553191173876&text=Olá, gostaria de saber mais sobre os planos disponíveis" target="_blank">
                                 Converse com um Especialista
                             </a>
                         </button>
