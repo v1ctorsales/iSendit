@@ -166,7 +166,7 @@ function PageSeeAllTasksRecebidas() {
 
     const handleViewDetails = async (task) => {
         setLoadingTaskId(task.id);
-
+    
         try {
             const response = await fetch('/api/getTasksDestinataria', {
                 method: 'POST',
@@ -175,31 +175,24 @@ function PageSeeAllTasksRecebidas() {
                 },
                 body: JSON.stringify({ uuid, taskId: task.id }),
             });
-
+    
             if (!response.ok) {
                 throw new Error('Erro ao buscar detalhes da tarefa recebida');
             }
-
+    
             const data = await response.json();
             const taskDetails = data.task;
-            let taskStatus = taskDetails.status;
-
+            const taskStatus = taskDetails.status; // Pegue o status diretamente da tarefa
+    
             // Remover campos indesejados
             delete taskDetails.empresa_destino_uuid;
             delete taskDetails.empresa_origem_uuid;
             delete taskDetails.autor;
             delete taskDetails.id;
+    
+            // Não incluir o status na exibição dos detalhes
             delete taskDetails.status;
-
-            // Formatar o status
-            taskStatus = taskStatus
-                .toLowerCase()
-                .split('_')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-
-            setSelectedStatus(taskStatus); // Define o status inicial no dropdown
-
+    
             const formatKey = (key) => {
                 if (key === 'script') return 'Script';
                 key = key.replace(/_/g, ' ');
@@ -209,7 +202,7 @@ function PageSeeAllTasksRecebidas() {
                 if (key === 'acao') return 'Ação';
                 return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
             };
-
+    
             const formatValue = (key, value) => {
                 if (key === 'created_at') {
                     const date = new Date(value);
@@ -221,7 +214,7 @@ function PageSeeAllTasksRecebidas() {
                         minute: '2-digit',
                     });
                 }
-
+    
                 if (key === 'script') {
                     const uniqueId = `copy-button-${task.id}`;
                     const formattedScript = value
@@ -229,7 +222,7 @@ function PageSeeAllTasksRecebidas() {
                         .split('\n')
                         .map(line => line.trim())
                         .join('\n');
-
+    
                     return `
                         <div style="position: relative; display: flex; justify-content: space-between;">
                             <pre style="background-color: #282A36; color: #50FA7B; padding: 10px; white-space: pre-wrap; word-wrap: break-word; flex-grow: 1; text-align: left;">${formattedScript}
@@ -237,18 +230,18 @@ function PageSeeAllTasksRecebidas() {
                             <button id="${uniqueId}" class="btn-copy">Copiar</button>
                         </div>`;
                 }
-
+    
                 if (key === 'acao') {
                     return value ? 'Aceitar' : 'Recusar';
                 }
-
+    
                 if (key === 'nat') {
                     return value === 'enable' ? 'Habilitar' : 'Desabilitar';
                 }
-
+    
                 return value;
             };
-
+    
             const taskInfo = Object.entries(taskDetails)
                 .filter(([key, value]) => value !== null && value !== '' && value !== undefined)
                 .map(([key, value]) => {
@@ -257,15 +250,16 @@ function PageSeeAllTasksRecebidas() {
                     return `<p style="text-align: left; margin: 0;"><strong>${formattedKey}:</strong> ${formattedValue}</p>`;
                 })
                 .join('');
-
+    
+            // Diretamente atribuindo o valor correto ao select no momento em que o modal é aberto
             MySwal.fire({
                 title: `<div class="titleStatus">
                     <p>Status:</p> 
                     <select id="statusDropdown" class="swal2-select" style="margin-top: 0;">
-                        <option value="aberto" ${taskStatus === 'Aberto' ? 'selected' : ''}>Aberto</option>
-                        <option value="em_andamento" ${taskStatus === 'Em Andamento' ? 'selected' : ''}>Em Andamento</option>
-                        <option value="concluido" ${taskStatus === 'Concluído' ? 'selected' : ''}>Concluído</option>
-                        <option value="cancelado" ${taskStatus === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                        <option value="aberto" ${taskStatus === 'aberto' ? 'selected' : ''}>Aberto</option>
+                        <option value="em_andamento" ${taskStatus === 'em_andamento' ? 'selected' : ''}>Em Andamento</option>
+                        <option value="concluido" ${taskStatus === 'concluido' ? 'selected' : ''}>Concluído</option>
+                        <option value="cancelado" ${taskStatus === 'cancelado' ? 'selected' : ''}>Cancelado</option>
                     </select>
                     </div>`,
                 html: taskInfo,
@@ -282,11 +276,12 @@ function PageSeeAllTasksRecebidas() {
                 allowOutsideClick: false,
                 didOpen: () => {
                     const dropdown = document.getElementById('statusDropdown');
+                    dropdown.value = taskStatus; // Assegura que o valor correto seja exibido
                     dropdown.addEventListener('change', (event) => {
                         const newStatus = event.target.value;
                         handleStatusChange(task.id, newStatus, taskInfo); // Atualiza o status e mantém o modal
                     });
-
+    
                     const copyButton = document.getElementById(`copy-button-${task.id}`);
                     if (copyButton) {
                         copyButton.addEventListener('click', () => {
@@ -295,7 +290,7 @@ function PageSeeAllTasksRecebidas() {
                     }
                 },
             });
-
+    
         } catch (error) {
             console.error('Erro ao buscar detalhes da tarefa recebida:', error);
             toast.error("Erro ao buscar detalhes da tarefa recebida");
@@ -303,6 +298,8 @@ function PageSeeAllTasksRecebidas() {
             setLoadingTaskId(null);
         }
     };
+    
+    
 
     const copyToClipboard = (text) => {
         const cleanText = text
