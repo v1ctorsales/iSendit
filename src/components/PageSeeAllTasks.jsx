@@ -102,9 +102,6 @@ function PageSeeAllTasks() {
         }
     };
     
-    
-    
-
     const handleViewDetails = async (task) => {
         setLoadingTaskId(task.id);
 
@@ -149,9 +146,9 @@ function PageSeeAllTasks() {
             delete taskDetails.autor;
             delete taskDetails.empresa_origem_uuid;
             delete taskDetails.empresa_destino_uuid;
+            delete taskDetails.script;
 
             const formatKey = (key) => {
-                if (key === 'script') return 'Script'; 
                 key = key.replace(/_/g, ' '); 
                 if (key === 'created at') return 'Criado em';
                 if (key === 'type') return 'Tipo';
@@ -170,22 +167,6 @@ function PageSeeAllTasks() {
                         hour: '2-digit',
                         minute: '2-digit',
                     });
-                }
-
-                if (key === 'script') {
-                    const uniqueId = `copy-button-${task.id}`;
-                    const formattedScript = value
-                        .trimStart()
-                        .split('\n')
-                        .map(line => line.trim())
-                        .join('\n');
-
-                    return `
-                        <div style="position: relative; display: flex; justify-content: space-between;">
-                            <pre style="background-color: #282A36; color: #50FA7B; padding: 10px; white-space: pre-wrap; word-wrap: break-word; flex-grow: 1; text-align: left;">${formattedScript}
-                            </pre>
-                            <button id="${uniqueId}" class="btn-copy">Copiar</button>
-                        </div>`;
                 }
 
                 if (key === 'acao') {
@@ -208,53 +189,27 @@ function PageSeeAllTasks() {
                 })
                 .join('');
 
-                MySwal.fire({
-                    iconHtml: getStatusIconHtml(taskStatus), // Insere o ícone baseado no status
-                    title: `<strong>Status: ${taskStatus}</strong>`, // Usa o status formatado no título
-                    html: taskInfo,
-                    confirmButtonText: 'Fechar',
-                    width: '600px',
-                    padding: '1em 3em',
-                    background: '#fff',
-                    customClass: {
-                        popup: 'swal-wide',
-                        icon: 'swal-custom-icon',
-                        confirmButton: 'swal-custom-confirm-button',
-                    },
-                    didOpen: () => {
-                        const copyButton = document.getElementById(`copy-button-${task.id}`);
-                        if (copyButton) {
-                            copyButton.addEventListener('click', () => {
-                                copyToClipboard(taskDetails.script);
-                            });
-                        }
-                    },
-                });
-                
+            MySwal.fire({
+                iconHtml: getStatusIconHtml(taskStatus), // Insere o ícone baseado no status
+                title: `<strong>Status: ${taskStatus}</strong>`, // Usa o status formatado no título
+                html: taskInfo,
+                confirmButtonText: 'Fechar',
+                width: '600px',
+                padding: '1em 3em',
+                background: '#fff',
+                customClass: {
+                    popup: 'swal-wide',
+                    icon: 'swal-custom-icon',
+                    confirmButton: 'swal-custom-confirm-button',
+                },
+            });
+            
         } catch (error) {
             console.error('Erro ao buscar detalhes da tarefa:', error);
             toast.error("Erro ao buscar detalhes da tarefa");
         } finally {
             setLoadingTaskId(null);
         }
-    };
-
-    const copyToClipboard = (text) => {
-        const cleanText = text
-            .replace(/<span[^>]*>/g, '') 
-            .replace(/<\/span>/g, '') 
-            .replace(/<br\s*\/?>/g, '\n') 
-            .replace(/\s{2,}/g, ' ') 
-            .replace(/&quot;/g, '"') 
-            .replace(/&nbsp;/g, ' ') 
-            .trim(); 
-
-        navigator.clipboard.writeText(cleanText).then(() => {
-            toast.info('Script copiado com sucesso!');
-        }).catch(err => {
-            console.error('Erro ao copiar o script:', err);
-            toast.error('Erro ao copiar o script!');
-        });
     };
 
     const mapTypeToLabel = (type) => {
