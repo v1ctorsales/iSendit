@@ -141,7 +141,7 @@ end`;
         const mailOptions = {
             from: supabaseEmail,
             to: empresaPaiEmail,
-            subject: 'Nova solicitação de regra de Firewall criada',
+            subject: '[ISENDIT] Nova solicitação de regra de Firewall criada',
             html: `
         <h2>Script para a criação da regra:</h2>
         <pre id="firewallScript" style="padding: 15px; background-color: #282A36; color:#50FA7B; font-size: medium ; 

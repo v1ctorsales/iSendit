@@ -39,15 +39,20 @@ function PageAjuda() {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
+                            <tr>
                                     <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Suporte</td>
+                                    <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Canal de Suporte</td>
+                                    <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>suporte@isendit.com.br</td>
+                                </tr>
+                                <tr>
+                                    <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Administrativo</td>
                                     <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Gabriel Gatti</td>
-                                    <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>rengatti11@gmail.com</td>
+                                    <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>gabriel.gatti@isendit.com.br</td>
                                 </tr>
                                 <tr>
                                     <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Desenvolvimento</td>
                                     <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Victor Sales</td>
-                                    <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>dev.victorsales@gmail.com</td>
+                                    <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>victor.sales@isendit.com.br</td>
                                 </tr>
                             </tbody>
                         </table>

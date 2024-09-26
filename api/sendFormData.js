@@ -55,8 +55,7 @@ export default async function sendFormData(req, res) {
             let script = '';
 
             if (formType === "fqdn") {
-                script = `
-config firewall address
+                script = `config firewall address
 &nbsp;&nbsp;&nbsp;&nbsp;edit <span style='color: #FFB86C;'>"${nomeObj}"</span>
 &nbsp;&nbsp;&nbsp;&nbsp;set type <span style='color: #FFB86C;'>fqdn</span>
 &nbsp;&nbsp;&nbsp;&nbsp;set fqdn <span style='color: #FFB86C;'>"${fqdn}"</span>`;
@@ -145,7 +144,7 @@ end`;
             const mailOptions = {
                 from: supabaseEmail,
                 to: empresaPaiEmail,
-                subject: `Nova solicitação de configuração de ${formType === "fqdn" ? "FQDN" : formType === "addressGroup" ? "Address Group" : "IP"}`,
+                subject: `[ISENDIT] Nova solicitação de configuração de ${formType === "fqdn" ? "FQDN" : formType === "addressGroup" ? "Address Group" : "IP"}`,
                 html: `
                     <h2>Script para a criação de ${formType === "fqdn" ? "FQDN" : formType === "addressGroup" ? "Address Group" : "IP"}:</h2>
                     <pre style="padding: 15px; background-color: #282A36; color:#50FA7B; font-size: medium;
