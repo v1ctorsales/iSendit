@@ -146,6 +146,16 @@ function PageSeeAllTasks() {
             delete taskDetails.autor;
             delete taskDetails.empresa_origem_uuid;
             delete taskDetails.empresa_destino_uuid;
+            delete taskDetails.empresa_origem;
+            delete taskDetails.empresa_destino;
+
+            //retornar do banco parametro isDemo
+            //(if isDemo == false{
+                //delete script
+            //}
+            //else{
+            //mostrar o script
+            //}
             delete taskDetails.script;
 
             const formatKey = (key) => {

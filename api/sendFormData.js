@@ -96,6 +96,7 @@ end`;
             }
 
             console.log('Script gerado:', script.trim());
+            const mascWithoutSlash = masc.replace('/', '');
 
             const { data, error } = await supabase
                 .from('tasks')
@@ -105,6 +106,8 @@ end`;
                         autor: 'victor@teste.com',
                         nome: nomeObj,
                         descricao: desc,
+                        ip: ip,
+                        mascara: mascWithoutSlash,
                         observacao: obs,
                         type: formType,
                         fqdn: fqdn,
