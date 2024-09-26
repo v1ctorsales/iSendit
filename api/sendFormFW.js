@@ -149,7 +149,7 @@ end`;
         ${firewallScript.trim()}
         </pre>
         
-        <hr />
+        Mais informações em: <a href="https://www.isendit.com.br" target="_blank">https://www.isendit.com.br</a><hr />
         <h2>Informações detalhadas:</h2>
         <p><strong>Localidade:</strong> "${localidade}"</p>
         <p><strong>Nome da Regra:</strong> "${nomeRegra}"</p>
