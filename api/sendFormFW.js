@@ -55,13 +55,15 @@ export default async function sendFormFW(req, res) {
 
         // Função para formatar campos que podem ter múltiplos valores com aspas ao redor de cada valor sem vírgula
         // Função para formatar campos que podem ter múltiplos valores com aspas ao redor de cada valor e aplicar a cor
-const formatMultipleValues = (value) => {
-    if (typeof value === 'string') {
-        // Se o valor contém múltiplos itens separados por vírgula, dividir e adicionar estilização
-        return value.split(',').map(item => `<span style='color: #FFB86C;'>${item.trim()}</span>`).join(' ');
-    }
-    return `<span style='color: #FFB86C;'>${value}</span>`; // Se for um único valor, adicionar estilização
-};
+        const formatMultipleValues = (value) => {
+            if (typeof value === 'string') {
+                // Se o valor contém múltiplos itens separados por vírgula, dividir, adicionar aspas e estilização
+                return value.split(',').map(item => `<span style='color: #FFB86C;'>"${item.trim()}"</span>`).join(' ');
+            }
+            // Se for um único valor (não string ou sem vírgula), adicionar aspas e estilização
+            return `<span style='color: #FFB86C;'>"${value}"</span>`;
+        };
+        
 
 // Script estilizado para salvar no banco e enviar por e-mail
 let firewallScript = `config firewall policy
