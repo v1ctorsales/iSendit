@@ -76,7 +76,10 @@ function FormRegraFW() {
                         throw new Error('Erro ao buscar interfaces');
                     }
                     const data = await response.json();
-                    setInterfaces(data);
+                    
+                    const interfacesComAny = [{ nome: "any" }, ...data];
+
+                setInterfaces(interfacesComAny);
                 } catch (err) {
                     console.error('Erro ao carregar interfaces:', err);
                     notify();

@@ -54,8 +54,7 @@ export default async function sendFormData(req, res) {
 
             let script = '';
 
-            if (formType === "fqdn") {
-                script = `config firewall address
+            if (formType === "fqdn") {script = `config firewall address
 &nbsp;&nbsp;&nbsp;&nbsp;edit <span style='color: #FFB86C;'>"${nomeObj}"</span>
 &nbsp;&nbsp;&nbsp;&nbsp;set type <span style='color: #FFB86C;'>fqdn</span>
 &nbsp;&nbsp;&nbsp;&nbsp;set fqdn <span style='color: #FFB86C;'>"${fqdn}"</span>`;
@@ -81,8 +80,7 @@ config firewall addrgrp
 next
 end`;
             } else if (formType === "ip") {
-                script = `
-config firewall address
+                script = `config firewall address
 &nbsp;&nbsp;&nbsp;&nbsp;edit <span style='color: #FFB86C;'>"${nomeObj}"</span>
 &nbsp;&nbsp;&nbsp;&nbsp;set subnet <span style='color: #FFB86C;'>"${ip}${masc}"</span>`;
                 if (desc && desc.trim() !== '') {
