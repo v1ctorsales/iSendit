@@ -131,7 +131,7 @@ function FormRegraFW() {
             setObjetodestino('');
             setDesc('');
             setAction('accept');
-            setLocalidade('');
+            //setLocalidade('');
             setNat('disable'); // Resetar o valor de NAT
             setObs('');
             notifyOk();
@@ -172,7 +172,7 @@ function FormRegraFW() {
                                 value={localidade}
                                 onChange={(e) => setLocalidade(e.target.value)}
                             >
-                                <option value="default">Selecione uma localidade</option> 
+                                //<option value="default">Selecione uma localidade</option> 
                                 {localidades.map((localidade, index) => (
                                     <option key={index} value={localidade.nome}>
                                         {localidade.nome}

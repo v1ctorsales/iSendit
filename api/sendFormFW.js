@@ -75,8 +75,11 @@ let firewallScript = `config firewall policy
 &nbsp;&nbsp;&nbsp;&nbsp;set srcaddr ${formatMultipleValues(objetoorigem)}
 &nbsp;&nbsp;&nbsp;&nbsp;set dstaddr ${formatMultipleValues(objetodestino)}
 &nbsp;&nbsp;&nbsp;&nbsp;set schedule <span style='color: #FFB86C;'>"always"</span>
-&nbsp;&nbsp;&nbsp;&nbsp;set service ${formatMultipleValues(porta)}
-&nbsp;&nbsp;&nbsp;&nbsp;set nat <span style='color: #FFB86C;'>"${natBinary === 1 ? 'enable' : 'disable'}"</span>`;
+&nbsp;&nbsp;&nbsp;&nbsp;set service ${formatMultipleValues(porta)}`;
+
+if (action === "accept") {
+    firewallScript += `
+&nbsp;&nbsp;&nbsp;&nbsp;set nat <span style='color: #FFB86C;'>"${natBinary === 1 ? 'enable' : 'disable'}"</span>`;}
 
 if (desc.trim() !== '') {
     firewallScript += `
