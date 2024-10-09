@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
-import ShootingStars from "./ShootingStars";
 import { BsCircleFill, BsArrowLeft } from 'react-icons/bs'; // Importa os ícones necessários
 
 function PagePlano() {
@@ -13,7 +12,6 @@ function PagePlano() {
     return (
         <>
             <div className="pagePlanoBg">
-                <ShootingStars />
                 <button className="btn-back" onClick={handleBackToLogin}>
                     <BsArrowLeft className="icon-back" /> Voltar para Login
                 </button>

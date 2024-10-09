@@ -192,7 +192,7 @@ function Form() {
             setIp('');
             setMasc('/1');
             setDesc('');
-            setObs(''); // Reseta o campo de observação
+            setObs('');
             setfqdn('');
             setMembros('');
             setLocalidadeSelecionada('');

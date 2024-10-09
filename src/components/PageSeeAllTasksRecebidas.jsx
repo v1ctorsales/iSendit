@@ -186,6 +186,7 @@ function PageSeeAllTasksRecebidas() {
     
             // Remover campos indesejados
             delete taskDetails.empresa_destino_uuid;
+            delete taskDetails.empresa_destino
             delete taskDetails.empresa_origem_uuid;
             delete taskDetails.autor;
             delete taskDetails.id;
