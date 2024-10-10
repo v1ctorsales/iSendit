@@ -3,8 +3,6 @@ import React, { useState } from "react";
 function PageAjuda() {
     const [activeForm, setActiveForm] = useState('contato');
 
-    const softwareVersion = process.env.REACT_APP_VERSION || "0.1.0000000000";  
-
     return (
         <>
             <div className="topForm">
@@ -63,7 +61,7 @@ function PageAjuda() {
 
                 {activeForm === 'atualizacoes' && (
                     <div className="atualizacoesSection">
-                        <h3>Atualização {softwareVersion}</h3>
+                        <h3>Atualização 0.0.1</h3>
                         <div className="textoAtt">
                         <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Corporis reprehenderit optio veniam excepturi eos, similique eaque repudiandae repellat veritatis vel sequi aperiam quasi pariatur ipsa eum earum tempore modi tempora voluptatibus a dolore vitae nobis. Quis eaque pariatur non asperiores sint. Corrupti iure qui sequi omnis quaerat ducimus quo cupiditate?</p>
                         <div className="attData">

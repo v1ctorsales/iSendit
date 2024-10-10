@@ -26,7 +26,6 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "build-version": "node -e \"require('fs').writeFileSync('.env', `REACT_APP_VERSION=0.1.$(date +%Y%m%d%H%M)\\n`)\"",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
