@@ -15,6 +15,8 @@ function FormRegraFW() {
     const [interfaceOrigem, setInterfaceOrigem] = useState('');
     const [interfaceDestino, setInterfaceDestino] = useState('');
     const [objetoorigem, setObjetoorigem] = useState('');
+    const [objetouser, setObjetoUser] = useState('');
+    const [objetogrupo, setObjetoGrupo] = useState('');
     const [objetodestino, setObjetodestino] = useState('');
     const [desc, setDesc] = useState('');
     const [action, setAction] = useState('accept');
@@ -114,6 +116,8 @@ function FormRegraFW() {
             interfaceDestino,
             objetoorigem,
             objetodestino,
+            objetouser,
+            objetogrupo,
             desc,
             obs,
             action,
@@ -128,6 +132,8 @@ function FormRegraFW() {
             setInterfaceOrigem('');
             setInterfaceDestino('');
             setObjetoorigem('');
+            setObjetoUser('');
+            setObjetoGrupo('');
             setObjetodestino('');
             setDesc('');
             setAction('accept');
@@ -243,6 +249,27 @@ function FormRegraFW() {
                             id="objetoorigem" 
                             value={objetoorigem} 
                             onChange={(e) => setObjetoorigem(e.target.value)} 
+                        />
+                    </div>
+                    <div className="formDiv">   
+                        <div className="divson" htmlFor="objetouser">User(s)</div>
+                        <input 
+                            placeholder="it.admin, user.vpn, cloud.admin"
+                            type="text" 
+                            id="objetouser" 
+                            value={objetouser} 
+                            onChange={(e) => setObjetoUser(e.target.value)} 
+                        />
+                    </div>
+
+                    <div className="formDiv">   
+                        <div className="divson" htmlFor="objetogrupo">Grupo(s)</div>
+                        <input 
+                            placeholder="ADM, IT, Dev"
+                            type="text" 
+                            id="objetogrupo" 
+                            value={objetogrupo} 
+                            onChange={(e) => setObjetoGrupo(e.target.value)} 
                         />
                     </div>
                     <div className="formDiv">   

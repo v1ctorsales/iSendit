@@ -243,14 +243,25 @@ function PageSeeAllTasksRecebidas() {
                 return value;
             };
     
-            const taskInfo = Object.entries(taskDetails)
-                .filter(([key, value]) => value !== null && value !== '' && value !== undefined)
-                .map(([key, value]) => {
-                    const formattedKey = formatKey(key);
-                    const formattedValue = formatValue(key, value);
-                    return `<p style="text-align: left; margin: 0;"><strong>${formattedKey}:</strong> ${formattedValue}</p>`;
-                })
-                .join('');
+            const entries = Object.entries(taskDetails)
+                .filter(([key, value]) => value !== null && value !== '' && value !== undefined);
+
+            const nonScriptEntries = entries.filter(([key]) => key !== 'script');
+            const scriptEntry = entries.find(([key]) => key === 'script');
+
+            let taskInfo = nonScriptEntries.map(([key, value]) => {
+                const formattedKey = formatKey(key);
+                const formattedValue = formatValue(key, value);
+                return `<p style="text-align: left; margin: 0;"><strong>${formattedKey}:</strong> ${formattedValue}</p>`;
+            }).join('');
+
+            if (scriptEntry) {
+                const [key, value] = scriptEntry;
+                const formattedKey = formatKey(key);
+                const formattedValue = formatValue(key, value);
+                taskInfo += `<p style="text-align: left; margin: 0;"><strong>${formattedKey}:</strong> ${formattedValue}</p>`;
+            }
+
     
             // Diretamente atribuindo o valor correto ao select no momento em que o modal é aberto
             MySwal.fire({

@@ -12,7 +12,7 @@ const supabaseEmail = process.env.EMAIL;
 
 export default async function sendFormFW(req, res) {
     if (req.method === 'POST') {
-        const { uuid, regrafw, nomeRegra, porta, nat, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, desc, obs, action, localidade, empresaPai, status } = req.body;
+        const { uuid, regrafw, nomeRegra, porta, nat, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, objetouser, objetogrupo, desc, obs, action, localidade, empresaPai, status } = req.body;
 
         if (!localidade) {
             return res.status(400).json({ message: 'Localidade é obrigatória' });
@@ -76,7 +76,16 @@ let firewallScript = `config firewall policy
 &nbsp;&nbsp;&nbsp;&nbsp;set dstaddr ${formatMultipleValues(objetodestino)}
 &nbsp;&nbsp;&nbsp;&nbsp;set schedule <span style='color: #FFB86C;'>"always"</span>
 &nbsp;&nbsp;&nbsp;&nbsp;set service ${formatMultipleValues(porta)}`;
+if (objetogrupo?.trim()) {
+firewallScript += `
+&nbsp;&nbsp;&nbsp;&nbsp;set groups ${formatMultipleValues(objetogrupo)}`;
+}
 
+if (objetouser?.trim()) {
+firewallScript += `
+&nbsp;&nbsp;&nbsp;&nbsp;set users ${formatMultipleValues(objetouser)}`;
+}
+  
 if (action === "accept") {
     firewallScript += `
 &nbsp;&nbsp;&nbsp;&nbsp;set nat <span style='color: #FFB86C;'>"${natBinary === 1 ? 'enable' : 'disable'}"</span>`;}
@@ -112,6 +121,8 @@ end`;
                     interface_destino: interfaceDestino,
                     objeto_origem: objetoorigem,
                     objeto_destino: objetodestino,
+                    user: objetouser,
+                    grupo: objetogrupo,
                     acao: action === "accept" ? 1 : 0,
                     localidade,
                     empresa_origem: empresaNome,
@@ -161,6 +172,8 @@ end`;
         <p><strong>Interface Origem:</strong> "${interfaceOrigem}"</p>
         <p><strong>Interface Destino:</strong> "${interfaceDestino}"</p>
         <p><strong>Objeto Origem:</strong> "${objetoorigem}"</p>
+        <p><strong>Grupo(s):</strong> "${objetogrupo}"</p>
+        <p><strong>User(s):</strong> "${objetouser}"</p>
         <p><strong>Objeto Destino:</strong> "${objetodestino}"</p>
         <p><strong>Ação:</strong> "${action === "accept" ? "Aceitar" : "Recusar"}"</p>
         <p><strong>Porta:</strong> "${porta}"</p>
