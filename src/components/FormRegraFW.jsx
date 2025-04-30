@@ -244,7 +244,7 @@ function FormRegraFW() {
                     <div className="formDiv">   
                         <div className="divson" htmlFor="objetoorigem">Origem</div>
                         <input 
-                            placeholder="AD, DataBase, FileServer"
+                            placeholder="all, DataBase, FileServer"
                             type="text" 
                             id="objetoorigem" 
                             value={objetoorigem} 
@@ -275,7 +275,7 @@ function FormRegraFW() {
                     <div className="formDiv">   
                         <div className="divson" htmlFor="objetodestino">Destino</div>
                         <input 
-                            placeholder="AD, DataBase, FileServer"
+                            placeholder="all, DataBase, FileServer"
                             type="text" 
                             id="objetodestino" 
                             value={objetodestino} 
