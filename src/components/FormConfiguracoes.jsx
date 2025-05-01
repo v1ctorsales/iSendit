@@ -39,12 +39,14 @@ function FormConfigurar() {
                         </button>
                     </>
                 )}
+                {!destinataria === false && (
                 <button
                     className={`btn-choice ${activeForm === 'importar' ? 'btn-active' : ''}`}
                     onClick={() => setActiveForm('importar')}
                 >
                     Importar Dados
                 </button>
+                )}
             </div>
             <div className="listaEditableInterfaces">
                 {activeForm === 'informacoes' && <Informacoes />}
