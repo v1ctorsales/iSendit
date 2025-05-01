@@ -4,6 +4,8 @@ import SideBar from './components/SideBar';
 import PageLogin from './components/PageLogin';
 import { FirewallPage, ObjetosPage, EnviosPage, ConfiguracoesPage, AjudaPage, ResetPW, SignUp } from './router';
 import { AuthProvider } from './contexts/AuthContext'; // Certifique-se de importar o AuthProvider
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import '../src/App.css'
 
 function App() {
@@ -27,6 +29,7 @@ function App() {
           </Routes>
         </div>
       </Router>
+      <ToastContainer position="top-right" autoClose={3000} />
     </AuthProvider>
   );
 }

@@ -361,7 +361,7 @@ margin-bottom: 0;
   width: 580px;
   margin: auto;
   display: grid;
-  gap: 8%;
+  gap: 1rem;
 }
 
 .blockedInput{
@@ -401,7 +401,7 @@ span{
   width: 580px;
     margin: auto;
     display: grid;
-    gap: 8%;
+    gap: 1rem;
 }
 
 .fireImg{
@@ -581,6 +581,13 @@ padding: 0;
   margin: auto;
   text-align: left;
   width: fit-content;
+}
+
+#form_importarDados {
+  width: 580px;
+  margin: auto;
+  display: grid;
+  gap: 1rem;
 }
 
 .tasks-table-container{
@@ -1011,3 +1018,52 @@ margin-top: 20px;
 .icon-ouro {
   color: #ffd700;
 }
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #AD49E1;
+  color: white;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.custom-file-upload:hover {
+  background-color: #7D33A3;
+}
+
+.tituloComAjuda {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.tituloComAjuda h3 {
+  text-align: center;
+  margin: 0; /* remove espaçamento extra */
+}
+
+.btn-ajuda {
+  background: none;
+  border: none;
+  color: #AD49E1;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: color 0.3s ease;
+}
+
+.btn-ajuda:hover {
+  color: #7D33A3;
+}
+
+.swal2-confirm:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
