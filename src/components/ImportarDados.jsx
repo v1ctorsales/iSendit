@@ -228,7 +228,6 @@ end`.trim();
         return (
             <div className="loading-icon-container center">
                 <AiOutlineLoading3Quarters className="loading-icon" />
-                <span>Carregando localidades...</span>
             </div>
         );
     }
