@@ -23,13 +23,16 @@ function EditableInterfaces() {
     const [editedName, setEditedName] = useState(''); // Estado para armazenar o novo nome da interface
     const [isSaving, setIsSaving] = useState(false); // Estado para controlar a atividade de salvamento
     const [isFetchSuccessful, setIsFetchSuccessful] = useState(false); // Novo estado para controlar o sucesso da busca
-    const { uuid } = useContext(AuthContext);// Obtém o UUID da empresa a partir do contexto
+    const { empresaPai, uuid, destinataria } = useContext(AuthContext);// Obtém o UUID da empresa a partir do contexto
+
+    const empresaId = destinataria ? uuid : empresaPai;
 
     // Carrega as localidades ao montar o componente
+    //se a empresa for empresa filha, use o uuid da empresaPai, se nao, use o uuid
     useEffect(() => {
         const fetchLocalidades = async () => {
             try {
-                const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${uuid}`);
+                const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${empresaId}`);
                 if (!response.ok) {
                     throw new Error('Erro ao buscar localidades');
                 }
@@ -41,12 +44,12 @@ function EditableInterfaces() {
                 setIsLoading(false);
             }
         };
-
-        if (uuid) { // Garante que o uuid está disponível
+    
+        if (empresaId) { // Só busca se já tiver o ID
             fetchLocalidades();
         }
-    }, [uuid]);
-
+    }, [empresaId]);
+    
     // Carrega as interfaces da localidade selecionada
     useEffect(() => {
         if (selectedLocalidade) {
@@ -54,29 +57,30 @@ function EditableInterfaces() {
                 try {
                     setIsLoadingInterfaces(true);
                     setInterfaces([]); // Limpa as interfaces antes de carregar as novas
-                    const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${selectedLocalidade}&empresa=${uuid}`);
+                    const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${selectedLocalidade}&empresa=${empresaId}`);
                     if (!response.ok) {
-                        setIsFetchSuccessful(false); // Define como falso se a resposta não for 200
+                        setIsFetchSuccessful(false);
                         throw new Error('Erro ao buscar interfaces');
                     }
                     const data = await response.json();
                     setInterfaces(data);
-                    setIsFetchSuccessful(true); // Define como verdadeiro se a resposta for 200
+                    setIsFetchSuccessful(true);
                 } catch (err) {
                     setError(err.message);
-                    setIsFetchSuccessful(false); // Define como falso se houver erro
+                    setIsFetchSuccessful(false);
                 } finally {
                     setIsLoadingInterfaces(false);
                 }
             };
     
-            if (uuid) {
+            if (empresaId) {
                 fetchInterfaces();
             }
         } else {
-            setIsFetchSuccessful(false); // Reseta o estado se nenhuma localidade estiver selecionada
+            setIsFetchSuccessful(false);
         }
-    }, [selectedLocalidade, uuid]);
+    }, [selectedLocalidade, empresaId]);
+    
 
     const MySwal = withReactContent(Swal);
 

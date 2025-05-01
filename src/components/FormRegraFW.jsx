@@ -32,6 +32,7 @@ function FormRegraFW() {
 
     const { uuid, empresaPai  } = useContext(AuthContext);
     const { isAuthenticated, destinataria } = useContext(AuthContext); 
+    const empresaId = destinataria ? uuid : empresaPai;
 
     useEffect(() => {
         if (uuid && destinataria !== undefined) {
@@ -47,7 +48,7 @@ function FormRegraFW() {
     useEffect(() => {
         const fetchLocalidades = async () => {
             try {
-                const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${uuid}`);
+                const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${empresaId}`);
                 if (!response.ok) {
                     throw new Error('Erro ao buscar localidades');
                 }
@@ -61,10 +62,10 @@ function FormRegraFW() {
             }
         };
     
-        if (uuid) {
+        if (empresaId) {
             fetchLocalidades();
         }
-    }, [uuid]);
+    }, [empresaId]);
     
 
     useEffect(() => {
@@ -73,7 +74,7 @@ function FormRegraFW() {
                 try {
                     setIsLoadingInterfaces(true);
                     console.log(localidade, uuid)
-                    const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${localidade}&empresa=${uuid}`);
+                    const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${localidade}&empresa=${empresaId}`);
                     if (!response.ok) {
                         throw new Error('Erro ao buscar interfaces');
                     }
@@ -90,11 +91,11 @@ function FormRegraFW() {
                 }
             };
     
-            if (uuid) {
+            if (empresaId) {
                 fetchInterfaces();
             }
         }
-    }, [localidade, uuid]);
+    }, [localidade, empresaId]);
     
     
 

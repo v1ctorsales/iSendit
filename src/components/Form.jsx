@@ -11,7 +11,7 @@ const notifyOk = () => toast.success("Objeto enviado!");
 const notifyFieldRequired = (field) => toast.error(`O campo ${field} é obrigatório.`);
 
 function Form() {
-    const { uuid, empresaPai } = useContext(AuthContext);// Acesse o UUID do contexto
+    const { uuid, empresaPai, destinataria } = useContext(AuthContext);// Acesse o UUID do contexto
     const [nomeObj, setNomeObj] = useState('');
     const [ip, setIp] = useState('');
     const [masc, setMasc] = useState('/1');
@@ -24,6 +24,7 @@ function Form() {
     const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true);
     const [activeForm, setActiveForm] = useState('ip');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const empresaId = destinataria ? uuid : empresaPai;
 
     const isButtonDisabled = (formType) => {
         if (formType === 'fqdn') {
@@ -37,7 +38,7 @@ function Form() {
     };
     const fetchLocalidades = async () => {
         try {
-            const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${uuid}`);
+            const response = await fetch(`/api/getInterfaceOuLocalidade?type=localidades&empresa=${empresaId}`);
             if (!response.ok) {
                 throw new Error('Erro ao buscar localidades');
             }
@@ -53,10 +54,10 @@ function Form() {
     
 
     useEffect(() => {
-        if (uuid) { // Garante que o UUID está disponível
+        if (empresaId) { // Garante que o UUID está disponível
             fetchLocalidades();
         }
-    }, [uuid]); 
+    }, [empresaId]); 
 
     const handleSubmit = (formType) => async (e) => {
         console.log('Valor da mascara:', masc);
