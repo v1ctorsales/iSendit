@@ -152,16 +152,18 @@ function ImportarDados() {
     const handleHelpClick = () => {
         const scriptText = `
 config system console
-    set output standard
+set output standard
 end
 
+show system zone
+show system interface
 show firewall address
 show firewall addrgrp
 show firewall service custom
 show firewall service group
 
 config system console
-    set output more
+set output more
 end`.trim();
 
         const uniqueId = 'copy-help-script';
