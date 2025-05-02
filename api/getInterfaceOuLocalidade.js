@@ -7,7 +7,6 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Desabilita o parser padrão do Next.js (obrigatório para usar formidable)
 export const config = {
     api: {
         bodyParser: false,
@@ -16,14 +15,10 @@ export const config = {
 
 export default async function getInterfaceOuLocalidade(req, res) {
     if (req.method === 'POST') {
-        // POST: Importar interfaces
         const form = formidable();
 
         form.parse(req, async (err, fields, files) => {
-            console.log('📥 Formulario processado:', { fields, files });
-
             const action = Array.isArray(fields.action) ? fields.action[0] : fields.action;
-
             if (action !== 'import') {
                 console.error('Ação inválida ou não especificada no POST');
                 return res.status(400).json({ message: 'Ação inválida ou não especificada' });
@@ -41,11 +36,6 @@ export default async function getInterfaceOuLocalidade(req, res) {
 
             console.log('ℹ️ Dados recebidos - Localidade:', localidade, '| Empresa:', empresa);
 
-            if (!localidade || !empresa) {
-                console.log('⚠️ Campos obrigatórios faltando.');
-                return res.status(400).json({ message: 'Localidade e empresa são obrigatórios' });
-            }
-
             const file = files.file;
             if (!file) {
                 console.log('⚠️ Nenhum arquivo recebido.');
@@ -53,47 +43,83 @@ export default async function getInterfaceOuLocalidade(req, res) {
             }
 
             try {
-                console.log('📄 Lendo arquivo:', file[0].filepath);
-
                 const content = fs.readFileSync(file[0].filepath, 'utf-8');
-
                 console.log('✅ Arquivo lido com sucesso. Primeiros 300 caracteres:\n', content.slice(0, 300));
 
-                // Extrair a seção "config system interface"
+                // 1️⃣ Pegando todas as zonas e interfaces dentro das zonas
+                const zoneSectionRegex = /config system zone([\s\S]*?)end/;
+                const zoneMatch = content.match(zoneSectionRegex);
+                const zones = [];
+                const interfacesToExclude = [];
+
+                if (zoneMatch) {
+                    const zoneContent = zoneMatch[1];
+                    console.log('✅ Seção "config system zone" encontrada.');
+
+                    // Extrair os nomes das zonas (edit "LAN", etc.)
+                    const zoneNames = [...zoneContent.matchAll(/edit\s+"(.*?)"/g)].map(m => m[1]);
+                    console.log('🌐 Zonas encontradas:', zoneNames);
+
+                    zones.push(...zoneNames);
+
+                    // Para cada zona, achar set interface "xxx" "yyy"
+                    const setInterfaceMatches = [...zoneContent.matchAll(/set interface ([^\n]*)/g)];
+                    setInterfaceMatches.forEach(match => {
+                        const interfaces = match[1]
+                            .split('"')
+                            .filter((v, i) => i % 2 !== 0);  // Pega só os valores dentro das aspas
+                        interfacesToExclude.push(...interfaces);
+                    });
+
+                    console.log('🚫 Interfaces que NÃO serão importadas (usadas nas zonas):', interfacesToExclude);
+                } else {
+                    console.log('⚠️ Nenhuma seção de zonas encontrada.');
+                }
+
+                // 2️⃣ Pegando todas as interfaces do config system interface
                 const interfaceSectionRegex = /config system interface([\s\S]*?)end/;
-                const match = content.match(interfaceSectionRegex);
+                const interfaceMatch = content.match(interfaceSectionRegex);
 
-                if (!match) {
+                let interfaceNames = [];
+                if (interfaceMatch) {
+                    const sectionContent = interfaceMatch[1];
+                    console.log('✅ Seção "config system interface" extraída.');
+
+                    interfaceNames = [...sectionContent.matchAll(/edit\s+"(.*?)"/g)]
+                        .map(m => m[1])
+                        .filter(name => !interfacesToExclude.includes(name));  // ❗ Exclui as interfaces que já estão em zonas
+
+                    console.log('🔍 Interfaces encontradas (filtradas):', interfaceNames);
+                } else {
                     console.log('⚠️ Seção de interfaces não encontrada no arquivo.');
-                    return res.status(400).json({ message: 'Não foi possível encontrar a seção de interfaces no arquivo.' });
                 }
 
-                const sectionContent = match[1];
-                console.log('✅ Seção "config system interface" extraída. Primeiros 300 caracteres:\n', sectionContent.slice(0, 300));
-
-                // Pega todos os nomes das interfaces em: edit "NOME"
-                const interfaceMatches = [...sectionContent.matchAll(/edit\s+"(.*?)"/g)];
-                const interfaceNames = interfaceMatches.map(m => m[1]);
-
-                console.log('🔍 Interfaces encontradas:', interfaceNames);
-
-                if (interfaceNames.length === 0) {
-                    console.log('⚠️ Nenhuma interface encontrada.');
-                    return res.status(400).json({ message: 'Nenhuma interface encontrada para importar.' });
+                // ⚠️ Se nenhuma interface ou zona encontrada, erro
+                if (zones.length === 0 && interfaceNames.length === 0) {
+                    console.log('⚠️ Nenhuma interface ou zona encontrada.');
+                    return res.status(400).json({ message: 'Nenhuma interface ou zona encontrada para importar.' });
                 }
 
-                const toInsert = interfaceNames.map((nome) => ({
-                    nome,
-                    localidade,
-                    empresa
-                }));
+                // 🔄 Inserir no Supabase
+                const toInsert = [];
 
-                console.log('🗑️ Limpando interfaces antigas da empresa antes de inserir novas...');
+                zones.forEach(nome => {
+                    toInsert.push({ nome, localidade, empresa });
+                });
 
+                interfaceNames.forEach(nome => {
+                    toInsert.push({ nome, localidade, empresa });
+                });
+
+                console.log('📦 Preparado para importar:', toInsert);
+
+                // Deleta as interfaces antigas da empresa e localidade antes
+                console.log('🗑️ Limpando interfaces antigas da empresa/localidade antes de inserir novas...');
                 const { error: deleteError } = await supabase
                     .from('interfaces')
                     .delete()
-                    .eq('empresa', empresa);
+                    .eq('empresa', empresa)
+                    .eq('localidade', localidade);
 
                 if (deleteError) {
                     console.error('❌ Erro ao deletar interfaces antigas:', deleteError);
@@ -101,7 +127,7 @@ export default async function getInterfaceOuLocalidade(req, res) {
                 }
 
                 console.log('✅ Interfaces antigas removidas com sucesso.');
-                console.log('📤 Inserindo novas interfaces:', toInsert);
+                console.log('🚀 Inserindo novas interfaces...');
 
                 const { error } = await supabase
                     .from('interfaces')
@@ -116,15 +142,18 @@ export default async function getInterfaceOuLocalidade(req, res) {
                 return res.status(200).json({
                     success: true,
                     message: 'Interfaces importadas com sucesso.',
-                    interfaces: interfaceNames
+                    interfaces: toInsert.map(i => i.nome)
                 });
+
             } catch (error) {
                 console.error('❌ Erro geral:', error);
                 return res.status(500).json({ message: 'Erro interno do servidor.' });
             }
         });
-    } else if (req.method === 'GET') {
-        // GET: Buscar interfaces ou localidades
+    }
+
+    // 🚩 Mantém o GET igual ao anterior
+    else if (req.method === 'GET') {
         const { type, localidade, empresa } = req.query;
 
         if (!type) {
@@ -147,7 +176,7 @@ export default async function getInterfaceOuLocalidade(req, res) {
                 }
                 ({ data, error } = await supabase
                     .from('interfaces')
-                    .select('nome, created_at')  // pegue também created_at se quiser mostrar
+                    .select('nome, created_at')
                     .eq('localidade', localidade)
                     .eq('empresa', empresa));
             } else if (type === 'localidades') {
