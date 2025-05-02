@@ -11,32 +11,44 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
 
     useEffect(() => {
-        // Verifica se o token existe no localStorage para definir o estado de autenticação
+        const path = window.location.pathname;
+    
+        // Se estamos na página de reset-password, não restauramos a autenticação
+        if (path === '/reset-password') {
+            setIsAuthenticated(false);
+            return;  // <- sai cedo
+        }
+    
         const storedToken = localStorage.getItem('authToken');
         const storedDestinataria = localStorage.getItem('destinataria');
         const storedUuid = localStorage.getItem('uuid');
-        const storedEmpresaPai = localStorage.getItem('empresaPai_uuid'); // Recupera empresaPai_uuid do localStorage
-
+        const storedEmpresaPai = localStorage.getItem('empresaPai_uuid');
+    
         if (storedToken && storedUuid && storedDestinataria) {
             setIsAuthenticated(true);
             setToken(storedToken);
             setUuid(storedUuid);
-            setDestinataria(storedDestinataria === 'true'); // Converter string para boolean
+            setDestinataria(storedDestinataria === 'true');
             if (storedEmpresaPai) {
-                setEmpresaPai(storedEmpresaPai); // Define empresaPai_uuid no estado
+                setEmpresaPai(storedEmpresaPai);
             }
         }
     }, []);
+    
 
     const login = async (username, password) => {
         try {
-            const response = await fetch('/api/verifyLogin', {
+            const response = await fetch('/api/handleAccount', {  // ✅ usa a nova rota unificada
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
-            });
+                body: JSON.stringify({ 
+                    action: 'login',
+                    username,
+                    password
+                }),
+            });            
     
             const data = await response.json();
             if (data.success) {

@@ -85,11 +85,32 @@ export default async function getInterfaceOuLocalidade(req, res) {
                     const sectionContent = interfaceMatch[1];
                     console.log('✅ Seção "config system interface" extraída.');
 
-                    interfaceNames = [...sectionContent.matchAll(/edit\s+"(.*?)"/g)]
-                        .map(m => m[1])
-                        .filter(name => !interfacesToExclude.includes(name));  // ❗ Exclui as interfaces que já estão em zonas
+                    const editBlocks = [...sectionContent.matchAll(/edit\s+"(.*?)"([\s\S]*?)next/g)];
 
-                    console.log('🔍 Interfaces encontradas (filtradas):', interfaceNames);
+interfaceNames = [];
+
+editBlocks.forEach(match => {
+    const interfaceName = match[1];
+    const blockContent = match[2];
+
+    // Procura o alias
+    const aliasMatch = blockContent.match(/set\s+alias\s+"([^"]+)"/i);
+
+
+    let finalName = interfaceName;
+    if (aliasMatch) {
+        const alias = aliasMatch[1];
+        finalName = `${interfaceName} (alias: ${alias})`;
+    }
+
+    // Só adiciona se NÃO está na lista de exclusão
+    if (!interfacesToExclude.includes(interfaceName)) {
+        interfaceNames.push(finalName);
+    }
+});
+
+console.log('🔍 Interfaces encontradas (filtradas + aliases):', interfaceNames);
+
                 } else {
                     console.log('⚠️ Seção de interfaces não encontrada no arquivo.');
                 }

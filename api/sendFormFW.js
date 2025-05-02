@@ -14,6 +14,16 @@ export default async function sendFormFW(req, res) {
     if (req.method === 'POST') {
         const { uuid, regrafw, nomeRegra, porta, nat, interfaceOrigem, interfaceDestino, objetoorigem, objetodestino, objetouser, objetogrupo, desc, obs, action, localidade, empresaPai, status } = req.body;
 
+        const cleanAlias = (str) => {
+            if (typeof str === 'string') {
+                return str.replace(/\s*\(alias:.*?\)$/, '').trim();
+            }
+            return str;
+        };
+        
+        const cleanedInterfaceOrigem = cleanAlias(interfaceOrigem);
+        const cleanedInterfaceDestino = cleanAlias(interfaceDestino);
+
         if (!localidade) {
             return res.status(400).json({ message: 'Localidade é obrigatória' });
         }
@@ -69,8 +79,8 @@ export default async function sendFormFW(req, res) {
 let firewallScript = `config firewall policy
 &nbsp;&nbsp;&nbsp;&nbsp;edit 0
 &nbsp;&nbsp;&nbsp;&nbsp;set name <span style='color: #FFB86C;'>"${nomeRegra}"</span>
-&nbsp;&nbsp;&nbsp;&nbsp;set srcintf <span style='color: #FFB86C;'>"${interfaceOrigem}"</span>
-&nbsp;&nbsp;&nbsp;&nbsp;set dstintf <span style='color: #FFB86C;'>"${interfaceDestino}"</span>
+&nbsp;&nbsp;&nbsp;&nbsp;set srcintf <span style='color: #FFB86C;'>"${cleanedInterfaceOrigem}"</span>
+&nbsp;&nbsp;&nbsp;&nbsp;set dstintf <span style='color: #FFB86C;'>"${cleanedInterfaceDestino}"</span>
 &nbsp;&nbsp;&nbsp;&nbsp;set action <span style='color: #FFB86C;'>"${action === "accept" ? "accept" : "deny"}"</span>
 &nbsp;&nbsp;&nbsp;&nbsp;set srcaddr ${formatMultipleValues(objetoorigem)}
 &nbsp;&nbsp;&nbsp;&nbsp;set dstaddr ${formatMultipleValues(objetodestino)}
@@ -117,8 +127,8 @@ end`;
                     type: regrafw,
                     porta: porta,
                     nat: natBinary, // Insere o valor do NAT como binário
-                    interface_origem: interfaceOrigem,
-                    interface_destino: interfaceDestino,
+                    interface_origem: cleanedInterfaceOrigem,
+                    interface_destino: cleanedInterfaceDestino,
                     objeto_origem: objetoorigem,
                     objeto_destino: objetodestino,
                     user: objetouser,
@@ -169,8 +179,8 @@ end`;
         <h2>Informações detalhadas:</h2>
         <p><strong>Localidade:</strong> "${localidade}"</p>
         <p><strong>Nome da Regra:</strong> "${nomeRegra}"</p>
-        <p><strong>Interface Origem:</strong> "${interfaceOrigem}"</p>
-        <p><strong>Interface Destino:</strong> "${interfaceDestino}"</p>
+        <p><strong>Interface Origem:</strong> "${cleanedInterfaceOrigem}"</p>
+        <p><strong>Interface Destino:</strong> "${cleanedInterfaceDestino}"</p>
         <p><strong>Objeto Origem:</strong> "${objetoorigem}"</p>
         <p><strong>Grupo(s):</strong> "${objetogrupo}"</p>
         <p><strong>User(s):</strong> "${objetouser}"</p>

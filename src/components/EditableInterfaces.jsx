@@ -27,6 +27,26 @@ function EditableInterfaces() {
 
     const empresaId = destinataria ? uuid : empresaPai;
 
+    function formatInterfaceName(nome) {
+        const aliasRegex = /\s*\|\|\$alias\$\|\|\((.*?)\)/;
+
+        const match = nome.match(aliasRegex);
+    
+        if (match) {
+            const baseName = nome.replace(aliasRegex, '').trim();
+            const alias = match[1];
+            return (
+                <>
+                    {baseName}{' '}
+                    <span style={{ fontStyle: 'italic', color: '#888' }}>({alias})</span>
+                </>
+            );
+        } else {
+            return nome;
+        }
+    }
+    
+
     // Carrega as localidades ao montar o componente
     //se a empresa for empresa filha, use o uuid da empresaPai, se nao, use o uuid
     useEffect(() => {
@@ -272,13 +292,19 @@ function EditableInterfaces() {
                         <h3>Interfaces disponíveis em <span>{selectedLocalidade}</span></h3>
                         {interfaces.map((iface, index) => (
                             <div key={index} className="EditableInterfaces">
-                                <input
-                                    className={`editableText ${editIndex === index ? '' : 'blockedInput'}`}
-                                    type="text"
-                                    disabled={editIndex !== index}
-                                    value={editIndex === index ? editedName : iface.nome}
-                                    onChange={(e) => setEditedName(e.target.value)} // Atualiza o nome enquanto edita
-                                />
+                                {editIndex === index ? (
+                            <input
+                                className="editableText"
+                                type="text"
+                                value={editedName}
+                                onChange={(e) => setEditedName(e.target.value)}
+                            />
+                        ) : (
+                            <div className="editableText blockedInput">
+                                {formatInterfaceName(iface.nome)}
+                            </div>
+                        )}
+
                                 <div className="divDosBotoes">
                                     <button
                                         className={`btn-excluir ${editIndex === index ? 'off' : ''}`}

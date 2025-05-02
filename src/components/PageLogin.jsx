@@ -11,7 +11,7 @@ import { AuthContext } from '../contexts/AuthContext'; // Importa o AuthContext
 import ShootingStars from "./ShootingStars";
 import Swal from 'sweetalert2'; // Importa o SweetAlert2 para o modal de "Esqueci minha senha"
 
-function PageLogin({ setIsAuthenticated }) {
+function PageLogin() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -32,8 +32,8 @@ function PageLogin({ setIsAuthenticated }) {
             const result = await login(username, password);
             if (result.success) {
                 notifySuccess();
-                setIsAuthenticated(true);
-                setUuid(result.uuid); // Armazena o UUID no contexto
+                //setIsAuthenticated(true);
+                //setUuid(result.uuid); // Armazena o UUID no contexto
                 navigate('/tarefas');
             } else {
                 notifyError(result.message || 'Usuário ou senha incorretos');
@@ -46,74 +46,74 @@ function PageLogin({ setIsAuthenticated }) {
         }
     };
 
-    const handleForgotPassword = () => {
-        Swal.fire({
-            title: 'Esqueci minha senha',
-            text: 'Por favor, insira seu e-mail:',
-            input: 'email',
-            inputPlaceholder: 'Digite seu e-mail',
-            showCancelButton: true,
-            confirmButtonText: 'Enviar',
-            cancelButtonText: 'Cancelar',
-            customClass: {
-                popup: 'swal2-custom-modal', // Aplica a classe personalizada
-                confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel'
-            },
-            preConfirm: (email) => {
-                if (!email) {
-                    Swal.showValidationMessage('O e-mail é obrigatório');
-                }
-                return email;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const email = result.value;
-    
-                // Exibe o ícone de carregamento e mantém o modal aberto
-                Swal.fire({
-                    title: 'Enviando...',
-                    html: 'Por favor, aguarde.',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading(); // Exibe o ícone de carregamento
+        const handleForgotPassword = () => {
+            Swal.fire({
+                title: 'Esqueci minha senha',
+                text: 'Por favor, insira seu e-mail:',
+                input: 'email',
+                inputPlaceholder: 'Digite seu e-mail',
+                showCancelButton: true,
+                confirmButtonText: 'Enviar',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    popup: 'swal2-custom-modal', // Aplica a classe personalizada
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                },
+                preConfirm: (email) => {
+                    if (!email) {
+                        Swal.showValidationMessage('O e-mail é obrigatório');
                     }
-                });
-    
-                // Faça a requisição para o backend com a string 'forgetPassword' e o e-mail fornecido
-                fetch('/api/handleAccount', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ action: 'forgetPassword', email }), // Certifique-se de que o email e action são válidos
-                })
-                .then((response) => {
-                    if (response.ok) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Sucesso!',
-                            text: 'Instruções de recuperação foram enviadas para o e-mail fornecido.',
-                        });
-                    } else {
+                    return email;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const email = result.value;
+        
+                    // Exibe o ícone de carregamento e mantém o modal aberto
+                    Swal.fire({
+                        title: 'Enviando...',
+                        html: 'Por favor, aguarde.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading(); // Exibe o ícone de carregamento
+                        }
+                    });
+        
+                    // Faça a requisição para o backend com a string 'forgetPassword' e o e-mail fornecido
+                    fetch('/api/handleAccount', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ action: 'forgetPassword', email }), // Certifique-se de que o email e action são válidos
+                    })
+                    .then((response) => {
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso!',
+                                text: 'Instruções de recuperação foram enviadas para o e-mail fornecido.',
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro',
+                                text: 'Não foi possível enviar as instruções de recuperação.',
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Erro:', error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Erro',
-                            text: 'Não foi possível enviar as instruções de recuperação.',
+                            text: 'Ocorreu um erro ao enviar o e-mail de recuperação.',
                         });
-                    }
-                })
-                .catch((error) => {
-                    console.error('Erro:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro',
-                        text: 'Ocorreu um erro ao enviar o e-mail de recuperação.',
                     });
-                });
-            }
-        });
-    };
+                }
+            });
+        };
 
     const isButtonDisabled = username.trim() === '' || password.trim() === '';
 
