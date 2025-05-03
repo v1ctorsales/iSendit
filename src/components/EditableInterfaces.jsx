@@ -10,6 +10,8 @@ import { BsPencilFill } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa";
 import { FaArrowRotateLeft } from "react-icons/fa6";
+import { Autocomplete, TextField } from '@mui/material';
+
 
 function EditableInterfaces() {
     const [localidades, setLocalidades] = useState([]);
@@ -26,26 +28,6 @@ function EditableInterfaces() {
     const { empresaPai, uuid, destinataria } = useContext(AuthContext);// Obtém o UUID da empresa a partir do contexto
 
     const empresaId = destinataria ? uuid : empresaPai;
-
-    function formatInterfaceName(nome) {
-        const aliasRegex = /\s*\|\|\$alias\$\|\|\((.*?)\)/;
-
-        const match = nome.match(aliasRegex);
-    
-        if (match) {
-            const baseName = nome.replace(aliasRegex, '').trim();
-            const alias = match[1];
-            return (
-                <>
-                    {baseName}{' '}
-                    <span style={{ fontStyle: 'italic', color: '#888' }}>({alias})</span>
-                </>
-            );
-        } else {
-            return nome;
-        }
-    }
-    
 
     // Carrega as localidades ao montar o componente
     //se a empresa for empresa filha, use o uuid da empresaPai, se nao, use o uuid
@@ -269,21 +251,44 @@ function EditableInterfaces() {
             <ToastContainer />
             <h3>Interfaces</h3>
             <div className="formDiv editableThing">
-                <div className="divson" htmlFor="localidade" id="">Localidade</div>
-                <select
-                    className="bigSelect"
-                    id="localidade"
-                    value={selectedLocalidade}
-                    onChange={(e) => setSelectedLocalidade(e.target.value)}
-                >
-                    <option value="">Selecione uma localidade</option>
-                    {localidades.map((localidade, index) => (
-                        <option key={index} value={localidade.nome}>
-                            {localidade.nome}
-                        </option>
-                    ))}
-                </select>
-            </div>
+    <div className="divson" htmlFor="localidade" id="">Localidade</div>
+    <Autocomplete
+        id="localidade-autocomplete"
+        options={localidades.map((loc) => ({ label: loc.nome, value: loc.nome }))}
+        getOptionLabel={(option) => option.label}
+        value={
+            localidades
+                .map((loc) => ({ label: loc.nome, value: loc.nome }))
+                .find((o) => o.value === selectedLocalidade) || null
+        }
+        onChange={(_, newValue) => setSelectedLocalidade(newValue?.value || '')}
+        disableClearable
+        renderInput={(params) => (
+            <TextField
+                {...params}
+                variant="outlined"
+                placeholder="Selecione uma localidade"
+                size="small"
+            />
+        )}
+        ListboxProps={{
+            sx: { fontSize: '0.8em' },
+        }}
+        sx={{
+            width: 490,
+            '& .MuiInputBase-root': {
+                fontSize: '0.8em',
+                padding: '4px !important',
+            },
+            '& .MuiAutocomplete-endAdornment': {
+                right: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+            },
+        }}
+    />
+</div>
+
             {isLoadingInterfaces ? (
                 <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
             ) : (
@@ -292,19 +297,13 @@ function EditableInterfaces() {
                         <h3>Interfaces disponíveis em <span>{selectedLocalidade}</span></h3>
                         {interfaces.map((iface, index) => (
                             <div key={index} className="EditableInterfaces">
-                                {editIndex === index ? (
-                            <input
-                                className="editableText"
-                                type="text"
-                                value={editedName}
-                                onChange={(e) => setEditedName(e.target.value)}
-                            />
-                        ) : (
-                            <div className="editableText blockedInput">
-                                {formatInterfaceName(iface.nome)}
-                            </div>
-                        )}
-
+                                <input
+                                    className={`editableText ${editIndex === index ? '' : 'blockedInput'}`}
+                                    type="text"
+                                    disabled={editIndex !== index}
+                                    value={editIndex === index ? editedName : iface.nome}
+                                    onChange={(e) => setEditedName(e.target.value)} // Atualiza o nome enquanto edita
+                                />
                                 <div className="divDosBotoes">
                                     <button
                                         className={`btn-excluir ${editIndex === index ? 'off' : ''}`}

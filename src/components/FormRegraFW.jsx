@@ -4,6 +4,7 @@ import BtnSubmit from "./Botoes/BtnSubmit";
 import { ToastContainer, toast } from 'react-toastify';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { AuthContext } from "../contexts/AuthContext";
+import { Autocomplete, TextField, Chip, Tooltip } from '@mui/material';
 
 const notify = () => toast.error("Houve um erro.");
 const notifyOk = () => toast.success("Regra de Firewall enviada!");
@@ -28,7 +29,12 @@ function FormRegraFW() {
     const [isLoadingLocalidades, setIsLoadingLocalidades] = useState(true); 
     const [isLoadingInterfaces, setIsLoadingInterfaces] = useState(false); 
     const [obs, setObs] = useState(''); 
+    const [objetosOrigemSelecionados, setObjetosOrigemSelecionados] = useState([]);
+    const [objetosDestinoSelecionados, setObjetosDestinoSelecionados] = useState([]);
+    const [objetos, setObjetos] = useState([]);
+const [isLoadingObjetos, setIsLoadingObjetos] = useState(false);
     
+
 
     const { uuid, empresaPai  } = useContext(AuthContext);
     const { isAuthenticated, destinataria } = useContext(AuthContext); 
@@ -41,8 +47,16 @@ function FormRegraFW() {
     }, [uuid, destinataria]);
     
     const isButtonDisabled = () => {
-        return isSubmitting || !nomeRegra.trim() || !porta.trim() || !interfaceOrigem.trim() || !interfaceDestino.trim() ||
-            !objetoorigem.trim() || !objetodestino.trim() || !action.trim() || !localidade.trim();
+        return isSubmitting 
+        || !nomeRegra.trim() 
+        || !porta.trim() 
+        || !interfaceOrigem.trim() 
+        || !interfaceDestino.trim() 
+        || objetosOrigemSelecionados.length === 0
+        || objetosDestinoSelecionados.length === 0
+        || !action.trim() 
+        || !localidade.trim();
+    
     };
 
     useEffect(() => {
@@ -73,16 +87,15 @@ function FormRegraFW() {
             const fetchInterfaces = async () => {
                 try {
                     setIsLoadingInterfaces(true);
-                    console.log(localidade, uuid)
+                    console.log(localidade, uuid);
+    
                     const response = await fetch(`/api/getInterfaceOuLocalidade?type=interfaces&localidade=${localidade}&empresa=${empresaId}`);
                     if (!response.ok) {
                         throw new Error('Erro ao buscar interfaces');
                     }
                     const data = await response.json();
-                    
                     const interfacesComAny = [{ nome: "any" }, ...data];
-
-                setInterfaces(interfacesComAny);
+                    setInterfaces(interfacesComAny);
                 } catch (err) {
                     console.error('Erro ao carregar interfaces:', err);
                     notify();
@@ -91,11 +104,33 @@ function FormRegraFW() {
                 }
             };
     
+            const fetchObjetos = async () => {
+                try {
+                    setIsLoadingObjetos(true);
+                    console.log(`Buscando objetos para localidade: ${localidade} e empresa: ${empresaId}`);
+    
+                    const response = await fetch(`/api/handleObjects?empresa=${empresaId}&localidade=${localidade}`);
+                    if (!response.ok) {
+                        throw new Error('Erro ao buscar objetos');
+                    }
+                    const data = await response.json();
+                    setObjetos(data);
+                    console.log('Objetos recebidos:', data);
+                } catch (err) {
+                    console.error('Erro ao carregar objetos:', err);
+                    notify();
+                } finally {
+                    setIsLoadingObjetos(false);
+                }
+            };
+    
             if (empresaId) {
                 fetchInterfaces();
+                fetchObjetos();  // 👈 CHAMANDO OS OBJETOS TAMBÉM
             }
         }
     }, [localidade, empresaId]);
+    
     
     
 
@@ -115,8 +150,9 @@ function FormRegraFW() {
             porta: portaUppercase,  // Enviar o valor como uppercase
             interfaceOrigem,
             interfaceDestino,
-            objetoorigem,
-            objetodestino,
+// ao enviar:
+objetoorigem: objetosOrigemSelecionados.map(o => o.nome).join(','),
+objetodestino: objetosDestinoSelecionados.map(o => o.nome).join(','),
             objetouser,
             objetogrupo,
             desc,
@@ -132,10 +168,10 @@ function FormRegraFW() {
             setPorta('');
             setInterfaceOrigem('');
             setInterfaceDestino('');
-            setObjetoorigem('');
+            setObjetosOrigemSelecionados([]);
             setObjetoUser('');
             setObjetoGrupo('');
-            setObjetodestino('');
+            setObjetosDestinoSelecionados([]);
             setDesc('');
             setAction('accept');
             //setLocalidade('');
@@ -168,26 +204,49 @@ function FormRegraFW() {
             </div>
             <form onSubmit={handleSubmit}>
                 <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_regrasfw">
-                    <div className="formDiv">
-                        <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
-                        {isLoadingLocalidades ? (
-                            <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
-                        ) : (
-                            <select 
-                                name="localidade" 
-                                id="localidade" 
-                                value={localidade}
-                                onChange={(e) => setLocalidade(e.target.value)}
-                            >
-                                //<option value="default">Selecione uma localidade</option> 
-                                {localidades.map((localidade, index) => (
-                                    <option key={index} value={localidade.nome}>
-                                        {localidade.nome}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
+                <div className="formDiv">
+  <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="localidade">
+    Localidade
+  </div>
+  {isLoadingLocalidades ? (
+    <div className="centerDois">
+      <AiOutlineLoading3Quarters className="loading-icon" />
+    </div>
+  ) : (
+    <Autocomplete
+      id="localidade"
+      options={localidades.map((l) => l.nome)}
+      value={localidade}
+      onChange={(_, value) => setLocalidade(value || '')}
+      disableClearable
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="outlined"
+          placeholder="Selecione uma localidade"
+        />
+      )}
+      ListboxProps={{
+        sx: {
+          fontSize: '0.8em'
+        }
+      }}
+      sx={{
+        width: 490,
+        '& .MuiInputBase-root': {
+          fontSize: '0.8em',
+          padding: '4px !important'
+        },
+        '& .MuiAutocomplete-endAdornment': {
+          right: 10,
+          top: '50%',
+          transform: 'translateY(-50%)'
+        }
+      }}
+    />
+  )}
+</div>
+
 
                     <div className="formDiv">
                         <div className="divson" htmlFor="nomeRegra">Nome</div>
@@ -206,52 +265,214 @@ function FormRegraFW() {
                         </div>
                     ) : (
                         <>
-                            <div className="formDiv">
-                                <div className="divson" htmlFor="interfaceorigem">Origem</div>
-                                <select 
-                                    name="interfaceorigem" 
-                                    id="interfaceorigem" 
-                                    value={interfaceOrigem}
-                                    onChange={(e) => setInterfaceOrigem(e.target.value)}
-                                >
-                                    <option value="">Selecione uma origem</option>
-                                    {interfaces.map((iface, index) => (
-                                        <option key={index} value={iface.nome}>
-                                            {iface.nome}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="formDiv">
-                                <div className="divson" htmlFor="interfacedestino">Destino</div>
-                                <select 
-                                    name="interfacedestino" 
-                                    id="interfacedestino" 
-                                    value={interfaceDestino}
-                                    onChange={(e) => setInterfaceDestino(e.target.value)}
-                                >
-                                    <option value="">Selecione um destino</option>
-                                    {interfaces.map((iface, index) => (
-                                        <option key={index} value={iface.nome}>
-                                            {iface.nome}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+{/* Interface Origem */}
+<div className="formDiv">
+  <div className="divson" htmlFor="interfaceorigem">Origem</div>
+  <Autocomplete
+  id="interfaceorigem"
+  options={interfaces.map(i => i.nome)}
+  getOptionLabel={opt => {
+    const m = opt.match(/^(.*?)\s*\(alias: (.*)\)$/);
+    return m ? m[1] : opt;
+  }}
+  renderOption={(props, opt) => {
+    const m     = opt.match(/^(.*?)\s*\(alias: (.*)\)$/);
+    const name  = m ? m[1] : opt;
+    const alias = m ? m[2] : '';
+    return (
+      <Tooltip title={alias} placement="right">
+        <li {...props} style={{ fontSize: '1em', lineHeight: 1.5 }}>
+          {name}
+          {alias && (
+            <span style={{ color: 'black', marginLeft: 4 }}>*</span>
+          )}
+        </li>
+      </Tooltip>
+    );
+  }}
+  renderInput={params => {
+    const raw = params.inputProps.value || '';
+    const hasAlias = /\(alias:/.test(raw);
+    const display = hasAlias
+      ? raw.replace(/\s*\(alias:.*\)$/, '')
+      : raw;
+    return (
+      <TextField
+        {...params}
+        variant="outlined"
+        placeholder="Selecione uma origem"
+        value={display}
+        InputProps={{
+          ...params.InputProps,
+          endAdornment: (
+            <>
+              {hasAlias && (
+                <span style={{ color: 'black', marginRight: 8 }}>*</span>
+              )}
+              {params.InputProps.endAdornment}
+            </>
+          )
+        }}
+        size="small"
+        fullWidth
+      />
+    );
+  }}
+  value={interfaceOrigem}
+  onChange={(_, v) => setInterfaceOrigem(v || '')}
+  disableClearable
+  ListboxProps={{ sx: { fontSize: '0.8em' } }}
+  sx={{
+    width: 490,
+    '& .MuiInputBase-root': { fontSize: '0.8em', p: '4px !important' },
+    '& .MuiAutocomplete-endAdornment': {
+      right: 10, top: '50%', transform: 'translateY(-50%)'
+    },
+  }}
+/>
+</div>
+
+{/* Interface Destino */}
+<div className="formDiv">
+  <div className="divson" htmlFor="interfacedestino">Destino</div>
+  {/* Interface Destino */}
+  <Autocomplete
+  id="interfacedestino"
+  options={interfaces.map(i => i.nome)}
+  getOptionLabel={opt => {
+    const m = opt.match(/^(.*?)\s*\(alias: (.*)\)$/);
+    return m ? m[1] : opt;
+  }}
+  renderOption={(props, opt) => {
+    const m     = opt.match(/^(.*?)\s*\(alias: (.*)\)$/);
+    const name  = m ? m[1] : opt;
+    const alias = m ? m[2] : '';
+    return (
+      <Tooltip title={alias} placement="right">
+        <li {...props} style={{ fontSize: '1em', lineHeight: 1.5 }}>
+          {name}
+          {alias && (
+            <span style={{ color: 'black', marginLeft: 4 }}>*</span>
+          )}
+        </li>
+      </Tooltip>
+    );
+  }}
+  renderInput={params => {
+    const raw = params.inputProps.value || '';
+    const hasAlias = /\(alias:/.test(raw);
+    const display = hasAlias
+      ? raw.replace(/\s*\(alias:.*\)$/, '')
+      : raw;
+    return (
+      <TextField
+        {...params}
+        variant="outlined"
+        placeholder="Selecione um destino"
+        value={display}
+        InputProps={{
+          ...params.InputProps,
+          endAdornment: (
+            <>
+              {hasAlias && (
+                <span style={{ color: 'black', marginRight: 8 }}>*</span>
+              )}
+              {params.InputProps.endAdornment}
+            </>
+          )
+        }}
+        size="small"
+        fullWidth
+      />
+    );
+  }}
+  value={interfaceDestino}
+  onChange={(_, v) => setInterfaceDestino(v || '')}
+  disableClearable
+  ListboxProps={{ sx: { fontSize: '0.8em' } }}
+  sx={{
+    width: 490,
+    '& .MuiInputBase-root': { fontSize: '0.8em', p: '4px !important' },
+    '& .MuiAutocomplete-endAdornment': {
+      right: 10, top: '50%', transform: 'translateY(-50%)'
+    },
+  }}
+/>
+</div>
+
                         </>
                     )}
 
                     <h4>Objetos</h4>
-                    <div className="formDiv">   
-                        <div className="divson" htmlFor="objetoorigem">Origem</div>
-                        <input 
-                            placeholder="all, DataBase, FileServer"
-                            type="text" 
-                            id="objetoorigem" 
-                            value={objetoorigem} 
-                            onChange={(e) => setObjetoorigem(e.target.value)} 
-                        />
-                    </div>
+                    <div className="formDiv">
+    <div className="divson" htmlFor="objetoorigem">Origem</div>
+    <Autocomplete
+  multiple
+  id="objetoorigem"
+  options={objetos}                                 // [{ nome, info }, …]
+  getOptionLabel={(option) => option.nome}          // exibe só o nome
+  renderOption={(props, option) => (
+    <Tooltip title={option.info || ''} placement="right">
+      <li
+        {...props}
+        style={{ fontSize: '1em', lineHeight: 1.5 }}
+      >
+        {option.nome}
+      </li>
+    </Tooltip>
+  )}
+  value={objetosOrigemSelecionados}
+  onChange={(_, newValue) => setObjetosOrigemSelecionados(newValue)}
+  filterSelectedOptions
+  renderTags={(value, getTagProps) =>
+    value.map((option, idx) => (
+      <Chip
+        key={option.nome}
+        label={option.nome}
+        size="small"
+        {...getTagProps({ index: idx })}
+        sx={{
+          fontSize: '0.75em',
+          maxWidth: '120px',
+          '& .MuiChip-label': {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }
+        }}
+      />
+    ))
+  }
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      variant="outlined"
+      placeholder="Selecione objetos de origem"
+    />
+  )}
+  ListboxProps={{
+    sx: {
+      fontSize: '0.8em',
+      // sem maxHeight para crescer dinamicamente
+    }
+  }}
+  sx={{
+    width: 490,
+    '& .MuiInputBase-root': {
+      fontSize: '0.8em',
+      padding: '4px !important'
+    },
+    '& .MuiAutocomplete-endAdornment': {
+      right: 10,
+      top: '50%',
+      transform: 'translateY(-50%)'
+    }
+  }}
+/>
+
+
+
+</div>
+
                     <div className="formDiv">   
                         <div className="divson" htmlFor="objetouser">User(s)</div>
                         <input 
@@ -273,53 +494,168 @@ function FormRegraFW() {
                             onChange={(e) => setObjetoGrupo(e.target.value)} 
                         />
                     </div>
-                    <div className="formDiv">   
-                        <div className="divson" htmlFor="objetodestino">Destino</div>
-                        <input 
-                            placeholder="all, DataBase, FileServer"
-                            type="text" 
-                            id="objetodestino" 
-                            value={objetodestino} 
-                            onChange={(e) => setObjetodestino(e.target.value)} 
-                        />
-                    </div>
+                    <div className="formDiv">
+    <div className="divson" htmlFor="objetodestino">Destino</div>
+    <Autocomplete
+  multiple
+  id="objetodestino"
+  options={objetos}                                 // [{ nome, info }, …]
+  getOptionLabel={(option) => option.nome}
+  renderOption={(props, option) => (
+    <Tooltip title={option.info || ''} placement="right">
+      <li
+        {...props}
+        style={{ fontSize: '1em', lineHeight: 1.5 }}
+      >
+        {option.nome}
+      </li>
+    </Tooltip>
+  )}
+  value={objetosDestinoSelecionados}
+  onChange={(_, newValue) => setObjetosDestinoSelecionados(newValue)}
+  filterSelectedOptions
+  renderTags={(value, getTagProps) =>
+    value.map((option, idx) => (
+      <Chip
+        key={option.nome}
+        label={option.nome}
+        size="small"
+        {...getTagProps({ index: idx })}
+        sx={{
+          fontSize: '0.75em',
+          maxWidth: '120px',
+          '& .MuiChip-label': {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }
+        }}
+      />
+    ))
+  }
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      variant="outlined"
+      placeholder="Selecione objetos de destino"
+    />
+  )}
+  ListboxProps={{
+    sx: {
+      fontSize: '0.8em',
+    }
+  }}
+  sx={{
+    width: 490,
+    '& .MuiInputBase-root': {
+      fontSize: '0.8em',
+      padding: '4px !important'
+    },
+    '& .MuiAutocomplete-endAdornment': {
+      right: 10,
+      top: '50%',
+      transform: 'translateY(-50%)'
+    }
+  }}
+/>
+
+
+
+</div>
+
 
                     <div className="formDiv">
-                        <div className="divson" htmlFor="porta">Porta(s)</div>
+                        <div className="divson portadivmargtop" htmlFor="porta">Porta(s)</div>
                         <input 
                             placeholder="ALL, HTTPS, 3389"
                             type="text" 
                             id="porta" 
+                            className="portadivmargtop"
                             value={porta} 
                             onChange={(e) => setPorta(e.target.value)} 
+                            
                         />
                     </div>
                     
-                    <div className="formDiv">
-                        <div className="divson" htmlFor="nat">NAT</div>
-                        <select 
-                            name="nat" 
-                            id="nat" 
-                            value={nat} 
-                            onChange={(e) => setNat(e.target.value)}
-                        >
-                            <option value="disable">Desativado</option>
-                            <option value="enable">Ativado</option>
-                        </select>
-                    </div>
+{/* NAT */}
+<div className="formDiv">
+  <div className="divson" htmlFor="nat">NAT</div>
+  <Autocomplete
+    id="nat"
+    options={[
+      { label: 'Desativado', value: 'disable' },
+      { label: 'Ativado', value: 'enable' }
+    ]}
+    getOptionLabel={(opt) => opt.label}
+    value={(() => {
+      const sel = [{ label: 'Desativado', value: 'disable' }, { label: 'Ativado', value: 'enable' }]
+        .find(o => o.value === nat);
+      return sel || null;
+    })()}
+    onChange={(_, newOpt) => setNat(newOpt?.value || 'disable')}
+    disableClearable
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        variant="outlined"
+        placeholder="NAT"
+      />
+    )}
+    ListboxProps={{ sx: { fontSize: '0.8em' } }}
+    sx={{
+      width: 490,
+      '& .MuiInputBase-root': {
+        fontSize: '0.8em',
+        padding: '4px !important'
+      },
+      '& .MuiAutocomplete-endAdornment': {
+        right: 10,
+        top: '50%',
+        transform: 'translateY(-50%)'
+      }
+    }}
+  />
+</div>
 
-                    <div className="formDiv">
-                        <div className="divson" htmlFor="action">Ação</div>
-                        <select 
-                            name="action" 
-                            id="action" 
-                            value={action} 
-                            onChange={(e) => setAction(e.target.value)} 
-                        >
-                            <option value="accept">Aceitar</option>
-                            <option value="deny">Recusar</option>
-                        </select>
-                    </div>
+{/* Ação */}
+<div className="formDiv">
+  <div className="divson" htmlFor="action">Ação</div>
+  <Autocomplete
+    id="action"
+    options={[
+      { label: 'Aceitar', value: 'accept' },
+      { label: 'Recusar', value: 'deny' }
+    ]}
+    getOptionLabel={(opt) => opt.label}
+    value={(() => {
+      const sel = [{ label: 'Aceitar', value: 'accept' }, { label: 'Recusar', value: 'deny' }]
+        .find(o => o.value === action);
+      return sel || null;
+    })()}
+    onChange={(_, newOpt) => setAction(newOpt?.value || 'accept')}
+    disableClearable
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        variant="outlined"
+        placeholder="Ação"
+      />
+    )}
+    ListboxProps={{ sx: { fontSize: '0.8em' } }}
+    sx={{
+      width: 490,
+      '& .MuiInputBase-root': {
+        fontSize: '0.8em',
+        padding: '4px !important'
+      },
+      '& .MuiAutocomplete-endAdornment': {
+        right: 10,
+        top: '50%',
+        transform: 'translateY(-50%)'
+      }
+    }}
+  />
+</div>
+
 
                     <div className="formDiv formDivDescricao">
                         <div className="divson divsondesc" htmlFor="desc">Descrição</div>

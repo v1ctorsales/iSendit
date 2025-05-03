@@ -43,10 +43,12 @@ export default async function getInterfaceOuLocalidade(req, res) {
             }
 
             try {
-                const content = fs.readFileSync(file[0].filepath, 'utf-8');
+                const content = fs.readFileSync(file[0].filepath, 'utf-8')
+                .replace(/\r\n/g, '\n')
+                .replace(/\r/g, '\n'); 
                 console.log('✅ Arquivo lido com sucesso. Primeiros 300 caracteres:\n', content.slice(0, 300));
 
-                // 1️⃣ Pegando todas as zonas e interfaces dentro das zonas
+                // 1️⃣ Pegando zonas + interfaces
                 const zoneSectionRegex = /config system zone([\s\S]*?)end/;
                 const zoneMatch = content.match(zoneSectionRegex);
                 const zones = [];
@@ -56,18 +58,15 @@ export default async function getInterfaceOuLocalidade(req, res) {
                     const zoneContent = zoneMatch[1];
                     console.log('✅ Seção "config system zone" encontrada.');
 
-                    // Extrair os nomes das zonas (edit "LAN", etc.)
                     const zoneNames = [...zoneContent.matchAll(/edit\s+"(.*?)"/g)].map(m => m[1]);
                     console.log('🌐 Zonas encontradas:', zoneNames);
-
                     zones.push(...zoneNames);
 
-                    // Para cada zona, achar set interface "xxx" "yyy"
                     const setInterfaceMatches = [...zoneContent.matchAll(/set interface ([^\n]*)/g)];
                     setInterfaceMatches.forEach(match => {
                         const interfaces = match[1]
                             .split('"')
-                            .filter((v, i) => i % 2 !== 0);  // Pega só os valores dentro das aspas
+                            .filter((v, i) => i % 2 !== 0);  // Só valores dentro das aspas
                         interfacesToExclude.push(...interfaces);
                     });
 
@@ -76,94 +75,195 @@ export default async function getInterfaceOuLocalidade(req, res) {
                     console.log('⚠️ Nenhuma seção de zonas encontrada.');
                 }
 
-                // 2️⃣ Pegando todas as interfaces do config system interface
+                // 2️⃣ Pegando interfaces do config system interface
                 const interfaceSectionRegex = /config system interface([\s\S]*?)end/;
                 const interfaceMatch = content.match(interfaceSectionRegex);
 
-                let interfaceNames = [];
+                const interfaceNames = [];
                 if (interfaceMatch) {
                     const sectionContent = interfaceMatch[1];
                     console.log('✅ Seção "config system interface" extraída.');
 
                     const editBlocks = [...sectionContent.matchAll(/edit\s+"(.*?)"([\s\S]*?)next/g)];
 
-interfaceNames = [];
+                    editBlocks.forEach(match => {
+                        const interfaceName = match[1];
+                        const blockContent = match[2];
 
-editBlocks.forEach(match => {
-    const interfaceName = match[1];
-    const blockContent = match[2];
+                        const aliasMatch = blockContent.match(/set\s+alias\s+"([^"]+)"/i);
 
-    // Procura o alias
-    const aliasMatch = blockContent.match(/set\s+alias\s+"([^"]+)"/i);
+                        let finalName = interfaceName;
+                        if (aliasMatch) {
+                            const alias = aliasMatch[1];
+                            finalName = `${interfaceName} (alias: ${alias})`;
+                        }
 
+                        if (!interfacesToExclude.includes(interfaceName)) {
+                            interfaceNames.push(finalName);
+                        }
+                    });
 
-    let finalName = interfaceName;
-    if (aliasMatch) {
-        const alias = aliasMatch[1];
-        finalName = `${interfaceName} (alias: ${alias})`;
-    }
-
-    // Só adiciona se NÃO está na lista de exclusão
-    if (!interfacesToExclude.includes(interfaceName)) {
-        interfaceNames.push(finalName);
-    }
-});
-
-console.log('🔍 Interfaces encontradas (filtradas + aliases):', interfaceNames);
-
+                    console.log('🔍 Interfaces encontradas (filtradas + aliases):', interfaceNames);
                 } else {
-                    console.log('⚠️ Seção de interfaces não encontrada no arquivo.');
+                    console.log('⚠️ Seção de interfaces não encontrada.');
                 }
 
-                // ⚠️ Se nenhuma interface ou zona encontrada, erro
-                if (zones.length === 0 && interfaceNames.length === 0) {
-                    console.log('⚠️ Nenhuma interface ou zona encontrada.');
-                    return res.status(400).json({ message: 'Nenhuma interface ou zona encontrada para importar.' });
+                // 3️⃣ Pegando objetos (address + addrgrp)
+                const objetos = [];
+
+                // 🔎 firewall address
+                const addressSectionRegex = /config firewall address([\s\S]*?)\nend\s*(?:\n|$)/;
+                const addressMatch = content.match(addressSectionRegex);
+
+                if (addressMatch) {
+                    const addressContent = addressMatch[1];
+
+                    const editBlocks = [...addressContent.matchAll(/edit\s+"([^"]+)"([\s\S]*?)\s*next/g)];
+                    editBlocks.forEach(match => {
+                        const nome = match[1];
+                        const blockContent = match[2];
+
+                        console.log(`🔎 Objeto: ${nome} | Conteúdo:`, blockContent.trim());  // <-- NOVO DEBUG
+
+                        console.log('⚠️ BLOCO COMPLETO DO OBJETO:', JSON.stringify(blockContent));
+
+                        // Captura todos os 'set ...' dentro do bloco e cria um map
+                        const setLines = [...blockContent.matchAll(/set\s+([^\s]+)\s+([^\n]+)/g)];
+                        const params = {};
+                        setLines.forEach(match => {
+                            const key = match[1].toLowerCase(); // exemplo: subnet, start-ip, end-ip
+                            const value = match[2].trim();
+                            params[key] = value;
+                        });
+                        
+                        let info = null;
+                        if (params['subnet']) {
+                            info = `set subnet ${params['subnet']}`;
+                        } else if (params['start-ip']) {
+                            info = `set start-ip ${params['start-ip']}`;
+                            if (params['end-ip']) {
+                                info += ` set end-ip ${params['end-ip']}`;
+                            }
+                        } else if (params['macaddr']) {
+                            info = `set macaddr ${params['macaddr']}`;
+                        } else if (params['fqdn']) {
+                            info = `set fqdn ${params['fqdn']}`;
+                        }
+                        
+
+                        objetos.push({
+                            nome,
+                            tipo: 'origem/destino',
+                            info,
+                            localidade,
+                            empresa,
+                        });
+                    });
+                    console.log('✅ Objetos (address) encontrados:', objetos.length);
+                } else {
+                    console.log('⚠️ Seção "config firewall address" não encontrada.');
                 }
 
-                // 🔄 Inserir no Supabase
-                const toInsert = [];
+                // 🔎 firewall addrgrp
+                const addrgrpSectionRegex = /config firewall addrgrp([\s\S]*?)end/;
+                const addrgrpMatch = content.match(addrgrpSectionRegex);
 
+                if (addrgrpMatch) {
+                    const addrgrpContent = addrgrpMatch[1];
+
+                    const editBlocks = [...addrgrpContent.matchAll(/edit\s+"(.*?)"/g)];
+                    editBlocks.forEach(match => {
+                        const nome = match[1];
+                        objetos.push({
+                            nome,
+                            tipo: 'origem/destino',
+                            info: null,
+                            localidade,
+                            empresa,
+                        });
+                    });
+                    console.log('✅ Objetos (addrgrp) encontrados:', objetos.length);
+                } else {
+                    console.log('⚠️ Seção "config firewall addrgrp" não encontrada.');
+                }
+
+                // 🚨 Nenhum dado encontrado?
+                if (zones.length === 0 && interfaceNames.length === 0 && objetos.length === 0) {
+                    console.log('⚠️ Nenhum dado encontrado para importar.');
+                    return res.status(400).json({ message: 'Nenhum dado encontrado para importar.' });
+                }
+
+                // 🔄 Preparar inserção de interfaces
+                const toInsertInterfaces = [];
                 zones.forEach(nome => {
-                    toInsert.push({ nome, localidade, empresa });
+                    toInsertInterfaces.push({ nome, localidade, empresa });
                 });
-
                 interfaceNames.forEach(nome => {
-                    toInsert.push({ nome, localidade, empresa });
+                    toInsertInterfaces.push({ nome, localidade, empresa });
                 });
+                console.log('📦 Interfaces preparadas para importação:', toInsertInterfaces);
 
-                console.log('📦 Preparado para importar:', toInsert);
-
-                // Deleta as interfaces antigas da empresa e localidade antes
-                console.log('🗑️ Limpando interfaces antigas da empresa/localidade antes de inserir novas...');
-                const { error: deleteError } = await supabase
+                // 🗑️ Limpar interfaces antigas
+                console.log('🗑️ Limpando interfaces antigas...');
+                const { error: deleteInterfacesError } = await supabase
                     .from('interfaces')
                     .delete()
                     .eq('empresa', empresa)
                     .eq('localidade', localidade);
 
-                if (deleteError) {
-                    console.error('❌ Erro ao deletar interfaces antigas:', deleteError);
+                if (deleteInterfacesError) {
+                    console.error('❌ Erro ao deletar interfaces antigas:', deleteInterfacesError);
                     return res.status(500).json({ message: 'Erro ao limpar interfaces antigas.' });
                 }
+                console.log('✅ Interfaces antigas removidas.');
 
-                console.log('✅ Interfaces antigas removidas com sucesso.');
-                console.log('🚀 Inserindo novas interfaces...');
+                // 🗑️ Limpar objetos antigos
+                console.log('🗑️ Limpando objetos antigos...');
+                const { error: deleteObjetosError } = await supabase
+                    .from('objetos')
+                    .delete()
+                    .eq('empresa', empresa)
+                    .eq('localidade', localidade);
 
-                const { error } = await supabase
-                    .from('interfaces')
-                    .insert(toInsert);
+                if (deleteObjetosError) {
+                    console.error('❌ Erro ao deletar objetos antigos:', deleteObjetosError);
+                    return res.status(500).json({ message: 'Erro ao limpar objetos antigos.' });
+                }
+                console.log('✅ Objetos antigos removidos.');
 
-                if (error) {
-                    console.error('❌ Erro ao inserir interfaces no Supabase:', error);
-                    return res.status(500).json({ message: 'Erro ao salvar interfaces no banco de dados.' });
+                // 🚀 Inserir interfaces
+                if (toInsertInterfaces.length > 0) {
+                    console.log('🚀 Inserindo novas interfaces...');
+                    const { error: insertInterfacesError } = await supabase
+                        .from('interfaces')
+                        .insert(toInsertInterfaces);
+
+                    if (insertInterfacesError) {
+                        console.error('❌ Erro ao inserir interfaces:', insertInterfacesError);
+                        return res.status(500).json({ message: 'Erro ao salvar interfaces.' });
+                    }
+                    console.log('✅ Interfaces inseridas com sucesso.');
                 }
 
-                console.log('✅ Interfaces inseridas com sucesso.');
+                // 🚀 Inserir objetos
+                if (objetos.length > 0) {
+                    console.log('🚀 Inserindo novos objetos...');
+                    const { error: insertObjetosError } = await supabase
+                        .from('objetos')
+                        .insert(objetos);
+
+                    if (insertObjetosError) {
+                        console.error('❌ Erro ao inserir objetos:', insertObjetosError);
+                        return res.status(500).json({ message: 'Erro ao salvar objetos.' });
+                    }
+                    console.log('✅ Objetos inseridos com sucesso.');
+                }
+
                 return res.status(200).json({
                     success: true,
-                    message: 'Interfaces importadas com sucesso.',
-                    interfaces: toInsert.map(i => i.nome)
+                    message: 'Interfaces e objetos importados com sucesso.',
+                    interfaces: toInsertInterfaces.map(i => i.nome),
+                    objetos: objetos.map(o => o.nome),
                 });
 
             } catch (error) {

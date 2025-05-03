@@ -72,10 +72,6 @@ pre{
   margin: 5px;
 }
 
-#objetodestino{
-  margin-bottom: 20px;
-}
-
 .logo{
   display: flex;
   align-items: center;
@@ -368,6 +364,7 @@ margin-bottom: 0;
   cursor: not-allowed;
   color: #888888;
   font-weight: bold;
+  background-color: rgb(238, 238, 238);
 }
 
 span{
@@ -1067,3 +1064,23 @@ margin-top: 20px;
   opacity: 0.6;
 }
 
+#objetoorigem, #objetodestino, #localidade, #action, #nat{
+  height: 10px;
+}
+
+#interfaceorigem, #interfacedestino{
+  height: 18px;
+}
+
+#localidade2{
+  height: 20px;
+  padding: 3px 4px ;
+}
+
+.portadivmargtop{
+  margin-top: 20px;
+}
+
+.loading-icon-container{
+  margin-top: 0;
+}

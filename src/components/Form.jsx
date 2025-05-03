@@ -5,6 +5,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import cube from "../img/cube2.gif";
 import BtnSubmit from "./Botoes/BtnSubmit";
 import { AuthContext } from '../contexts/AuthContext';
+import { Autocomplete, TextField} from '@mui/material';
 
 const notify = () => toast.error("Houve um erro.");
 const notifyOk = () => toast.success("Objeto enviado!");
@@ -241,26 +242,50 @@ function Form() {
             {activeForm === 'fqdn' && (
     <form onSubmit={handleSubmit("fqdn")}>
         <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_fqdn">
-            <div className="formDiv">
-                <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
-                {isLoadingLocalidades ? (
-                    <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
-                ) : (
-                    <select 
-                        name="localidade" 
-                        id="localidade"
-                        value={localidadeSelecionada} 
-                        onChange={(e) => setLocalidadeSelecionada(e.target.value)}
-                    >
-                        <option value="">Selecione uma localidade</option>
-                        {localidades.map((localidade, index) => (
-                            <option key={index} value={localidade.nome}>
-                                {localidade.nome}
-                            </option>
-                        ))}
-                    </select>
-                )}
-            </div>
+        <div className="formDiv">
+  <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="localidade">
+    Localidade
+  </div>
+  {isLoadingLocalidades ? (
+    <div className="centerDois">
+      <AiOutlineLoading3Quarters className="loading-icon" />
+    </div>
+  ) : (
+    <Autocomplete
+      id="localidade"
+      options={localidades.map(loc => ({ label: loc.nome, value: loc.nome }))}
+      getOptionLabel={opt => opt.label}
+      value={
+        localidades
+          .map(loc => ({ label: loc.nome, value: loc.nome }))
+          .find(o => o.value === localidadeSelecionada) || null
+      }
+      onChange={(_, newOpt) => setLocalidadeSelecionada(newOpt?.value || '')}
+      disableClearable
+      renderInput={params => (
+        <TextField
+          {...params}
+          variant="outlined"
+          placeholder="Selecione uma localidade"
+        />
+      )}
+      ListboxProps={{ sx: { fontSize: '0.8em' } }}
+      sx={{
+        width: 490,
+        '& .MuiInputBase-root': {
+          fontSize: '0.8em',
+          padding: '4px !important'
+        },
+        '& .MuiAutocomplete-endAdornment': {
+          right: 10,
+          top: '50%',
+          transform: 'translateY(-50%)'
+        }
+      }}
+    />
+  )}
+</div>
+
             <div className="formDiv">
                 <div className="divson" htmlFor="nomeObj">Nome</div>
                 <input 
@@ -312,26 +337,50 @@ function Form() {
             {activeForm === 'addressGroup' && (
                 <form onSubmit={handleSubmit("addressGroup")}>
                     <div className={`formPai ${isLoadingLocalidades ? 'off' : ''}`} id="form_addressGroup">
-                        <div className="formDiv">
-                            <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
-                            {isLoadingLocalidades ? (
-                                <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
-                            ) : (
-                                <select 
-                                    name="localidade" 
-                                    id="localidade"
-                                    value={localidadeSelecionada} 
-                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)}
-                                >
-                                    <option value="">Selecione uma localidade</option>
-                                    {localidades.map((localidade, index) => (
-                                        <option key={index} value={localidade.nome}>
-                                            {localidade.nome}
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
-                        </div>
+                    <div className="formDiv">
+  <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="localidade">
+    Localidade
+  </div>
+  {isLoadingLocalidades ? (
+    <div className="centerDois">
+      <AiOutlineLoading3Quarters className="loading-icon" />
+    </div>
+  ) : (
+    <Autocomplete
+      id="localidade"
+      options={localidades.map(loc => ({ label: loc.nome, value: loc.nome }))}
+      getOptionLabel={opt => opt.label}
+      value={
+        localidades
+          .map(loc => ({ label: loc.nome, value: loc.nome }))
+          .find(o => o.value === localidadeSelecionada) || null
+      }
+      onChange={(_, newOpt) => setLocalidadeSelecionada(newOpt?.value || "")}
+      disableClearable
+      renderInput={params => (
+        <TextField
+          {...params}
+          variant="outlined"
+          placeholder="Selecione uma localidade"
+        />
+      )}
+      ListboxProps={{ sx: { fontSize: "0.8em" } }}
+      sx={{
+        width: 490,
+        "& .MuiInputBase-root": {
+          fontSize: "0.8em",
+          padding: "4px !important"
+        },
+        "& .MuiAutocomplete-endAdornment": {
+          right: 10,
+          top: "50%",
+          transform: "translateY(-50%)"
+        }
+      }}
+    />
+  )}
+</div>
+
                         <div className="formDiv">
                             <div className="divson" htmlFor="nomeObj">Nome</div>
                             <input 
@@ -383,26 +432,51 @@ function Form() {
             {activeForm === 'ip' && (
                 <form onSubmit={handleSubmit("ip")}>
                     <div className="formPai" id="form_ip">
-                        <div className="formDiv">
-                            <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="action">Localidade</div>
-                            {isLoadingLocalidades ? (
-                                <div className="centerDois"><AiOutlineLoading3Quarters className="loading-icon" /></div>
-                            ) : (
-                                <select 
-                                    name="localidade" 
-                                    id="localidade"
-                                    value={localidadeSelecionada} 
-                                    onChange={(e) => setLocalidadeSelecionada(e.target.value)}
-                                >
-                                    <option value="">Selecione uma localidade</option>
-                                    {localidades.map((localidade, index) => (
-                                        <option key={index} value={localidade.nome}>
-                                            {localidade.nome}
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
-                        </div>
+                    <div className="formDiv">
+  <div className={`divson ${isLoadingLocalidades ? 'off' : ''}`} htmlFor="localidade">
+    Localidade
+  </div>
+  {isLoadingLocalidades ? (
+    <div className="centerDois">
+      <AiOutlineLoading3Quarters className="loading-icon" />
+    </div>
+  ) : (
+    <Autocomplete
+      id="localidade2"
+      options={localidades.map(loc => ({ label: loc.nome, value: loc.nome }))}
+      getOptionLabel={opt => opt.label}
+      value={
+        localidades
+          .map(loc => ({ label: loc.nome, value: loc.nome }))
+          .find(o => o.value === localidadeSelecionada) || null
+      }
+      onChange={(_, newOpt) => setLocalidadeSelecionada(newOpt?.value || "")}
+      disableClearable
+      renderInput={params => (
+        <TextField
+          {...params}
+          variant="outlined"
+          placeholder="Selecione uma localidade"
+          size="small"
+        />
+      )}
+      ListboxProps={{ sx: { fontSize: "0.8em" } }}
+      sx={{
+        width: 490,
+        "& .MuiInputBase-root": {
+          fontSize: "0.8em",
+          padding: "4px !important",
+        },
+        "& .MuiAutocomplete-endAdornment": {
+          right: 10,
+          top: "50%",
+          transform: "translateY(-50%)",
+        },
+      }}
+    />
+  )}
+</div>
+
                         <div className="formDiv">
                             <div className="divson" htmlFor="nomeObj">Nome</div>
                             <input 
