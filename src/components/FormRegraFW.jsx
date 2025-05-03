@@ -499,7 +499,7 @@ objetodestino: objetosDestinoSelecionados.map(o => o.nome).join(','),
     <Autocomplete
   multiple
   id="objetodestino"
-  options={objetos}                                 // [{ nome, info }, …]
+  options={objetos.filter(obj => !(obj.info && obj.info.toLowerCase().includes('set macaddr')))}
   getOptionLabel={(option) => option.nome}
   renderOption={(props, option) => (
     <Tooltip title={option.info || ''} placement="right">
