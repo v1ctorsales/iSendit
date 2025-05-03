@@ -17,7 +17,7 @@ export default async function sendFormData(req, res) {
         if (!uuid) {
             console.error('UUID não fornecido ou inválido');
             return res.status(400).json({ message: 'UUID é obrigatório' });
-        }
+        }        
         
 
         // Verificar se já existe um objeto com o mesmo nome na mesma localidade
@@ -199,6 +199,25 @@ if (formType === "fqdn" && fqdn && fqdn.trim() !== '') {
     }
 }
 
+if (formType ==="addressGroup" && membros && membros.trim() !== '') {
+    const { error: errorObjetoMembros } = await supabase
+        .from('objetos')
+        .insert([
+            {
+                nome: nomeObj,
+                tipo: "origem/destino",
+                info: `set member "${membros}"`,
+                localidade: localidade,
+                empresa: empresaFilhaData.empresaPai_uuid
+            }
+        ]);
+
+    if (errorObjetoMembros) {
+        console.error('Erro ao criar o objeto MEMBERS na tabela objetos:', errorObjetoMembros);
+    } else {
+        console.log('Objeto MEMBERS criado na tabela objetos com sucesso.');
+    }
+}
 
 
 

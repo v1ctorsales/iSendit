@@ -1064,13 +1064,14 @@ margin-top: 20px;
   opacity: 0.6;
 }
 
-#objetoorigem, #objetodestino, #localidade, #action, #nat{
+#objetoorigem, #objetodestino, #localidade, #action, #nat, #membros{
   height: 10px;
 }
 
 #interfaceorigem, #interfacedestino{
   height: 18px;
 }
+
 
 #localidade2{
   height: 20px;

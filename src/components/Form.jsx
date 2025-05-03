@@ -26,6 +26,10 @@ function Form() {
     const [activeForm, setActiveForm] = useState('ip');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const empresaId = destinataria ? uuid : empresaPai;
+    const [objetos, setObjetos] = useState([]);
+const [isLoadingObjetos, setIsLoadingObjetos] = useState(false);
+const [membrosSelecionados, setMembrosSelecionados] = useState([]);
+
 
     const isButtonDisabled = (formType) => {
         if (formType === 'fqdn') {
@@ -204,6 +208,33 @@ function Form() {
             toast.error(error.message || 'Houve um erro.');
         }
     }
+
+    useEffect(() => {
+        if (localidadeSelecionada) {
+            const fetchObjetos = async () => {
+                try {
+                    setIsLoadingObjetos(true);
+                    setMembrosSelecionados([]);
+                    setMembros('');
+
+                    const response = await fetch(`/api/handleObjects?empresa=${empresaId}&localidade=${localidadeSelecionada}`);
+                    if (!response.ok) {
+                        throw new Error('Erro ao buscar objetos');
+                    }
+                    const data = await response.json();
+                    setObjetos(data);
+                    console.log('Objetos recebidos:', data);
+                } catch (err) {
+                    console.error('Erro ao carregar objetos:', err);
+                    notify();
+                } finally {
+                    setIsLoadingObjetos(false);
+                }
+            };
+            fetchObjetos();
+        }
+    }, [localidadeSelecionada, empresaId]);
+    
     
     
 
@@ -392,15 +423,75 @@ function Form() {
                             />
                         </div>
                         <div className="formDiv">
-                            <div className="divson" htmlFor="membros">Membros</div>
-                            <input 
-                            placeholder="ex: AD, DataBase, FileServer"
-                                type="text" 
-                                id="membros" 
-                                value={membros} 
-                                onChange={(e) => setMembros(e.target.value)} 
-                            />
-                        </div>
+    <div className="divson" htmlFor="membros">Membros</div>
+    {isLoadingObjetos ? (
+        <div className="centerDois">
+            <AiOutlineLoading3Quarters className="loading-icon" />
+        </div>
+    ) : (
+        <Autocomplete
+            multiple
+            id="membros"
+            options={objetos}  // ✅ usa os dados buscados
+            getOptionLabel={(option) => option.nome}
+            renderOption={(props, option) => (
+                <li {...props} style={{ fontSize: '1em', lineHeight: 1.5 }}>
+                    {option.nome}
+                </li>
+            )}
+            value={membrosSelecionados}
+            onChange={(_, newValue) => {
+                setMembrosSelecionados(newValue);
+                setMembros(newValue.map(o => o.nome).join(', '));
+            }}
+            renderTags={(value, getTagProps) =>
+                value.map((option, idx) => (
+                    <span
+                        {...getTagProps({ index: idx })}
+                        style={{
+                            display: 'inline-block',
+                            background: '#e0e0e0',
+                            borderRadius: '16px',
+                            padding: '4px 8px',
+                            margin: '2px',
+                            fontSize: '0.75em',
+                            maxWidth: '120px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}
+                    >
+                        {option.nome}
+                    </span>
+                ))
+            }
+            renderInput={(params) => (
+                <TextField
+                    {...params}
+                    variant="outlined"
+                    placeholder="Selecione membros (Address Group)"
+                />
+            )}
+            ListboxProps={{
+                sx: { fontSize: '0.8em' }
+            }}
+            sx={{
+                width: 490,
+                '& .MuiInputBase-root': {
+                    fontSize: '0.8em',
+                    padding: '4px !important'
+                },
+                '& .MuiAutocomplete-endAdornment': {
+                    right: 10,
+                    top: '50%',
+                    transform: 'translateY(-50%)'
+                }
+            }}
+        />
+    )}
+</div>
+
+
                         <div className="formDiv formDivDescricao">
                         <div className="divson divsondesc" htmlFor="desc">Descrição</div>
                         <input 
