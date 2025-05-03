@@ -183,12 +183,13 @@ function Form() {
             });
     
             if (!response.ok) {
-                throw new Error('Erro na requisição');
+                const errorData = await response.json(); // ✅ captura do erro detalhado
+                throw new Error(errorData.message || 'Erro na requisição');
             }
     
             const data = await response.json();
+            console.log('done', data);
             notifyOk();
-    
             // Resetar todos os campos
             setNomeObj('');
             setIp('');
@@ -200,7 +201,7 @@ function Form() {
             setLocalidadeSelecionada('');
         } catch (error) {
             console.error('Erro ao enviar requisição ao backend:', error);
-            notify();
+            toast.error(error.message || 'Houve um erro.');
         }
     }
     
@@ -567,7 +568,8 @@ async function sendFormDataComponent(uuid, formType, nomeObj, ip, masc, desc, ob
         });
 
         if (!response.ok) {
-            throw new Error('Erro na requisição');
+            const errorData = await response.json(); // 👈 PEGAMOS A MENSAGEM DO BACKEND
+            throw new Error(errorData.message || 'Erro na requisição');
         }
 
         const data = await response.json();
@@ -585,7 +587,7 @@ async function sendFormDataComponent(uuid, formType, nomeObj, ip, masc, desc, ob
         setLocalidadeSelecionada('');
     } catch (error) {
         console.error('Erro ao enviar requisição ao backend:', error);
-        notify();
+        toast.error(error.message || 'Houve um erro.');
     }
 }
 

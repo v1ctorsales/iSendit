@@ -18,6 +18,39 @@ export default async function sendFormData(req, res) {
             console.error('UUID não fornecido ou inválido');
             return res.status(400).json({ message: 'UUID é obrigatório' });
         }
+        
+
+        // Verificar se já existe um objeto com o mesmo nome na mesma localidade
+const { data: objetoExistente, error: erroVerificacao } = await supabase
+.from('tasks')
+.select('id')
+.eq('localidade', localidade)
+.eq('nome', nomeObj)
+.maybeSingle();
+
+if (erroVerificacao) {
+console.error('Esse objeto já existe nessa localidade!', erroVerificacao);
+return res.status(500).json({ message: 'Esse objeto já existe nessa localidade!' });
+}
+
+if (objetoExistente) {
+console.log('Objeto duplicado detectado:', objetoExistente);
+return res.status(409).json({ message: 'Já existe um objeto com esse nome nesta localidade' });
+}
+
+function cidrToMask(cidr) {
+    const prefix = parseInt(cidr.replace('/', ''), 10);
+    if (prefix < 0 || prefix > 32) return null;
+
+    const mask = (0xFFFFFFFF << (32 - prefix)) >>> 0;
+    return [
+        (mask >>> 24) & 0xFF,
+        (mask >>> 16) & 0xFF,
+        (mask >>> 8) & 0xFF,
+        mask & 0xFF,
+    ].join('.');
+}
+
 
         try {
             const { data: empresaFilhaData, error: empresaFilhaError } = await supabase
@@ -122,6 +155,52 @@ end`;
                 console.error('Erro ao inserir dados:', error);
                 return res.status(500).json({ message: 'Erro ao salvar dados' });
             }
+
+// 🔥 Inserir o objeto na tabela 'objetos' se for do tipo 'ip' e tiver IP preenchido
+if (formType === "ip" && ip && ip.trim() !== '') {
+    const mascaraDecimal = cidrToMask(masc);
+    const { error: errorObjeto } = await supabase
+        .from('objetos')
+        .insert([
+            {
+                nome: nomeObj,
+                info: `set subnet ${ip} ${mascaraDecimal}`,
+                localidade: localidade,
+                empresa: empresaFilhaData.empresaPai_uuid
+            }
+        ]);
+
+    if (errorObjeto) {
+        console.error('Erro ao criar o objeto na tabela objetos:', errorObjeto);
+        // Opcional: retornar erro ou apenas logar
+        // return res.status(500).json({ message: 'Erro ao criar objeto na tabela objetos' });
+    } else {
+        console.log('Objeto criado na tabela objetos com sucesso.');
+    }
+}
+
+// 🔥 Inserir o objeto na tabela 'objetos' se for do tipo 'fqdn' e tiver FQDN preenchido
+if (formType === "fqdn" && fqdn && fqdn.trim() !== '') {
+    const { error: errorObjetoFqdn } = await supabase
+        .from('objetos')
+        .insert([
+            {
+                nome: nomeObj,
+                info: `set fqdn "${fqdn}"`,
+                localidade: localidade,
+                empresa: empresaFilhaData.empresaPai_uuid
+            }
+        ]);
+
+    if (errorObjetoFqdn) {
+        console.error('Erro ao criar o objeto FQDN na tabela objetos:', errorObjetoFqdn);
+    } else {
+        console.log('Objeto FQDN criado na tabela objetos com sucesso.');
+    }
+}
+
+
+
 
             let observacaoHtml = '';
             if (obs && obs.trim() !== '') {
