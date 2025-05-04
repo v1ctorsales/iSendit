@@ -94,8 +94,9 @@ const [isLoadingObjetos, setIsLoadingObjetos] = useState(false);
                         throw new Error('Erro ao buscar interfaces');
                     }
                     const data = await response.json();
-                    const interfacesComAny = [{ nome: "any" }, ...data];
-                    setInterfaces(interfacesComAny);
+                    const interfacesExtras = [{ nome: "any" }, { nome: "virtual-wan-link" }];
+const interfacesComExtras = [...interfacesExtras, ...data];
+setInterfaces(interfacesComExtras);
                 } catch (err) {
                     console.error('Erro ao carregar interfaces:', err);
                     notify();
