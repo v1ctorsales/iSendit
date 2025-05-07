@@ -20,23 +20,6 @@ export default async function sendFormData(req, res) {
         }        
         
 
-        // Verificar se já existe um objeto com o mesmo nome na mesma localidade
-const { data: objetoExistente, error: erroVerificacao } = await supabase
-.from('tasks')
-.select('id')
-.eq('localidade', localidade)
-.eq('nome', nomeObj)
-.maybeSingle();
-
-if (erroVerificacao) {
-console.error('Esse objeto já existe nessa localidade!', erroVerificacao);
-return res.status(500).json({ message: 'Esse objeto já existe nessa localidade!' });
-}
-
-if (objetoExistente) {
-console.log('Objeto duplicado detectado:', objetoExistente);
-return res.status(409).json({ message: 'Já existe um objeto com esse nome nesta localidade' });
-}
 
 function cidrToMask(cidr) {
     const prefix = parseInt(cidr.replace('/', ''), 10);
@@ -84,6 +67,25 @@ function cidrToMask(cidr) {
                 empresaPaiNome = empresaPaiData.nome;
                 empresaPaiEmail = empresaPaiData.email;
             }
+
+                    // Verificar se já existe um objeto com o mesmo nome na mesma localidade
+                    const { data: objetoExistente, error: erroVerificacao } = await supabase
+                    .from('objetos')
+                    .select('id')
+                    .eq('localidade', localidade)
+                    .eq('empresa', empresaFilhaData.empresaPai_uuid)
+                    .eq('nome', nomeObj)
+                    .maybeSingle();
+
+                    if (erroVerificacao) {
+                    console.error('Esse objeto já existe nessa localidade!', erroVerificacao);
+                    return res.status(500).json({ message: 'Esse objeto já existe nessa localidade!' });
+                    }
+
+                    if (objetoExistente) {
+                    console.log('Objeto duplicado detectado:', objetoExistente);
+                    return res.status(409).json({ message: 'Já existe um objeto com esse nome nesta localidade' });
+                    }
 
             let script = '';
 
