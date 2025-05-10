@@ -69,11 +69,14 @@ export default async function getInterfaceOuLocalidade(req, res) {
                             .filter((v, i) => i % 2 !== 0);  // Só valores dentro das aspas
                         interfacesToExclude.push(...interfaces);
                     });
-
+                    
+                    console.log(`✅ Parsing de zonas finalizado: ${zones.length} zona(s) importada(s).`);
                     console.log('🚫 Interfaces que NÃO serão importadas (usadas nas zonas):', interfacesToExclude);
                 } else {
                     console.log('⚠️ Nenhuma seção de zonas encontrada.');
                 }
+
+
 
                 // 2️⃣ Pegando interfaces do config system interface
                 const interfaceSectionRegex = /config system interface([\s\S]*?)end/;
@@ -103,6 +106,7 @@ export default async function getInterfaceOuLocalidade(req, res) {
                         }
                     });
 
+                    console.log(`✅ Parsing de interfaces finalizado: ${interfaceNames.length} interface(s) importada(s).`);
                     console.log('🔍 Interfaces encontradas (filtradas + aliases):', interfaceNames);
                 } else {
                     console.log('⚠️ Seção de interfaces não encontrada.');
@@ -160,6 +164,8 @@ export default async function getInterfaceOuLocalidade(req, res) {
                         });
                     });
                     console.log('✅ Objetos (address) encontrados:', objetos.length);
+                    console.log(`✅ Parsing de objetos firewall address finalizado: ${objetos.length} objeto(s) adicionados até agora.`);
+
                 } else {
                     console.log('⚠️ Seção "config firewall address" não encontrada.');
                 }
@@ -168,24 +174,101 @@ export default async function getInterfaceOuLocalidade(req, res) {
                 const addrgrpSectionRegex = /config firewall addrgrp([\s\S]*?)end/;
                 const addrgrpMatch = content.match(addrgrpSectionRegex);
 
-                if (addrgrpMatch) {
-                    const addrgrpContent = addrgrpMatch[1];
+               // 🔎 firewall addrgrp (parsing manual robusto)
+if (addrgrpMatch) {
+    const addrgrpContent = addrgrpMatch[1];
+    const lines = addrgrpContent.split('\n');
 
-                    const editBlocks = [...addrgrpContent.matchAll(/edit\s+"(.*?)"/g)];
-                    editBlocks.forEach(match => {
-                        const nome = match[1];
-                        objetos.push({
-                            nome,
-                            tipo: 'origem/destino',
-                            info: null,
-                            localidade,
-                            empresa,
-                        });
-                    });
-                    console.log('✅ Objetos (addrgrp) encontrados:', objetos.length);
-                } else {
-                    console.log('⚠️ Seção "config firewall addrgrp" não encontrada.');
-                }
+    let currentNome = null;
+    let currentLines = [];
+
+    const objetosInvalidos = [];
+
+const pushCurrentBlock = () => {
+    if (!currentNome) return;
+
+    const joinedBlock = currentLines.join('\n');
+
+    let info = null;
+    const memberLines = [];
+
+    let insideMember = false;
+    for (const l of currentLines) {
+        const line = l.trim();
+        if (line.startsWith('set member')) {
+            insideMember = true;
+            memberLines.push(line.replace('set member', '').trim());
+        } else if (insideMember && (line.startsWith('set ') || line === 'next')) {
+            insideMember = false;
+        } else if (insideMember) {
+            memberLines.push(line);
+        }
+    }
+
+    if (memberLines.length > 0) {
+        try {
+            const full = memberLines.join(' ');
+            const members = [...full.matchAll(/"([^"]+)"/g)].map(m => m[1]);
+            info = `set member ${members.join(', ')}`;
+        } catch (e) {
+            console.warn(`⚠️ Erro ao processar membros de ${currentNome}. Ignorando objeto.`);
+            objetosInvalidos.push(currentNome);
+            return;
+        }
+    }
+
+    if (!info || info.trim() === 'set member') {
+        console.warn(`⚠️ Objeto "${currentNome}" ignorado por info inválido: "${info}"`);
+        objetosInvalidos.push(currentNome);
+        return;
+    }
+
+    objetos.push({
+        nome: currentNome,
+        tipo: 'origem/destino',
+        info,
+        localidade,
+        empresa,
+    });
+
+    currentNome = null;
+    currentLines = [];
+};
+
+    
+    
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('edit "')) {
+            pushCurrentBlock();
+            currentNome = trimmed.slice(6).split('"')[0];
+            currentLines = [];
+        } else if (trimmed === 'next') {
+            pushCurrentBlock();
+        } else {
+            if (currentNome) currentLines.push(trimmed);
+        }
+    }
+    
+    
+
+    // Garantir o último bloco
+    pushCurrentBlock();
+
+    if (objetosInvalidos.length > 0) {
+        console.log('🚫 Objetos ignorados por erro de parsing:');
+        objetosInvalidos.forEach((nome, i) => {
+            console.log(`  ${i + 1}: ${nome}`);
+        });
+    }
+    
+
+    console.log(`✅ Parsing de objetos addrgrp finalizado: ${objetos.length} objeto(s) totais após addrgrp (incluindo address).`);
+
+} else {
+    console.log('⚠️ Seção "config firewall addrgrp" não encontrada.');
+}
+
 
                 // 🚨 Nenhum dado encontrado?
                 if (zones.length === 0 && interfaceNames.length === 0 && objetos.length === 0) {
@@ -245,12 +328,27 @@ export default async function getInterfaceOuLocalidade(req, res) {
                     console.log('✅ Interfaces inseridas com sucesso.');
                 }
 
+                console.log('🧪 Lista final de objetos (total:', objetos.length, ')');
+objetos.forEach((obj, index) => {
+  console.log(`🔸 ${index + 1} - ${obj.nome} | Info: ${obj.info}`);
+});
+
+
                 // 🚀 Inserir objetos
                 if (objetos.length > 0) {
                     console.log('🚀 Inserindo novos objetos...');
-                    const { error: insertObjetosError } = await supabase
-                        .from('objetos')
-                        .insert(objetos);
+                    const { data: insertedObjetos, error: insertObjetosError } = await supabase
+    .from('objetos')
+    .insert(objetos);
+
+if (insertObjetosError) {
+    console.error('❌ Erro ao inserir objetos:', insertObjetosError);
+    console.log('📤 Payload dos objetos enviados ao Supabase:', JSON.stringify(objetos, null, 2));
+    return res.status(500).json({ message: 'Erro ao salvar objetos.', detalhes: insertObjetosError });
+}
+
+console.log('✅ Objetos inseridos com sucesso:', insertedObjetos?.length || 0);
+
 
                     if (insertObjetosError) {
                         console.error('❌ Erro ao inserir objetos:', insertObjetosError);
