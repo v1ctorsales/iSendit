@@ -48,7 +48,7 @@ export default async function getInterfaceOuLocalidade(req, res) {
                 .replace(/\r/g, '\n'); 
                 console.log('✅ Arquivo lido com sucesso. Primeiros 300 caracteres:\n', content.slice(0, 300));
 
-                // 1️⃣ Pegando zonas + interfaces
+                 // 1⃣ Pegando zonas + interfaces
                 const zoneSectionRegex = /config system zone([\s\S]*?)end/;
                 const zoneMatch = content.match(zoneSectionRegex);
                 const zones = [];
@@ -66,45 +66,94 @@ export default async function getInterfaceOuLocalidade(req, res) {
                     setInterfaceMatches.forEach(match => {
                         const interfaces = match[1]
                             .split('"')
-                            .filter((v, i) => i % 2 !== 0);  // Só valores dentro das aspas
+                            .filter((v, i) => i % 2 !== 0);
                         interfacesToExclude.push(...interfaces);
                     });
-                    
+
                     console.log(`✅ Parsing de zonas finalizado: ${zones.length} zona(s) importada(s).`);
                     console.log('🚫 Interfaces que NÃO serão importadas (usadas nas zonas):', interfacesToExclude);
                 } else {
                     console.log('⚠️ Nenhuma seção de zonas encontrada.');
                 }
 
+                // 2⃣ Pegando interfaces do config system interface com parsing manual (state machine)
+                function extractInterfaceBlock(content) {
+  const lines = content.split('\n');
+  const resultLines = [];
+  let insideBlock = false;
+  let blockDepth = 0;
 
+  for (const line of lines) {
+    const trimmed = line.trim();
 
-                // 2️⃣ Pegando interfaces do config system interface
-                const interfaceSectionRegex = /config system interface([\s\S]*?)end/;
-                const interfaceMatch = content.match(interfaceSectionRegex);
+    if (trimmed.startsWith('config system interface')) {
+      insideBlock = true;
+      blockDepth = 1;
+      continue;
+    }
 
-                const interfaceNames = [];
-                if (interfaceMatch) {
-                    const sectionContent = interfaceMatch[1];
+    if (insideBlock) {
+      if (trimmed.startsWith('config')) {
+        blockDepth++;
+      } else if (trimmed === 'end') {
+        blockDepth--;
+        if (blockDepth === 0) break;
+      }
+      resultLines.push(line);
+    }
+  }
+
+  return resultLines.join('\n');
+}
+
+                const sectionContent = extractInterfaceBlock(content);
+const interfaceNames = [];
+
+if (sectionContent && sectionContent.length > 0) {
+
+                    const sectionContent = extractInterfaceBlock(content);
+
                     console.log('✅ Seção "config system interface" extraída.');
 
-                    const editBlocks = [...sectionContent.matchAll(/edit\s+"(.*?)"([\s\S]*?)next/g)];
+                    const lines = sectionContent.split('\n');
+                    let currentName = null;
+                    let currentLines = [];
 
-                    editBlocks.forEach(match => {
-                        const interfaceName = match[1];
-                        const blockContent = match[2];
-
-                        const aliasMatch = blockContent.match(/set\s+alias\s+"([^"]+)"/i);
-
-                        let finalName = interfaceName;
+                    function processInterfaceBlock(name, block) {
+                        const aliasMatch = block.match(/set\s+alias\s+"([^"]+)"/i);
+                        let finalName = name;
                         if (aliasMatch) {
-                            const alias = aliasMatch[1];
-                            finalName = `${interfaceName} (alias: ${alias})`;
+                            finalName = `${name} (alias: ${aliasMatch[1]})`;
                         }
-
-                        if (!interfacesToExclude.includes(interfaceName)) {
+                        if (!interfacesToExclude.includes(name)) {
                             interfaceNames.push(finalName);
                         }
-                    });
+                    }
+
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (trimmed.startsWith('edit "')) {
+                            if (currentName !== null) {
+                                processInterfaceBlock(currentName, currentLines.join('\n'));
+                            }
+                            currentName = trimmed.slice(6).split('"')[0];
+                            currentLines = [];
+                        } else if (trimmed === 'next') {
+                            if (currentName !== null) {
+                                processInterfaceBlock(currentName, currentLines.join('\n'));
+                                currentName = null;
+                                currentLines = [];
+                            }
+                        } else {
+                            if (currentName !== null) {
+                                currentLines.push(trimmed);
+                            }
+                        }
+                    }
+
+                    if (currentName !== null) {
+                        processInterfaceBlock(currentName, currentLines.join('\n'));
+                    }
 
                     console.log(`✅ Parsing de interfaces finalizado: ${interfaceNames.length} interface(s) importada(s).`);
                     console.log('🔍 Interfaces encontradas (filtradas + aliases):', interfaceNames);
@@ -316,17 +365,33 @@ const pushCurrentBlock = () => {
 
                 // 🚀 Inserir interfaces
                 if (toInsertInterfaces.length > 0) {
-                    console.log('🚀 Inserindo novas interfaces...');
-                    const { error: insertInterfacesError } = await supabase
-                        .from('interfaces')
-                        .insert(toInsertInterfaces);
+    console.log(`🚀 Inserindo ${toInsertInterfaces.length} interfaces em batches...`);
 
-                    if (insertInterfacesError) {
-                        console.error('❌ Erro ao inserir interfaces:', insertInterfacesError);
-                        return res.status(500).json({ message: 'Erro ao salvar interfaces.' });
-                    }
-                    console.log('✅ Interfaces inseridas com sucesso.');
-                }
+    const batchSize = 50; // tente com 50, depois reduza se necessário
+for (let i = 0; i < toInsertInterfaces.length; i += batchSize) {
+    const batch = toInsertInterfaces.slice(i, i + batchSize);
+    
+    console.log(`📦 Enviando batch ${i / batchSize + 1}: ${batch.length} interfaces`);
+
+    const { error: batchError } = await supabase
+        .from('interfaces')
+        .insert(batch);
+
+    if (batchError) {
+        console.error(`❌ Erro no batch ${i / batchSize + 1}:`, batchError);
+        console.log('📤 Batch problemático:', JSON.stringify(batch, null, 2));
+        return res.status(500).json({
+            message: 'Erro ao salvar interfaces.',
+            detalhes: batchError,
+        });
+    }
+
+    // Ajuda a evitar sobrecarga
+    await new Promise(resolve => setTimeout(resolve, 150));
+}
+
+}
+
 
                 console.log('🧪 Lista final de objetos (total:', objetos.length, ')');
 objetos.forEach((obj, index) => {
