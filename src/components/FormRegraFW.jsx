@@ -33,7 +33,18 @@ function FormRegraFW() {
     const [objetosDestinoSelecionados, setObjetosDestinoSelecionados] = useState([]);
     const [objetos, setObjetos] = useState([]);
 const [isLoadingObjetos, setIsLoadingObjetos] = useState(false);
-    
+const [objetosOrigemInput, setObjetosOrigemInput] = useState('');
+const [objetosDestinoInput, setObjetosDestinoInput] = useState('');
+const norm = (item) => (typeof item === 'string' ? item : item.nome);
+
+const chipifyInput = (input, selected, setSelected) => {
+  const tokens = input.split(',').map(t => t.trim()).filter(Boolean);
+  if (!tokens.length) return;
+  const existing = new Set(selected.map(norm));
+  const newOnes = tokens.filter(t => !existing.has(t));
+  if (newOnes.length) setSelected([...selected, ...newOnes]);
+};
+
 
 
     const { uuid, empresaPai  } = useContext(AuthContext);
@@ -47,13 +58,15 @@ const [isLoadingObjetos, setIsLoadingObjetos] = useState(false);
     }, [uuid, destinataria]);
     
     const isButtonDisabled = () => {
+        const origemVazia = objetosOrigemSelecionados.length === 0 && !objetosOrigemInput.trim();
+  const destinoVazio = objetosDestinoSelecionados.length === 0 && !objetosDestinoInput.trim();
         return isSubmitting 
         || !nomeRegra.trim() 
         || !porta.trim() 
         || !interfaceOrigem.trim() 
         || !interfaceDestino.trim() 
-        || objetosOrigemSelecionados.length === 0
-        || objetosDestinoSelecionados.length === 0
+        || origemVazia
+        || destinoVazio
         || !action.trim() 
         || !localidade.trim();
     
@@ -142,6 +155,19 @@ setInterfaces(interfacesComExtras);
     
         // Converter o campo porta para uppercase
         const portaUppercase = porta.toUpperCase();
+
+        const norm = (item) => typeof item === 'string' ? item : item.nome;
+
+const origemList = [
+  ...objetosOrigemSelecionados.map(norm),
+  ...(objetosOrigemInput.trim() ? [objetosOrigemInput.trim()] : []),
+];
+
+const destinoList = [
+  ...objetosDestinoSelecionados.map(norm),
+  ...(objetosDestinoInput.trim() ? [objetosDestinoInput.trim()] : []),
+];
+
     
         sendFormDataComponent({
             uuid,
@@ -152,8 +178,8 @@ setInterfaces(interfacesComExtras);
             interfaceOrigem,
             interfaceDestino,
 // ao enviar:
-objetoorigem: objetosOrigemSelecionados.map(o => o.nome).join(','),
-objetodestino: objetosDestinoSelecionados.map(o => o.nome).join(','),
+objetoorigem: origemList.join(','),
+objetodestino: destinoList.join(','),
             objetouser,
             objetogrupo,
             desc,
@@ -173,6 +199,8 @@ objetodestino: objetosDestinoSelecionados.map(o => o.nome).join(','),
             setObjetoUser('');
             setObjetoGrupo('');
             setObjetosDestinoSelecionados([]);
+            setObjetosOrigemInput('');
+setObjetosDestinoInput('');
             setDesc('');
             setAction('accept');
             //setLocalidade('');
@@ -407,68 +435,81 @@ objetodestino: objetosDestinoSelecionados.map(o => o.nome).join(','),
                     <h4>Objetos</h4>
                     <div className="formDiv">
     <div className="divson" htmlFor="objetoorigem">Origem</div>
-    <Autocomplete
+<Autocomplete
   multiple
+  freeSolo
   id="objetoorigem"
-  options={objetos}                                 // [{ nome, info }, …]
-  getOptionLabel={(option) => option.nome}          // exibe só o nome
+  options={objetos} // [{ nome, info }]
+  getOptionLabel={(option) => typeof option === 'string' ? option : option.nome}
   renderOption={(props, option) => (
-    <Tooltip title={option.info || ''} placement="right">
-      <li
-        {...props}
-        style={{ fontSize: '1em', lineHeight: 1.5 }}
-      >
-        {option.nome}
+    <Tooltip title={(option.info || '')} placement="right">
+      <li {...props} style={{ fontSize: '1em', lineHeight: 1.5 }}>
+        {typeof option === 'string' ? option : option.nome}
       </li>
     </Tooltip>
   )}
   value={objetosOrigemSelecionados}
-  onChange={(_, newValue) => setObjetosOrigemSelecionados(newValue)}
+  onChange={(_, newValue) => {
+    // aceita strings e objetos
+    setObjetosOrigemSelecionados(newValue);
+  }}
+  inputValue={objetosOrigemInput}
+  onInputChange={(_, newInput) => setObjetosOrigemInput(newInput)}
+  clearOnBlur={false}          // mantém o texto ao perder foco
+  selectOnFocus={false}
+  handleHomeEndKeys
   filterSelectedOptions
-  renderTags={(value, getTagProps) =>
-    value.map((option, idx) => (
+renderTags={(value, getTagProps) =>
+  value.map((option, idx) => {
+    const label = typeof option === 'string' ? option : option.nome;
+    return (
       <Chip
-        key={option.nome}
-        label={option.nome}
+        key={label}
+        label={label}
         size="small"
-        {...getTagProps({ index: idx })}
+        {...getTagProps({ index: idx })} // garante o "X"
         sx={{
           fontSize: '0.75em',
-          maxWidth: '120px',
-          '& .MuiChip-label': {
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }
+          maxWidth: '160px',
+          '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' },
+          bgcolor: '#ffe3ef',
+          color: '#d81b60',
+          border: '1px solid #f48fb1',
         }}
       />
-    ))
-  }
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      variant="outlined"
-      placeholder="Selecione objetos de origem"
-    />
-  )}
-  ListboxProps={{
-    sx: {
-      fontSize: '0.8em',
-      // sem maxHeight para crescer dinamicamente
-    }
-  }}
+    );
+  })
+}
+renderInput={(params) => (
+  <TextField
+    {...params}
+    variant="outlined"
+    placeholder="Selecione ou digite objetos de origem"
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        chipifyInput(objetosOrigemInput, objetosOrigemSelecionados, setObjetosOrigemSelecionados);
+        setObjetosOrigemInput('');
+      }
+    }}
+    onBlur={() => {
+      // opcional: chipifica ao sair do campo
+      if (objetosOrigemInput.trim()) {
+        chipifyInput(objetosOrigemInput, objetosOrigemSelecionados, setObjetosOrigemSelecionados);
+        setObjetosOrigemInput('');
+      }
+    }}
+  />
+)}
+
+  ListboxProps={{ sx: { fontSize: '0.8em' } }}
   sx={{
     width: 490,
-    '& .MuiInputBase-root': {
-      fontSize: '0.8em',
-      padding: '4px !important'
-    },
-    '& .MuiAutocomplete-endAdornment': {
-      right: 10,
-      top: '50%',
-      transform: 'translateY(-50%)'
-    }
+    '& .MuiInputBase-root': { fontSize: '0.8em', padding: '4px !important' },
+    '& .MuiAutocomplete-endAdornment': { right: 10, top: '50%', transform: 'translateY(-50%)' }
   }}
 />
+
 
 
 
@@ -497,67 +538,86 @@ objetodestino: objetosDestinoSelecionados.map(o => o.nome).join(','),
                     </div>
                     <div className="formDiv">
     <div className="divson" htmlFor="objetodestino">Destino</div>
-    <Autocomplete
+<Autocomplete
   multiple
+  freeSolo
   id="objetodestino"
-  options={objetos.filter(obj => !(obj.info && obj.info.toLowerCase().includes('set macaddr')))}
-  getOptionLabel={(option) => option.nome}
+  options={objetos
+    .filter(obj => !(obj.info && obj.info.toLowerCase().includes('set macaddr')))}
+  getOptionLabel={(option) => typeof option === 'string' ? option : option.nome}
   renderOption={(props, option) => (
-    <Tooltip title={option.info || ''} placement="right">
-      <li
-        {...props}
-        style={{ fontSize: '1em', lineHeight: 1.5 }}
-      >
-        {option.nome}
+    <Tooltip title={(typeof option === 'string' ? '' : (option.info || ''))} placement="right">
+      <li {...props} style={{ fontSize: '1em', lineHeight: 1.5 }}>
+        {typeof option === 'string' ? option : option.nome}
       </li>
     </Tooltip>
   )}
   value={objetosDestinoSelecionados}
   onChange={(_, newValue) => setObjetosDestinoSelecionados(newValue)}
+  inputValue={objetosDestinoInput}
+  onInputChange={(_, newInput) => setObjetosDestinoInput(newInput)}
+  clearOnBlur={false}
+  selectOnFocus={false}
+  handleHomeEndKeys
   filterSelectedOptions
-  renderTags={(value, getTagProps) =>
-    value.map((option, idx) => (
+renderTags={(value, getTagProps) =>
+  value.map((option, idx) => {
+    const label = typeof option === 'string' ? option : option.nome;
+    return (
       <Chip
-        key={option.nome}
-        label={option.nome}
+        key={label}
+        label={label}
         size="small"
-        {...getTagProps({ index: idx })}
+        {...getTagProps({ index: idx })} // garante o "X"
         sx={{
           fontSize: '0.75em',
-          maxWidth: '120px',
-          '& .MuiChip-label': {
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }
+          maxWidth: '160px',
+          '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' },
+          bgcolor: '#ffe3ef',
+          color: '#d81b60',
+          border: '1px solid #f48fb1',
         }}
       />
-    ))
-  }
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      variant="outlined"
-      placeholder="Selecione objetos de destino"
-    />
-  )}
-  ListboxProps={{
-    sx: {
-      fontSize: '0.8em',
-    }
-  }}
+    );
+  })
+}
+renderInput={(params) => (
+  <TextField
+    {...params}
+    variant="outlined"
+    placeholder="Selecione ou digite objetos de destino"
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        chipifyInput(
+          objetosDestinoInput,
+          objetosDestinoSelecionados,
+          setObjetosDestinoSelecionados
+        );
+        setObjetosDestinoInput('');
+      }
+    }}
+    onBlur={() => {
+      if (objetosDestinoInput.trim()) {
+        chipifyInput(
+          objetosDestinoInput,
+          objetosDestinoSelecionados,
+          setObjetosDestinoSelecionados
+        );
+        setObjetosDestinoInput('');
+      }
+    }}
+  />
+)}
+
+  ListboxProps={{ sx: { fontSize: '0.8em' } }}
   sx={{
     width: 490,
-    '& .MuiInputBase-root': {
-      fontSize: '0.8em',
-      padding: '4px !important'
-    },
-    '& .MuiAutocomplete-endAdornment': {
-      right: 10,
-      top: '50%',
-      transform: 'translateY(-50%)'
-    }
+    '& .MuiInputBase-root': { fontSize: '0.8em', padding: '4px !important' },
+    '& .MuiAutocomplete-endAdornment': { right: 10, top: '50%', transform: 'translateY(-50%)' }
   }}
 />
+
 
 
 
