@@ -36,6 +36,12 @@ const [isLoadingObjetos, setIsLoadingObjetos] = useState(false);
 const [objetosOrigemInput, setObjetosOrigemInput] = useState('');
 const [objetosDestinoInput, setObjetosDestinoInput] = useState('');
 const norm = (item) => (typeof item === 'string' ? item : item.nome);
+const [usersSelecionados, setUsersSelecionados] = useState([]);
+const [usersInput, setUsersInput] = useState('');
+const [gruposSelecionados, setGruposSelecionados] = useState([]);
+const [gruposInput, setGruposInput] = useState('');
+const [portasSelecionadas, setPortasSelecionadas] = useState([]);
+const [portasInput, setPortasInput] = useState('');
 
 const chipifyInput = (input, selected, setSelected) => {
   const tokens = input.split(',').map(t => t.trim()).filter(Boolean);
@@ -44,6 +50,24 @@ const chipifyInput = (input, selected, setSelected) => {
   const newOnes = tokens.filter(t => !existing.has(t));
   if (newOnes.length) setSelected([...selected, ...newOnes]);
 };
+
+// chipifica texto comum (vírgula/Enter), deduplica
+const chipifyInputGeneric = (input, selected, setSelected, mapFn = (x) => x) => {
+  const tokens = input
+    .split(',')
+    .map(t => t.trim())
+    .filter(Boolean)
+    .map(mapFn);
+  if (!tokens.length) return;
+  const existing = new Set(selected.map(String));
+  const novos = tokens.filter(t => !existing.has(String(t)));
+  if (novos.length) setSelected([...selected, ...novos]);
+};
+
+// chipify específico para portas: sempre UPPERCASE
+const chipifyPortas = (input, selected, setSelected) =>
+  chipifyInputGeneric(input, selected, setSelected, (t) => t.toUpperCase());
+
 
 
 
@@ -62,7 +86,7 @@ const chipifyInput = (input, selected, setSelected) => {
   const destinoVazio = objetosDestinoSelecionados.length === 0 && !objetosDestinoInput.trim();
         return isSubmitting 
         || !nomeRegra.trim() 
-        || !porta.trim() 
+        || (portasSelecionadas.length === 0 && !portasInput.trim())
         || !interfaceOrigem.trim() 
         || !interfaceDestino.trim() 
         || origemVazia
@@ -152,11 +176,7 @@ setInterfaces(interfacesComExtras);
         e.preventDefault();
         setIsSubmitting(true);
         setLoading(true);
-    
-        // Converter o campo porta para uppercase
-        const portaUppercase = porta.toUpperCase();
-
-        const norm = (item) => typeof item === 'string' ? item : item.nome;
+  
 
 const origemList = [
   ...objetosOrigemSelecionados.map(norm),
@@ -168,20 +188,39 @@ const destinoList = [
   ...(objetosDestinoInput.trim() ? [objetosDestinoInput.trim()] : []),
 ];
 
+// users/grupos/portas vindos dos chips + input atual
+const usersList = [
+  ...usersSelecionados,
+  ...(usersInput.trim() ? [usersInput.trim()] : []),
+];
+
+const gruposList = [
+  ...gruposSelecionados,
+  ...(gruposInput.trim() ? [gruposInput.trim()] : []),
+];
+
+const portasList = [
+  ...portasSelecionadas,
+  ...(portasInput.trim() ? [portasInput.trim().toUpperCase()] : []),
+];
+
+// porta final (já em UPPERCASE quando for o caso)
+const portaUppercase = portasList.join(',');
+
     
         sendFormDataComponent({
             uuid,
             empresaPai,
             regrafw: "regrafw",
             nomeRegra,
-            porta: portaUppercase,  // Enviar o valor como uppercase
+            porta: portaUppercase, // Enviar o valor como uppercase
             interfaceOrigem,
             interfaceDestino,
 // ao enviar:
 objetoorigem: origemList.join(','),
 objetodestino: destinoList.join(','),
-            objetouser,
-            objetogrupo,
+            objetouser: usersList.join(','),
+            objetogrupo: gruposList.join(','),
             desc,
             obs,
             action,
@@ -200,7 +239,10 @@ objetodestino: destinoList.join(','),
             setObjetoGrupo('');
             setObjetosDestinoSelecionados([]);
             setObjetosOrigemInput('');
-setObjetosDestinoInput('');
+            setUsersSelecionados([]); setUsersInput('');
+            setGruposSelecionados([]); setGruposInput('');
+            setPortasSelecionadas([]); setPortasInput('');
+            setObjetosDestinoInput('');
             setDesc('');
             setAction('accept');
             //setLocalidade('');
@@ -515,27 +557,123 @@ renderInput={(params) => (
 
 </div>
 
-                    <div className="formDiv">   
-                        <div className="divson" htmlFor="objetouser">User(s)</div>
-                        <input 
+                  <div className="formDiv">
+                      <div className="divson" htmlFor="objetouser">User(s)</div>
+                      <Autocomplete
+                        multiple
+                        freeSolo
+                        id="objetouser"
+                        options={[]} // sem opções pré-carregadas (livre)
+                        value={usersSelecionados}
+                        onChange={(_, newValue) => setUsersSelecionados(newValue)}
+                        inputValue={usersInput}
+                        onInputChange={(_, v) => setUsersInput(v)}
+                        clearOnBlur={false}
+                        filterSelectedOptions
+                        renderTags={(value, getTagProps) =>
+                          value.map((label, idx) => (
+                            <Chip
+                              key={label}
+                              label={label}
+                              size="small"
+                              {...getTagProps({ index: idx })}
+                              sx={{
+                                fontSize: '0.75em',
+                                maxWidth: '160px',
+                                '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' },
+                                bgcolor: '#ffe3ef', color: '#d81b60', border: '1px solid #f48fb1',
+                              }}
+                            />
+                          ))
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
                             placeholder="it.admin, user.vpn, cloud.admin"
-                            type="text" 
-                            id="objetouser" 
-                            value={objetouser} 
-                            onChange={(e) => setObjetoUser(e.target.value)} 
-                        />
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ',') {
+                                e.preventDefault();
+                                chipifyInputGeneric(usersInput, usersSelecionados, setUsersSelecionados);
+                                setUsersInput('');
+                              }
+                            }}
+                            onBlur={() => {
+                              if (usersInput.trim()) {
+                                chipifyInputGeneric(usersInput, usersSelecionados, setUsersSelecionados);
+                                setUsersInput('');
+                              }
+                            }}
+                          />
+                        )}
+                        ListboxProps={{ sx: { fontSize: '0.8em' } }}
+                        sx={{
+                          width: 490,
+                          '& .MuiInputBase-root': { fontSize: '0.8em', padding: '4px !important' },
+                          '& .MuiAutocomplete-endAdornment': { right: 10, top: '50%', transform: 'translateY(-50%)' },
+                        }}
+                      />
                     </div>
 
-                    <div className="formDiv">   
-                        <div className="divson" htmlFor="objetogrupo">Grupo(s)</div>
-                        <input 
-                            placeholder="ADM, IT, Dev"
-                            type="text" 
-                            id="objetogrupo" 
-                            value={objetogrupo} 
-                            onChange={(e) => setObjetoGrupo(e.target.value)} 
-                        />
-                    </div>
+
+<div className="formDiv">
+  <div className="divson" htmlFor="objetogrupo">Grupo(s)</div>
+  <Autocomplete
+    multiple
+    freeSolo
+    id="objetogrupo"
+    options={[]}
+    value={gruposSelecionados}
+    onChange={(_, newValue) => setGruposSelecionados(newValue)}
+    inputValue={gruposInput}
+    onInputChange={(_, v) => setGruposInput(v)}
+    clearOnBlur={false}
+    filterSelectedOptions
+    renderTags={(value, getTagProps) =>
+      value.map((label, idx) => (
+        <Chip
+          key={label}
+          label={label}
+          size="small"
+          {...getTagProps({ index: idx })}
+          sx={{
+            fontSize: '0.75em',
+            maxWidth: '160px',
+            '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' },
+            bgcolor: '#ffe3ef', color: '#d81b60', border: '1px solid #f48fb1',
+          }}
+        />
+      ))
+    }
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        variant="outlined"
+        placeholder="ADM, IT, Dev"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            chipifyInputGeneric(gruposInput, gruposSelecionados, setGruposSelecionados);
+            setGruposInput('');
+          }
+        }}
+        onBlur={() => {
+          if (gruposInput.trim()) {
+            chipifyInputGeneric(gruposInput, gruposSelecionados, setGruposSelecionados);
+            setGruposInput('');
+          }
+        }}
+      />
+    )}
+    ListboxProps={{ sx: { fontSize: '0.8em' } }}
+    sx={{
+      width: 490,
+      '& .MuiInputBase-root': { fontSize: '0.8em', padding: '4px !important' },
+      '& .MuiAutocomplete-endAdornment': { right: 10, top: '50%', transform: 'translateY(-50%)' },
+    }}
+  />
+</div>
+
                     <div className="formDiv">
     <div className="divson" htmlFor="objetodestino">Destino</div>
 <Autocomplete
@@ -624,18 +762,70 @@ renderInput={(params) => (
 </div>
 
 
-                    <div className="formDiv">
-                        <div className="divson portadivmargtop" htmlFor="porta">Porta(s)</div>
-                        <input 
-                            placeholder="ALL, HTTPS, 3389"
-                            type="text" 
-                            id="porta" 
-                            className="portadivmargtop"
-                            value={porta} 
-                            onChange={(e) => setPorta(e.target.value)} 
-                            
-                        />
-                    </div>
+<div className="formDiv">
+  <div className="divson" htmlFor="porta">Porta(s)</div>
+  <Autocomplete
+    multiple
+    freeSolo
+    id="porta"
+    options={[]} // livre
+    value={portasSelecionadas}
+    onChange={(_, newValue) => {
+      // sempre uppercase ao receber seleção/string
+      const norm = newValue.map(v => (typeof v === 'string' ? v : String(v))).map(s => s.toUpperCase());
+      // dedup
+      setPortasSelecionadas(Array.from(new Set(norm)));
+    }}
+    inputValue={portasInput}
+    onInputChange={(_, v) => setPortasInput(v)}
+    clearOnBlur={false}
+    filterSelectedOptions
+    renderTags={(value, getTagProps) =>
+      value.map((label, idx) => (
+        <Chip
+          key={label}
+          label={label}
+          size="small"
+          {...getTagProps({ index: idx })}
+          sx={{
+            fontSize: '0.75em',
+            maxWidth: '160px',
+            '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' },
+            bgcolor: '#ffe3ef', color: '#d81b60', border: '1px solid #f48fb1',
+          }}
+        />
+      ))
+    }
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        variant="outlined"
+        placeholder="ALL, HTTPS, 3389"
+        className="portadivmargtop"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            chipifyPortas(portasInput, portasSelecionadas, setPortasSelecionadas);
+            setPortasInput('');
+          }
+        }}
+        onBlur={() => {
+          if (portasInput.trim()) {
+            chipifyPortas(portasInput, portasSelecionadas, setPortasSelecionadas);
+            setPortasInput('');
+          }
+        }}
+      />
+    )}
+    ListboxProps={{ sx: { fontSize: '0.8em' } }}
+    sx={{
+      width: 490,
+      '& .MuiInputBase-root': { fontSize: '0.8em', padding: '4px !important' },
+      '& .MuiAutocomplete-endAdornment': { right: 10, top: '50%', transform: 'translateY(-50%)' },
+    }}
+  />
+</div>
+
                     
 {/* NAT */}
 <div className="formDiv">
